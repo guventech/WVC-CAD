@@ -1,0 +1,60 @@
+type RecoveryDialogProps = {
+  readonly savedAt: string;
+  readonly documentLabel: string | null;
+  readonly onRestore: () => void;
+  readonly onDiscard: () => void;
+};
+
+export function RecoveryDialog({
+  savedAt,
+  documentLabel,
+  onRestore,
+  onDiscard,
+}: RecoveryDialogProps) {
+  const when = formatSavedAt(savedAt);
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <div
+        className="modal-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="recovery-title"
+        aria-describedby="recovery-body"
+        data-testid="recovery-dialog"
+      >
+        <h2 id="recovery-title">Recover unsaved sketch?</h2>
+        <p id="recovery-body">
+          A local autosave was found{when !== null ? ` from ${when}` : ""}
+          {documentLabel !== null ? ` (${documentLabel})` : ""}. Restoring does
+          not overwrite your last downloaded file — use Save to write a new
+          copy.
+        </p>
+        <div className="modal-actions">
+          <button
+            type="button"
+            data-testid="recovery-discard"
+            onClick={onDiscard}
+          >
+            Discard
+          </button>
+          <button
+            type="button"
+            className="is-active"
+            data-testid="recovery-restore"
+            onClick={onRestore}
+          >
+            Restore
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatSavedAt(iso: string): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toLocaleString();
+}

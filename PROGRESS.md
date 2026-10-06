@@ -1,0 +1,341 @@
+# Progress
+
+## Completed
+
+- [x] Chunk 0 — Repository foundation
+- [x] Chunk 1 — 2D viewport and camera
+- [x] Chunk 2 — Selection and hit testing
+- [x] Chunk 3 — Point tool
+- [x] Architecture prep (pre–Chunk 4) — I1, I2, I3, I5 (+ M1 fixture removal)
+- [x] Chunk 4 — Line tool (+ H/V·grid compose fix)
+- [x] Pre–Chunk 5 health / light-runtime pass
+- [x] Chunk 5 — Rectangle tool
+- [x] Chunk 6 — Circle tool
+- [x] Chunk 7 — Arc tool (center-point)
+- [x] Chunk 8 — Construction geometry
+- [x] Chunk 9 — Snap / inference engine (subset)
+- [x] Pre–Chunk 10 — Select-tool geometry editing + docs/review
+- [x] Chunk 10 — Constraint data model
+- [x] Chunk 11 — Coincident constraint
+- [x] Chunk 12 — Horizontal / vertical constraints
+- [x] Chunk 13 — Dimensional constraints
+- [x] Chunk 14 — Constraint solver (Levenberg–Marquardt)
+- [x] Chunk 15 — Degrees of freedom
+- [x] Pre–Chunk 16 — World Datum Frame (fixed origin + X/Y axes)
+- [x] Chunk 16 — Over-constraint detection (richer conflict sets + UX)
+- [x] Chunk 17 — Under-constrained visualization
+- [x] Chunk 18 — Dimension editing (canvas double-click + unit parsing)
+- [x] Chunk 19 — Trim and extend
+- [x] Chunk 20 — Mirror
+- [x] Chunk 21 — Fillet and chamfer
+- [x] Chunk 22 — Sketch diagnostics
+- [x] Chunk 23 — Closed-profile detection
+- [x] Chunk 24 — Undo/redo command system
+- [x] Chunk 25 — Save/load
+- [x] Chunk 26 — Autosave and recovery
+- [x] Chunk 27 — CAD-like UI refinement
+
+## Current
+
+**Post–Chunk 27.** Engineering core + CAD-like shell are in place. Next: packaging (Tauri 2) when requested, or deferred assessment items / polish.
+
+### Chunk 27 results (2026-10-06) — CAD-like UI refinement
+
+| Area | What landed |
+|------|-------------|
+| Menu | `MenuBar` — File / Edit / Sketch / Constraints / Tools with working dropdown actions |
+| Document | `DocumentBar` — New / Open / Save, dirty title, Undo / Redo |
+| New | File → New sketch (+ Ctrl+N); confirms if dirty; clears autosave slot |
+| Canvas | "2D Sketch" chrome label above viewport |
+| Status | Primary strip (X/Y, metrics, DOF, units, Ready) + secondary session context |
+| Theme | Original dark engineering chrome (CSS variables); no proprietary CAD assets |
+| ADR | ADR-046 |
+
+### Assessment remediation (2026-10-06) — pre–Chunk 27
+
+Addressed items from [assessments.md](./assessments.md) (ADR-045):
+
+| Area | What landed |
+|------|-------------|
+| Honesty | Removed unimplemented catalog `distance` type |
+| Fillet | Split ops into Shared / Rebuild / LengthRestore / Reconcile / RectangleEdge / Apply + barrel |
+| Dual path | Documented geometry re-seating; satisfaction invariant on reconcile |
+| Solver | Central-difference Jacobian; ~100-constraint perf baseline; mixed length+angle DOF fixture; practical-limit docs |
+| Loader | Reject zero-length lines / non-positive radii; load-then-diagnose test |
+| Parallel | First-picked user line anchored so second follows |
+| Intersections | Line–circle + circle–circle helpers |
+| App | `useSketchDocument` / `useSketchAutosave` / `useSketchFileIo` (App shell ~358 lines) |
+| Docs | Chamfer rebuild-only; `solve()` = stored-geometry diagnose; geometry folder reality |
+
+Deferred: residual scaling, sign-retry, feature residual polymorphism, exact profile areas, hard tangent arc-sweep residual.
+
+### Point-on-object constraint (2026-10-06) — Tier 3 geometric catalog complete
+
+| Area | What landed |
+|------|-------------|
+| Domain | `PointOnObject.ts` — segment foot (Δx, Δy), circle/arc radial + arc sweep penalty |
+| Tools | **On object** — point + line/circle/arc edge (either order); datums rejected |
+| UI | Canvas glyph `⌇`; Constraints toolbar |
+| Guards | Duplicates rejected; distinct from coincident infinite-line point–line |
+| ADR | ADR-044 |
+
+### Symmetric constraint (2026-10-06)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Symmetric.ts` — two point-like handles mirrored across a line/axis (Δx, Δy) |
+| Tools | **Symmetric** — three picks: two points + mirror line (any order); world axes OK |
+| UI | Canvas glyph `⇄`; Constraints toolbar |
+| Guards | Duplicate pair+axis rejected; needs exactly two points and one line |
+| ADR | ADR-043 |
+
+### Equal constraint (2026-10-06) — Tier 3 started
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Equal.ts` — one residual: equal line lengths or equal circle/arc radii |
+| Tools | **Equal** — two lines, or two curves (same kind; mixed rejected) |
+| UI | Canvas glyph `=`; Constraints toolbar |
+| Guards | Duplicates on same unordered pair rejected; world axes not accepted as lines |
+| ADR | ADR-042 |
+
+### Midpoint constraint (2026-10-06) — Tier 2 complete
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Midpoint.ts` — point at finite line midpoint (Δx, Δy); axes rejected |
+| Tools | **Midpoint** — point-like + line (either order) |
+| UI | Canvas glyph `M`; Constraints toolbar |
+| Guards | Same-line endpoint rejected; duplicates rejected |
+| Auto | Point / Line / Circle create from midpoint snap → Midpoint constraint (ADR-041) |
+| ADR | ADR-040, ADR-041 |
+| Tier 2 | Parallel, Perpendicular, Tangent, Concentric, Midpoint all shipped |
+
+### Concentric constraint (2026-10-06)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Concentric.ts` — two Δ equations (shared center XY) for circle/arc pairs |
+| Tools | **Concentric** — two curve picks |
+| UI | Canvas glyph `◎`; Constraints toolbar |
+| Guards | Duplicate on same pair rejected |
+| ADR | ADR-039 |
+
+### Tangent constraint (2026-10-06)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Tangent.ts` — line↔circle/arc (`|d|−R`) and circle↔circle (external/internal) |
+| Solver | Side / mode captured at solve start (no flip mid-iteration) |
+| Tools | **Tangent** — line+curve or two curves; world axes allowed as lines |
+| UI | Canvas glyph `T`; Constraints toolbar |
+| Limits | Contact point not required on arc sweep; follow-which quirks deferred (like parallel) |
+| ADR | ADR-038 |
+
+### Parallel / perpendicular constraints (2026-10-06)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `Parallel.ts` — unit-direction residuals (`sin θ` / `cos θ`); world axes allowed |
+| Solver | One equation each; angular satisfaction tolerance |
+| Tools | **Parallel** / **Perpendicular** — two line (or axis) picks |
+| UI | Canvas glyphs `//` / `⊥`; Constraints toolbar |
+| Guards | Duplicate / parallel+perp on same pair rejected; sketch unchanged on conflict |
+| Known | Which line follows / angle sense can jump — deferred fix |
+| ADR | ADR-037 |
+
+### Fix constraint (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Tool | **Fix** — one tool: point/endpoint/center, line (both ends), or circle/arc (center + radius); lock stored on `locked` |
+| Solver | Two residuals (Δx, Δy); duplicate Fix on the same handle rejected; world datums rejected |
+| UI | Canvas glyph `F`; Constraints toolbar |
+| Fixture | Free point → 0 DOF; rectangle corner Fix → 2 DOF remaining (size); save/load keeps `locked` |
+
+### Fillet topology residuals (2026-10-05)
+
+A finished R-driven filleted box can honestly report **FULLY CONSTRAINED** without catalog `tangent` tools:
+
+| Area | What landed |
+|------|-------------|
+| Residuals | `fillet` feature → center-to-parent dist = R + **1-D** along-line endpoint glue (not 2-D XY glue — that falsely removed size/locate DOF) |
+| Angles | Arc start/end resynced after solve write-back (derived, not free DOF) |
+| Drag | Open-corner Select-drag pins only the dragged trimmed edge; rebuild all corner features after edge move |
+| Fixture | 200×200 R20 + four Offsets → DOF 0 / fully constrained |
+| Regressions | Multi-fillet Offset locate/size, radius edit, extreme filleted edge drag |
+
+### Fillet radius edit fix (2026-10-05)
+
+Editing a fillet radius on a located box is covered by regression fixtures (100×100 with Length on filleted top+right edges + Offset at origin + TR fillet). Radius edit translates parents by ΔR, restores lengths, reconnects free rectangle corners, then settles — skipping a destructive re-trim when topology is already intact. Sibling fillets/chamfers are re-seated when present.
+
+### Chunk 26 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Autosave | Debounced dirty writes to `localStorage` envelope (`sketcher.autosave.v1`) |
+| Recovery | Startup Restore / Discard dialog; never overwrites downloaded user file |
+| Dirty | Content fingerprint vs last Save/Open; toolbar `*` + status **Unsaved changes** |
+| Flush | `beforeunload` warns + writes autosave when dirty |
+| ADR | ADR-035 |
+
+### Chunk 25 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Format | Versioned `*.sketch.json` (`schemaVersion`, mm units, geometry, constraints, settings, frame, metadata) |
+| Domain | `sketchToDocument` / `parseSketchJson` + entity-id sync after load |
+| UI | File **Open** / **Save** (Ctrl+O / Ctrl+S); history cleared on load |
+| Checks | Reject non-mm units and unknown schema versions; round-trip + solver equivalence tests |
+| ADR | ADR-034 |
+
+### Chunk 24 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Delete | `createDeleteConstraintCommand` — Constraints panel × removes one constraint |
+| UI | Top-toolbar **Undo** / **Redo** (labels from stack); keyboard still works |
+| History | `clearCommandHistory`, `peekUndoLabel` / `peekRedoLabel` |
+| Tests | Delete constraint + create→constrain→edit dimension undo/redo round-trip |
+| ADR | ADR-033 |
+
+### Post–Chunk 23 fix (2026-10-05) — extreme filleted drag
+
+Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicular edge no longer tears blends:
+
+| Area | What landed |
+|------|-------------|
+| Trim | `trimLineAtCorner` keeps the far end **into the body**, not merely farther from the corner |
+| Wedge pick | `filletWedgePickPoint` walks into the longer segment arm (avoids exterior-wedge ties) |
+| Length restore | Shift partner + connected blends; fit driven edge and snap sibling edges to partner tangents before rebuild |
+| Safety | Drag rejected if fillet/chamfer topology is not intact after the pipeline |
+| Test | Extreme stepwise bottom drag to y=−150 keeps joins + driving length |
+
+### Axis-offset dimensions (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Tools | **Offset X** / **Offset Y** — single pick → `coordinate-y` / `coordinate-x` |
+| UX | Draw anywhere, then locate; axes fixed, edit moves sketch |
+| UI | Canvas labels `Y …` / `X …`; panel names “Offset from X/Y-axis” |
+| ADR | ADR-032 |
+
+## Next
+
+- Tier 3 geometric catalog complete (Angle dim tool already shipped in Chunk 13)
+- Chunk 27 — CAD-like UI refinement
+- …
+- Later: Tauri 2 Windows installer — see [PACKAGING.md](./PACKAGING.md)
+
+## Chunk 23 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `analyzeProfiles` → `ProfileLoop` (area, CW/CCW, `parentLoopId` for holes) |
+| Wire | Solid line + arc loops + circle loops; nesting (concentric circles, circle-in-polygon) |
+| Open | `openEntityIds` for wire not in a closed loop |
+| UI / diagnostics | Sketch Analysis shows outer/hole counts; profile findings use analyzer |
+| Limits | Solid arcs not wired into loops yet; no 3D extrusion |
+
+## Chunk 22 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `analyzeSketchDiagnostics` — geometry / constraints / provisional profiles |
+| Checks | Zero-length/radius, invalid arcs, duplicates, open endpoints, self-intersections, non-manifold, construction-on-wire, DOF / conflicts / unconstrained |
+| UI | **Sketch Analysis** side panel (`DiagnosticsPanel`) |
+| Limits | Closed-profile detection is provisional (simple line loops + circles); full ProfileLoop is Chunk 23 |
+
+## Chunk 21 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Math | `FilletChamferMath.ts` — corner wedge, fillet arc + chamfer bevel |
+| Ops | Trim two lines, add arc or chamfer segment; reject if `maintainConstraints` fails |
+| Feature | Fillet: `fillet` + radius; Chamfer: `chamfer` + length×angle; line drag rebuilds |
+| Rectangle | Adjacent edges OK; opens that corner on the `rectangle` feature (keeps feature + H/V); Offset locate = group translate, size = edge move + rebuild |
+| Tools | **Fillet** / **Chamfer** — pick two lines, third click sets size (distance from corner) |
+| Limits | No tangent solver equations yet |
+
+## Chunk 20 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Math | `MirrorMath.ts` — reflect point/line/circle/arc across an axis |
+| Ops | `MirrorOps.ts` — duplicate selection across world axis or any line |
+| Tool | **Mirror** — select geometry, click line or world axis; copies geometry only (no constraint clones) |
+| Undo | `createMirrorCommand` snapshots geometry |
+
+## Chunk 19 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Math | `Intersections.ts` — infinite / segment line–line intersections |
+| Ops | `TrimExtendOps.ts` — line trim (end shorten / middle split) + extend to nearest cutter |
+| Boundaries | Other lines + world X/Y axes; rectangle feature edges blocked |
+| Tools | **Trim** / **Extend** on Geometry toolbar; single-click; undoable commands |
+| Constraints | Failed maintenance rejects the op; middle split drops constraints on the removed id |
+
+## Chunk 18 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Parse | `DimensionInput.ts` — length (`75`, `75 mm`), angle (`90`, `90°`, `rad`) |
+| Canvas | Double-click dimension label (Select tool) → floating editor; Enter commits, Esc cancels |
+| Panel | Same parser for Constraints panel value fields |
+| Checks | Invalid text rejected; negative/zero still blocked by dimension validation; undo/redo via edit command |
+
+## Chunk 16 results (2026-10-05)
+
+| Area | What landed |
+|------|-------------|
+| Diagnose | `OverConstraint.ts` — dry-solve conflict set + named reason for failed add/edit |
+| Duplicate | Structural H+V / equivalent dims also return `conflict` ids |
+| UX | Constraints panel alert lists involved constraints; highlight + Dismiss (sketch unchanged) |
+| Contract | Failed ops never mutate the previous valid sketch |
+
+## Chunk 17 results (2026-10-04)
+
+| Area | What landed |
+|------|-------------|
+| Analysis | Free Jacobian columns → free handles (`UnderConstrainedViz.ts`) |
+| Canvas | Amber DOF markers + single-axis ticks |
+| Panel / status | Human DOF summary |
+
+## Pre–Chunk 16 results (2026-10-04) — World Datum Frame
+
+| Area | What landed |
+|------|-------------|
+| Model | `SketchFrame`: origin + X/Y axes (`z` reserved) |
+| Constraints | Coincident to origin / axes; datums immovable |
+
+## Known limitations (product)
+
+- Dimension canvas graphics are labels only (no technical-drawing arrows yet)
+- Three-point / tangent arcs not implemented
+- Advanced snaps (intersection, parallel, perp, tangent) not yet
+- Fillet/chamfer: line–line corners and rectangle corners (opens corner on `rectangle` feature; Offset locate vs size)
+- Chamfer topology is rebuild-only (no solver residual, unlike fillet)
+- Tangent uses supporting circle (contact may lie off a drawn arc sweep)
+- Frozen sign/side/mode captures can trap LM on large branch-crossing moves
+- Dense solver: interactive comfort is tens–low hundreds of constraints (not yet 1,000)
+- Mixed mm/radian residuals are unscaled (column scaling deferred)
+- Whole-rectangle body drag translate still limited (Offset X/Y: locate rigid-translates; opposing same-axis Offsets size one edge + rebuild blends)
+- Profile analyzer: line + arc wire loops + circles; area uses arc mid-samples
+- Perfect H/V lines get orientation constraints on create
+- Mirror copies geometry only (constraints not duplicated)
+- No Playwright E2E yet
+- No Windows installer yet (Tauri planned)
+
+## Living docs
+
+| File | Role |
+|------|------|
+| [AGENTS.md](./AGENTS.md) | Mission, chunk plan, agent rules |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Layer boundaries, performance rules |
+| [DECISIONS.md](./DECISIONS.md) | ADRs |
+| [TEST_PLAN.md](./TEST_PLAN.md) | Tests, tolerances |
+| [PACKAGING.md](./PACKAGING.md) | Windows Tauri installer plan |
+| [PROGRESS.md](./PROGRESS.md) | This file |
+| [assessments.md](./assessments.md) | Architecture assessment snapshot |
+| [README.md](./README.md) | How to run |

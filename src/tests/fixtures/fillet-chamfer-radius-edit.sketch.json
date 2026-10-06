@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Sketch 1",
+  "geometry": [
+    {
+      "id": "line-195",
+      "type": "line",
+      "start": {
+        "x": 20.00000000000098,
+        "y": -5.200711512692432e-14
+      },
+      "end": {
+        "x": 216.87786437626903,
+        "y": -4.399057596824533e-15
+      },
+      "construction": false
+    },
+    {
+      "id": "line-196",
+      "type": "line",
+      "start": {
+        "x": 231.01999999999998,
+        "y": 14.142135623730951
+      },
+      "end": {
+        "x": 231.01999999999995,
+        "y": 192.6803643762691
+      },
+      "construction": false
+    },
+    {
+      "id": "line-197",
+      "type": "line",
+      "start": {
+        "x": 216.877864376269,
+        "y": 206.82250000000005
+      },
+      "end": {
+        "x": 20.000000000000405,
+        "y": 206.82250000000005
+      },
+      "construction": false
+    },
+    {
+      "id": "line-198",
+      "type": "line",
+      "start": {
+        "x": 4.075294367338814e-13,
+        "y": 186.8225
+      },
+      "end": {
+        "x": 9.78484715102584e-13,
+        "y": 19.999999999999876
+      },
+      "construction": false
+    },
+    {
+      "id": "arc-247",
+      "type": "arc",
+      "center": {
+        "x": 20.000000000000405,
+        "y": 186.82250000000005
+      },
+      "radius": 20,
+      "startAngle": 1.5707963267948966,
+      "endAngle": -3.1415926535897905,
+      "construction": false
+    },
+    {
+      "id": "line-254",
+      "type": "line",
+      "start": {
+        "x": 231.01999999999995,
+        "y": 192.6803643762691
+      },
+      "end": {
+        "x": 216.877864376269,
+        "y": 206.82250000000005
+      },
+      "construction": false
+    },
+    {
+      "id": "line-262",
+      "type": "line",
+      "start": {
+        "x": 216.87786437626903,
+        "y": -4.399057596824533e-15
+      },
+      "end": {
+        "x": 231.01999999999998,
+        "y": 14.142135623730951
+      },
+      "construction": false
+    },
+    {
+      "id": "arc-336",
+      "type": "arc",
+      "center": {
+        "x": 20.00000000000098,
+        "y": 19.99999999999995
+      },
+      "radius": 20,
+      "startAngle": -3.1415926535897896,
+      "endAngle": -1.5707963267948966,
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-200",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-195",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-201",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-197",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-202",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-198",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-203",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-196",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "coordinate-y-208",
+      "type": "coordinate-y",
+      "references": [
+        {
+          "entityId": "line-195",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "coordinate-x-209",
+      "type": "coordinate-x",
+      "references": [
+        {
+          "entityId": "line-198",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "constraint-248",
+      "type": "fillet",
+      "references": [
+        {
+          "entityId": "line-198",
+          "role": "first"
+        },
+        {
+          "entityId": "line-197",
+          "role": "second"
+        },
+        {
+          "entityId": "arc-247",
+          "role": "entity"
+        }
+      ],
+      "value": 20
+    },
+    {
+      "id": "constraint-249",
+      "type": "radius",
+      "references": [
+        {
+          "entityId": "arc-247",
+          "role": "entity"
+        }
+      ],
+      "value": 20,
+      "driving": true
+    },
+    {
+      "id": "constraint-255",
+      "type": "chamfer",
+      "references": [
+        {
+          "entityId": "line-197",
+          "role": "first"
+        },
+        {
+          "entityId": "line-196",
+          "role": "second"
+        },
+        {
+          "entityId": "line-254",
+          "role": "entity"
+        }
+      ],
+      "value": 20
+    },
+    {
+      "id": "constraint-256",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-254",
+          "role": "entity"
+        }
+      ],
+      "value": 20,
+      "driving": true
+    },
+    {
+      "id": "constraint-257",
+      "type": "angle",
+      "references": [
+        {
+          "entityId": "line-197",
+          "role": "entity"
+        },
+        {
+          "entityId": "line-254",
+          "role": "entity"
+        }
+      ],
+      "value": 0.7853981633974483,
+      "driving": true
+    },
+    {
+      "id": "constraint-263",
+      "type": "chamfer",
+      "references": [
+        {
+          "entityId": "line-195",
+          "role": "first"
+        },
+        {
+          "entityId": "line-196",
+          "role": "second"
+        },
+        {
+          "entityId": "line-262",
+          "role": "entity"
+        }
+      ],
+      "value": 20
+    },
+    {
+      "id": "constraint-264",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-262",
+          "role": "entity"
+        }
+      ],
+      "value": 20,
+      "driving": true
+    },
+    {
+      "id": "constraint-265",
+      "type": "angle",
+      "references": [
+        {
+          "entityId": "line-195",
+          "role": "entity"
+        },
+        {
+          "entityId": "line-262",
+          "role": "entity"
+        }
+      ],
+      "value": 0.7853981633974483,
+      "driving": true
+    },
+    {
+      "id": "constraint-337",
+      "type": "fillet",
+      "references": [
+        {
+          "entityId": "line-198",
+          "role": "first"
+        },
+        {
+          "entityId": "line-195",
+          "role": "second"
+        },
+        {
+          "entityId": "arc-336",
+          "role": "entity"
+        }
+      ],
+      "value": 20
+    },
+    {
+      "id": "constraint-338",
+      "type": "radius",
+      "references": [
+        {
+          "entityId": "arc-336",
+          "role": "entity"
+        }
+      ],
+      "value": 20,
+      "driving": true
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-05T12:41:26.288Z",
+    "app": "sketcher"
+  }
+}

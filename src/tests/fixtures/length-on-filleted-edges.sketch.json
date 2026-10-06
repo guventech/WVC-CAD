@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Sketch 1",
+  "geometry": [
+    {
+      "id": "point-719",
+      "type": "point",
+      "position": {
+        "x": 1.1366724731655085e-13,
+        "y": -1.134773592358635e-11
+      },
+      "construction": false
+    },
+    {
+      "id": "point-720",
+      "type": "point",
+      "position": {
+        "x": 100.00000000000014,
+        "y": -1.754899231801904e-11
+      },
+      "construction": false
+    },
+    {
+      "id": "point-722",
+      "type": "point",
+      "position": {
+        "x": 1.0329586152424738e-13,
+        "y": 99.9999999999697
+      },
+      "construction": false
+    },
+    {
+      "id": "line-723",
+      "type": "line",
+      "start": {
+        "x": -1.6020547324761358e-9,
+        "y": -1.7957825086812706e-9
+      },
+      "end": {
+        "x": 100.00000071378923,
+        "y": -3.182888113676904e-9
+      },
+      "construction": false
+    },
+    {
+      "id": "line-724",
+      "type": "line",
+      "start": {
+        "x": 100.00000071378923,
+        "y": -4.214482839700728e-9
+      },
+      "end": {
+        "x": 100.00000071378923,
+        "y": 99.999999995272
+      },
+      "construction": false
+    },
+    {
+      "id": "line-725",
+      "type": "line",
+      "start": {
+        "x": 99.9999999981842,
+        "y": 100.00000071389314
+      },
+      "end": {
+        "x": -1.5492777343621418e-9,
+        "y": 100.00000071389314
+      },
+      "construction": false
+    },
+    {
+      "id": "line-726",
+      "type": "line",
+      "start": {
+        "x": -1.0327026675635114e-9,
+        "y": 100.00000071389314
+      },
+      "end": {
+        "x": -1.406359072820678e-9,
+        "y": -2.0089786833339847e-9
+      },
+      "construction": false
+    },
+    {
+      "id": "arc-765",
+      "type": "arc",
+      "center": {
+        "x": 82.0476977451597,
+        "y": 82.04769774513184
+      },
+      "radius": 17.952302254840436,
+      "startAngle": 7.915895417464001e-16,
+      "endAngle": 1.5707963267949385,
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-728",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-723",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-729",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-725",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-730",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-726",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-731",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-724",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-732",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-723",
+          "role": "end"
+        },
+        {
+          "entityId": "line-724",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-734",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-725",
+          "role": "end"
+        },
+        {
+          "entityId": "line-726",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-735",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-726",
+          "role": "end"
+        },
+        {
+          "entityId": "line-723",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "coordinate-y-736",
+      "type": "coordinate-y",
+      "references": [
+        {
+          "entityId": "line-723",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "coordinate-x-737",
+      "type": "coordinate-x",
+      "references": [
+        {
+          "entityId": "line-726",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "length-738",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-725",
+          "role": "entity"
+        }
+      ],
+      "value": 100,
+      "driving": true
+    },
+    {
+      "id": "length-739",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-724",
+          "role": "entity"
+        }
+      ],
+      "value": 100,
+      "driving": true
+    },
+    {
+      "id": "constraint-766",
+      "type": "fillet",
+      "references": [
+        {
+          "entityId": "line-725",
+          "role": "first"
+        },
+        {
+          "entityId": "line-724",
+          "role": "second"
+        },
+        {
+          "entityId": "arc-765",
+          "role": "entity"
+        }
+      ],
+      "value": 17.952302254840436
+    },
+    {
+      "id": "constraint-767",
+      "type": "radius",
+      "references": [
+        {
+          "entityId": "arc-765",
+          "role": "entity"
+        }
+      ],
+      "value": 17.952302254840436,
+      "driving": true
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-05T13:40:37.646Z",
+    "app": "sketcher"
+  }
+}
