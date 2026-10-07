@@ -1,6 +1,10 @@
-# Sketcher
+# WVC-CAD
 
-Parametric 2D mechanical sketcher (Chunks **0–27** complete). Internal units: millimetres. The sketch model is the source of truth — React is a view only.
+**Weekend Vibe-Coded CAD** — a parametric 2D mechanical sketcher (Chunks **0–27** complete).
+
+Internal units: millimetres. The sketch model is the source of truth; React is a view only.
+
+> Private WIP — engineering-oriented sketcher, not a production CAD product.
 
 ## Scripts
 
@@ -14,6 +18,8 @@ npm run build
 ```
 
 ## Controls
+
+Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geometry/constraint toolbars.
 
 - **Select** — click to select; drag points, line ends/body, rect corners/edges, circle/arc centers or rims; Delete/Backspace to remove
 - **Point** — click to place; Escape → Select
@@ -29,7 +35,7 @@ npm run build
 - **Construction** — toolbar toggle creates dashed reference geometry; **Toggle Constr.** / `C` (with selection) flips selected entities
 - **Coincident** — pick first point/endpoint/center, then second point or a line; partners stay together when dragged
 - **Horizontal / Vertical** — click a line, or two points/endpoints/centers; stays H/V while dragging; conflicting constraints are rejected
-- **Parallel / Perpendicular / Tangent / Concentric / Midpoint / Equal / Symmetric / Point on object / Fix** — constraint tools (see Constraints menu / toolbar)
+- **Parallel / Perpendicular / Tangent / Concentric / Midpoint / Equal / Symmetric / Point on object / Fix** — constraint tools (Constraints menu / toolbar)
 - **Dimensions** — Length, H/V distance, Radius / Diameter, Angle, Offset X/Y. Edit in the Constraints panel or double-click a canvas label
 - **File** — New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S); versioned `*.sketch.json`
 - **Autosave** — dirty sketches autosave to a local recovery slot; restore prompt after crash/reload
