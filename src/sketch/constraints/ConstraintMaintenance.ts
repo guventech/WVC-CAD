@@ -70,3 +70,12 @@ export function maintainConstraints(
         : [...result.conflictingConstraints],
   };
 }
+
+/**
+ * After load/restore, settle any residual violations that were saved while a
+ * residual path was incorrect (or drifted). No-op when already satisfied.
+ * On failure returns the original sketch unchanged.
+ */
+export function settleLoadedSketch(sketch: Sketch): Sketch {
+  return maintainConstraints(sketch).sketch;
+}

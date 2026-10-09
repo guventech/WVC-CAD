@@ -10,6 +10,7 @@ import {
   sketchContentFingerprint,
   type AutosaveStore,
 } from "../sketch/serialization/SketchAutosave.ts";
+import { settleLoadedSketch } from "../sketch/constraints/ConstraintMaintenance.ts";
 import {
   parseSketchJson,
   serializeSketchToJson,
@@ -83,12 +84,13 @@ export function useSketchFileIo({
         setConstraintConflict(null);
         return;
       }
+      const sketch = settleLoadedSketch(parsed.sketch);
       setDocumentState({
-        sketch: parsed.sketch,
+        sketch,
         history: clearCommandHistory(),
       });
-      setDocumentFileName(sketchDownloadFileName(parsed.sketch.name));
-      setLastCleanFingerprint(sketchContentFingerprint(parsed.sketch));
+      setDocumentFileName(sketchDownloadFileName(sketch.name));
+      setLastCleanFingerprint(sketchContentFingerprint(sketch));
       clearAutosaveStore(autosaveStore);
       setSelection((current) => clearSelection(current));
       setConstraintMessage(null);

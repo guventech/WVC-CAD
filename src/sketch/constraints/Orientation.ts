@@ -18,6 +18,11 @@ export function isOrientationType(type: string): type is OrientationType {
 /**
  * The two point handles an orientation constraint relates.
  * Supported patterns: one line (`entity`/`object`) or two point-like handles.
+ *
+ * Single-line H/V must use the line's stored endpoints — never rectangle corner
+ * point entities. After a corner is opened for fillet/chamfer, topology glue is
+ * dropped and corner points can diverge from edge endpoints; normalizing would
+ * make a slanted edge report residual 0 while the visible line is skewed.
  */
 export function orientationHandles(
   sketch: Sketch,
@@ -29,8 +34,8 @@ export function orientationHandles(
       return null;
     }
     return [
-      normalizePointLikeRef(sketch, { entityId: lineRef.entityId, role: "start" }),
-      normalizePointLikeRef(sketch, { entityId: lineRef.entityId, role: "end" }),
+      { entityId: lineRef.entityId, role: "start" },
+      { entityId: lineRef.entityId, role: "end" },
     ];
   }
 

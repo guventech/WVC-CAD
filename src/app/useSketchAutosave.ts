@@ -12,6 +12,7 @@ import {
   writeAutosaveStore,
   type AutosaveEnvelope,
 } from "../sketch/serialization/SketchAutosave.ts";
+import { settleLoadedSketch } from "../sketch/constraints/ConstraintMaintenance.ts";
 import type { Sketch } from "../sketch/model/Sketch.ts";
 import type { ConstraintConflict } from "../sketch/constraints/OverConstraint.ts";
 import {
@@ -70,7 +71,7 @@ export function useSketchAutosave({
       return;
     }
     setDocumentState({
-      sketch: restored.sketch,
+      sketch: settleLoadedSketch(restored.sketch),
       history: clearCommandHistory(),
     });
     setDocumentFileName(pendingRecovery.documentFileName);
