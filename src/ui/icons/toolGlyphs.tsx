@@ -65,9 +65,7 @@ export const CONSTRAINT_TOOL_IDS: readonly ActiveTool[] = [
 ];
 
 export const DIMENSION_TOOL_IDS: readonly ActiveTool[] = [
-  "dim-length",
-  "dim-horizontal-distance",
-  "dim-vertical-distance",
+  "dim-distance",
   "dim-radius",
   "dim-diameter",
   "dim-angle",
@@ -245,26 +243,12 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
       <polyline points="11,7 13,9 11,11" />
     </Svg>
   ),
-  "dim-length": () => (
+  "dim-distance": () => (
     <Svg>
       <line x1="3" y1="12" x2="15" y2="6" />
       <line x1="4" y1="14" x2="14" y2="8" />
       <polyline points="4.5,12 4,14 6,13.5" />
       <polyline points="13.5,6.5 14,8 12,8.5" />
-    </Svg>
-  ),
-  "dim-horizontal-distance": () => (
-    <Svg>
-      <line x1="4" y1="11" x2="14" y2="11" />
-      <line x1="4" y1="8" x2="4" y2="14" />
-      <line x1="14" y1="8" x2="14" y2="14" />
-    </Svg>
-  ),
-  "dim-vertical-distance": () => (
-    <Svg>
-      <line x1="9" y1="3.5" x2="9" y2="14.5" />
-      <line x1="6" y1="3.5" x2="12" y2="3.5" />
-      <line x1="6" y1="14.5" x2="12" y2="14.5" />
     </Svg>
   ),
   "dim-radius": () => (

@@ -8,6 +8,8 @@ import {
 } from "../model/SketchFrame.ts";
 import type { ActiveTool } from "../tools/ActiveTool.ts";
 import { isConstraintPickTool } from "../tools/ActiveTool.ts";
+import { resolveConstraintPoint } from "./ConstraintRef.ts";
+import { classifySmartDistance } from "./SmartDistance.ts";
 
 export type ApplicabilityState = "enabled" | "disabled";
 
@@ -47,9 +49,7 @@ const CONTEXT_TOOLS: readonly ActiveTool[] = [
   "fix",
   "dim-offset-x-axis",
   "dim-offset-y-axis",
-  "dim-length",
-  "dim-horizontal-distance",
-  "dim-vertical-distance",
+  "dim-distance",
   "dim-radius",
   "dim-diameter",
   "dim-angle",
@@ -266,31 +266,20 @@ function evaluateOne(
       }
       return disabled(toolId, "Needs a point, line, or circle/arc");
     }
-    case "dim-length": {
-      if (lineCount === 1) {
-        return enabled(toolId, "Length: apply to selected line", true);
-      }
-      if (lineCount > 1) {
-        return disabled(toolId, "Select a single line");
-      }
-      return disabled(toolId, "Needs a line");
-    }
-    case "dim-horizontal-distance":
-    case "dim-vertical-distance": {
-      const label =
-        toolId === "dim-horizontal-distance"
-          ? "Horizontal distance"
-          : "Vertical distance";
+    case "dim-distance": {
       if (lineCount === 1 && pointLikeCount === 0) {
-        return enabled(toolId, `${label}: apply to selected line`, true);
+        return enabled(toolId, "Distance: apply length to selected line", true);
       }
       if (pointLikeCount === 2) {
-        return enabled(toolId, `${label}: apply to two points`, true);
+        return enabled(toolId, "Distance: apply between two points", true);
       }
       if (pointLikeCount === 1) {
-        return enabled(toolId, `${label}: pick a second point`, false);
+        return enabled(toolId, "Distance: pick a second point", false);
       }
-      return disabled(toolId, `Needs a line or two points`);
+      if (lineCount > 1) {
+        return disabled(toolId, "Select a single line or two points");
+      }
+      return disabled(toolId, "Needs a line or two points");
     }
     case "dim-radius":
     case "dim-diameter": {
@@ -380,7 +369,7 @@ export function selectionConstraintAction(
   }
 
   const kinds = classifySelection(sketch, selectedIds);
-  const built = buildRequestFromSelection(toolId, kinds);
+  const built = buildRequestFromSelection(sketch, toolId, kinds);
   if (built === null) {
     return { kind: "continue-pick", tool: toolId };
   }
@@ -388,6 +377,7 @@ export function selectionConstraintAction(
 }
 
 function buildRequestFromSelection(
+  sketch: Sketch,
   toolId: ActiveTool,
   kinds: SelectionKinds,
 ): SelectionConstraintAction | null {
@@ -561,39 +551,31 @@ function buildRequestFromSelection(
         };
       }
       return null;
-    case "dim-length":
-      if (kinds.lineIds.length === 1) {
+    case "dim-distance": {
+      if (kinds.lineIds.length === 1 && points.length === 0) {
         return {
           kind: "apply-maintained",
           request: { type: "length", references: [lineRef(kinds.lineIds[0]!)] },
         };
       }
-      return null;
-    case "dim-horizontal-distance":
-    case "dim-vertical-distance": {
-      const type =
-        toolId === "dim-horizontal-distance"
-          ? "horizontal-distance"
-          : "vertical-distance";
-      if (kinds.lineIds.length === 1) {
-        const id = kinds.lineIds[0]!;
-        return {
-          kind: "apply-maintained",
-          request: {
-            type,
-            references: [
-              { entityId: id, role: "start" },
-              { entityId: id, role: "end" },
-            ],
-          },
-        };
-      }
       if (points.length >= 2) {
+        const aRef = pointRef(points[0]!);
+        const bRef = pointRef(points[1]!);
+        const classified = classifySmartDistance(
+          null,
+          aRef,
+          bRef,
+          resolveConstraintPoint(sketch, aRef),
+          resolveConstraintPoint(sketch, bRef),
+        );
+        if (classified === null || classified.type === "length") {
+          return null;
+        }
         return {
           kind: "apply-maintained",
           request: {
-            type,
-            references: [pointRef(points[0]!), pointRef(points[1]!)],
+            type: classified.type,
+            references: [classified.a, classified.b],
           },
         };
       }

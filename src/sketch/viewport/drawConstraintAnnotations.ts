@@ -222,6 +222,7 @@ function dimensionAnchor(sketch: Sketch, constraint: Constraint): Point2D | null
       const line = referencedLine(sketch, constraint.references[0]);
       return line === null ? null : lineMidpoint(line.start, line.end);
     }
+    case "distance":
     case "horizontal-distance":
     case "vertical-distance": {
       const handles = distanceHandles(sketch, constraint.references);
@@ -275,6 +276,8 @@ function formatDimension(constraint: Constraint, measured: number): string {
       return `↔${measured.toFixed(2)}`;
     case "vertical-distance":
       return `↕${measured.toFixed(2)}`;
+    case "distance":
+      return `⟷${measured.toFixed(2)}`;
     case "coordinate-x":
       return `X ${measured.toFixed(2)}`;
     case "coordinate-y":

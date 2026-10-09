@@ -26,9 +26,7 @@ export type ConstraintPickToolId =
   | "symmetric"
   | "point-on-object"
   | "fix"
-  | "dim-length"
-  | "dim-horizontal-distance"
-  | "dim-vertical-distance"
+  | "dim-distance"
   | "dim-offset-x-axis"
   | "dim-offset-y-axis"
   | "dim-radius"
@@ -47,9 +45,7 @@ const CONSTRAINT_PICK_TOOLS: readonly ConstraintPickToolId[] = [
   "symmetric",
   "point-on-object",
   "fix",
-  "dim-length",
-  "dim-horizontal-distance",
-  "dim-vertical-distance",
+  "dim-distance",
   "dim-offset-x-axis",
   "dim-offset-y-axis",
   "dim-radius",

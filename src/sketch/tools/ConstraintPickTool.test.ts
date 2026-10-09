@@ -78,15 +78,46 @@ describe("ConstraintPickTool", () => {
     }
   });
 
-  it("H distance on a line expands to its two endpoints", () => {
+  it("Distance on a line creates length", () => {
     const created = addLineToSketch(createEmptySketch(), { x: 0, y: 0 }, { x: 40, y: 10 })!;
     expect(
-      click("dim-horizontal-distance", created.sketch, { x: 20, y: 5 }).result.createConstraint,
+      click("dim-distance", created.sketch, { x: 20, y: 5 }).result.createConstraint,
     ).toEqual({
+      type: "length",
+      references: [{ entityId: created.line.id, role: "entity" }],
+    });
+  });
+
+  it("Distance on two horizontal points creates horizontal-distance", () => {
+    let sketch = createEmptySketch();
+    const a = addPointToSketch(sketch, { x: 0, y: 0 });
+    sketch = a.sketch;
+    const b = addPointToSketch(sketch, { x: 40, y: 0 });
+    sketch = b.sketch;
+    const first = click("dim-distance", sketch, { x: 0, y: 0 });
+    const second = click("dim-distance", sketch, { x: 40, y: 0 }, first.state);
+    expect(second.result.createConstraint).toEqual({
       type: "horizontal-distance",
       references: [
-        { entityId: created.line.id, role: "start" },
-        { entityId: created.line.id, role: "end" },
+        { entityId: a.point.id, role: "position" },
+        { entityId: b.point.id, role: "position" },
+      ],
+    });
+  });
+
+  it("Distance on two diagonal points creates Euclidean distance", () => {
+    let sketch = createEmptySketch();
+    const a = addPointToSketch(sketch, { x: 0, y: 0 });
+    sketch = a.sketch;
+    const b = addPointToSketch(sketch, { x: 30, y: 40 });
+    sketch = b.sketch;
+    const first = click("dim-distance", sketch, { x: 0, y: 0 });
+    const second = click("dim-distance", sketch, { x: 30, y: 40 }, first.state);
+    expect(second.result.createConstraint).toEqual({
+      type: "distance",
+      references: [
+        { entityId: a.point.id, role: "position" },
+        { entityId: b.point.id, role: "position" },
       ],
     });
   });
@@ -294,11 +325,9 @@ describe("ConstraintPickTool", () => {
     });
   });
 
-  it("Length ignores points and circles", () => {
-    const point = { kind: "point-like" as const, ref: { entityId: "p", role: "position" as const } };
+  it("Distance ignores a lone circle pick", () => {
     const curve = { kind: "curve" as const, ref: { entityId: "c", role: "entity" as const } };
-    expect(interpretConstraintPick("dim-length", null, point).kind).toBe("ignore");
-    expect(interpretConstraintPick("dim-length", null, curve).kind).toBe("ignore");
+    expect(interpretConstraintPick("dim-distance", null, curve).kind).toBe("ignore");
   });
 
   it("Offset from X-axis: one point pick requests coordinate-y", () => {

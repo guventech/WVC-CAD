@@ -1,5 +1,7 @@
 import type { ConstraintCreateRequest } from "../commands/AddMaintainedConstraintCommand.ts";
+import { resolveConstraintPoint } from "../constraints/ConstraintRef.ts";
 import { constraintPickFromHit } from "../constraints/pickConstraintRef.ts";
+import { classifySmartDistance } from "../constraints/SmartDistance.ts";
 import { isApproximatelyEqual, TOLERANCE } from "../geometry/GeometryMath.ts";
 import type { ConstraintReference } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
@@ -45,13 +47,15 @@ type PickStep =
  * - Point-on-object: point-like + line/circle/arc object (either order)
  * - Fix: one point-like handle, line, or circle/arc
  * - axis offset: one point-like (or parallel line expanded by the pointer handler)
- * - length: a line · radius / diameter: a circle or arc · angle: two lines
+ * - distance: a line (`length`) or two points (H / V / Euclidean by alignment)
+ * - radius / diameter: a circle or arc · angle: two lines
  */
 export function interpretConstraintPick(
   tool: ConstraintPickToolId,
   first: ConstraintToolPick | null,
   pick: ConstraintToolPick,
   second: ConstraintToolPick | null = null,
+  sketch: Sketch | null = null,
 ): PickStep {
   switch (tool) {
     case "fix":
@@ -204,27 +208,64 @@ export function interpretConstraintPick(
       };
     }
     case "horizontal":
-    case "vertical":
-    case "dim-horizontal-distance":
-    case "dim-vertical-distance": {
-      const type = pairToolType(tool);
+    case "vertical": {
+      const type = tool;
       if (first === null) {
         if (pick.kind === "line") {
-          const references =
-            tool === "horizontal" || tool === "vertical"
-              ? [pick.ref]
-              : [
-                  { entityId: pick.ref.entityId, role: "start" as const },
-                  { entityId: pick.ref.entityId, role: "end" as const },
-                ];
-          return { kind: "create", request: { type, references } };
+          return { kind: "create", request: { type, references: [pick.ref] } };
         }
-        return pick.kind === "point-like" ? { kind: "await-second", first: pick } : { kind: "ignore" };
+        return pick.kind === "point-like"
+          ? { kind: "await-second", first: pick }
+          : { kind: "ignore" };
       }
       if (pick.kind !== "point-like") {
         return { kind: "ignore" };
       }
       return { kind: "create", request: { type, references: [first.ref, pick.ref] } };
+    }
+    case "dim-distance": {
+      if (first === null) {
+        if (pick.kind === "line") {
+          return {
+            kind: "create",
+            request: { type: "length", references: [pick.ref] },
+          };
+        }
+        return pick.kind === "point-like"
+          ? { kind: "await-second", first: pick }
+          : { kind: "ignore" };
+      }
+      if (pick.kind !== "point-like" || first.kind !== "point-like") {
+        return { kind: "ignore" };
+      }
+      if (sketch === null) {
+        return {
+          kind: "create",
+          request: {
+            type: "distance",
+            references: [first.ref, pick.ref],
+          },
+        };
+      }
+      const aWorld = resolveConstraintPoint(sketch, first.ref);
+      const bWorld = resolveConstraintPoint(sketch, pick.ref);
+      const classified = classifySmartDistance(
+        null,
+        first.ref,
+        pick.ref,
+        aWorld,
+        bWorld,
+      );
+      if (classified === null || classified.type === "length") {
+        return { kind: "ignore" };
+      }
+      return {
+        kind: "create",
+        request: {
+          type: classified.type,
+          references: [classified.a, classified.b],
+        },
+      };
     }
     case "dim-offset-x-axis":
     case "dim-offset-y-axis": {
@@ -239,10 +280,6 @@ export function interpretConstraintPick(
         },
       };
     }
-    case "dim-length":
-      return pick.kind === "line"
-        ? { kind: "create", request: { type: "length", references: [pick.ref] } }
-        : { kind: "ignore" };
     case "dim-radius":
     case "dim-diameter":
       return pick.kind === "curve"
@@ -400,7 +437,13 @@ export function handleConstraintPickToolPointerDown(
     return idle(state);
   }
 
-  const step = interpretConstraintPick(tool, state.first, pick, state.second);
+  const step = interpretConstraintPick(
+    tool,
+    state.first,
+    pick,
+    state.second,
+    context.sketch,
+  );
   if (step.kind === "ignore") {
     return idle(state);
   }
@@ -464,17 +507,3 @@ export function cancelConstraintPickToolSession(
   return { state: createConstraintPickToolState(), cancelled: true };
 }
 
-function pairToolType(
-  tool: "horizontal" | "vertical" | "dim-horizontal-distance" | "dim-vertical-distance",
-): ConstraintCreateRequest["type"] {
-  switch (tool) {
-    case "horizontal":
-      return "horizontal";
-    case "vertical":
-      return "vertical";
-    case "dim-horizontal-distance":
-      return "horizontal-distance";
-    case "dim-vertical-distance":
-      return "vertical-distance";
-  }
-}

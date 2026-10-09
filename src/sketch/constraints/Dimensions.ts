@@ -20,6 +20,7 @@ import {
 /** Dimensional types enforced by the solver (Chunk 13 + coordinate anchors). */
 export type SupportedDimensionType =
   | "length"
+  | "distance"
   | "horizontal-distance"
   | "vertical-distance"
   | "radius"
@@ -33,6 +34,7 @@ export function isSupportedDimensionType(
 ): type is SupportedDimensionType {
   switch (type) {
     case "length":
+    case "distance":
     case "horizontal-distance":
     case "vertical-distance":
     case "radius":
@@ -104,6 +106,14 @@ export function measureDimension(
     case "length": {
       const line = references.length === 1 ? referencedLine(sketch, references[0]) : null;
       return line === null ? null : distance(line.start, line.end);
+    }
+    case "distance": {
+      const handles = distanceHandles(sketch, references);
+      const points = handles === null ? null : resolvePair(sketch, handles);
+      if (points === null) {
+        return null;
+      }
+      return distance(points[0], points[1]);
     }
     case "horizontal-distance":
     case "vertical-distance": {
@@ -182,7 +192,12 @@ export function validateDimensionValue(
   }
   switch (type) {
     case "length":
-      return value > TOLERANCE.coincidence ? null : "Length must be greater than 0 mm.";
+    case "distance":
+      return value > TOLERANCE.coincidence
+        ? null
+        : type === "length"
+          ? "Length must be greater than 0 mm."
+          : "Distance must be greater than 0 mm.";
     case "radius":
       return value > TOLERANCE.coincidence ? null : "Radius must be greater than 0 mm.";
     case "diameter":

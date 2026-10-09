@@ -49,7 +49,16 @@
 | U4 | `ConstraintContextBar` on Select; greyed boxes; apply or continue-pick; coincident failures surfaced |
 | U5 | Constraint panel Related/All filter; feature rows de-emphasized; status Session disclosure |
 
-**U6 backlog (not started):** richer create snaps/auto-constraints; generic point–point distance; fully-constrained entity coloring; polygon/slot/3-pt arc; Tauri packaging.
+**U6 backlog (not started):** richer create snaps/auto-constraints; fully-constrained entity coloring; polygon/slot/3-pt arc; Tauri packaging.
+
+### Unified Distance dimension (2026-10-09)
+
+| Area | What landed |
+|------|-------------|
+| Model | Euclidean `distance` type + residuals; H/V distance kept for axis-aligned spans |
+| UI | Single **Distance** tool replaces Length / H distance / V distance |
+| Smart pick | Line → `length`; two points → H / V / Euclidean by ~2° alignment |
+| ADR | ADR-048 |
 
 ### Chunk 27 results (2026-10-06) — CAD-like UI refinement
 

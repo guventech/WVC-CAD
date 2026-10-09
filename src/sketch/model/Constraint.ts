@@ -22,10 +22,11 @@ export type FeatureConstraintType = "rectangle" | "fillet" | "chamfer";
 
 /**
  * Dimensional constraint kinds (value in mm, or radians for angle).
- * Generic point–point `distance` is intentionally omitted until residuals + a
- * factory exist (honesty: unsupported types must not enter the catalog).
+ * `distance` is Euclidean point–point; H/V remain for axis-aligned spans
+ * (also created by the unified Distance tool via smart classification).
  */
 export type DimensionalConstraintType =
+  | "distance"
   | "horizontal-distance"
   | "vertical-distance"
   | "length"
@@ -96,6 +97,7 @@ export function isDimensionalConstraintType(
   type: ConstraintType,
 ): type is DimensionalConstraintType {
   switch (type) {
+    case "distance":
     case "horizontal-distance":
     case "vertical-distance":
     case "length":

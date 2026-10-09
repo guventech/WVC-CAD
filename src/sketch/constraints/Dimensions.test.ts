@@ -138,6 +138,23 @@ describe("dimensional constraints (Chunk 13)", () => {
     expect(listUnsatisfiedConstraints(sketch)).toEqual([]);
   });
 
+  it("drives Euclidean distance between two diagonal points", () => {
+    let sketch = createEmptySketch();
+    const a = addPointToSketch(sketch, { x: 0, y: 0 });
+    sketch = a.sketch;
+    const b = addPointToSketch(sketch, { x: 30, y: 40 });
+    sketch = b.sketch;
+    const refs = [
+      { entityId: a.point.id, role: "position" as const },
+      { entityId: b.point.id, role: "position" as const },
+    ];
+    sketch = add(sketch, { type: "distance", references: refs });
+    expect(measureDimension(sketch, "distance", refs)).toBeCloseTo(50, 6);
+    sketch = editValue(sketch, 25);
+    expect(measureDimension(sketch, "distance", refs)).toBeCloseTo(25, 5);
+    expect(listUnsatisfiedConstraints(sketch)).toEqual([]);
+  });
+
   it("drives circle radius and diameter; rejects zero radius", () => {
     const created = addCircleToSketch(createEmptySketch(), { x: 5, y: 5 }, 10)!;
     const ref = [{ entityId: created.circle.id, role: "entity" as const }];

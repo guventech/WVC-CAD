@@ -734,3 +734,21 @@ Align interaction with commercial sketchers (icons + selection-driven constraint
 
 Status:
 **Implemented (UX U1–U5).** U6 backlog remains deferred.
+
+---
+
+## ADR-048 — Unified Distance dimension tool
+
+Date: 2026-10-09
+
+Decision:
+Replace separate Length / Horizontal distance / Vertical distance toolbar tools with one **Distance** tool:
+1. Pick a line → create `length` (Euclidean along the line).
+2. Pick two points → create `horizontal-distance`, `vertical-distance`, or Euclidean `distance` based on ~2° axis alignment (commercial smart-dimension style).
+3. Keep H/V types in the schema so saved sketches and smart classification remain honest; do not fake a single residual for all three.
+
+Reason:
+Three nearly-identical pick UIs were inconsistent (length accepted only lines; H/V accepted line or two points) and crowded the dimension bar.
+
+Status:
+**Implemented.**

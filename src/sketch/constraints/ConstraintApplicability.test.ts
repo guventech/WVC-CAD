@@ -39,7 +39,8 @@ describe("ConstraintApplicability", () => {
     expect(byId.horizontal?.state).toBe("enabled");
     expect(byId.horizontal?.canApply).toBe(true);
     expect(byId.vertical?.state).toBe("enabled");
-    expect(byId["dim-length"]?.state).toBe("enabled");
+    expect(byId["dim-distance"]?.state).toBe("enabled");
+    expect(byId["dim-distance"]?.canApply).toBe(true);
     expect(byId.fix?.state).toBe("enabled");
     expect(byId.parallel?.state).toBe("enabled");
     expect(byId.parallel?.canApply).toBe(false);
@@ -77,10 +78,10 @@ describe("ConstraintApplicability", () => {
     );
     expect(byId["dim-radius"]?.canApply).toBe(true);
     expect(byId["dim-diameter"]?.canApply).toBe(true);
-    expect(byId["dim-length"]?.state).toBe("disabled");
+    expect(byId["dim-distance"]?.state).toBe("disabled");
   });
 
-  it("builds a length request from one selected line", () => {
+  it("builds a length request from one selected line via Distance", () => {
     const created = addLineToSketch(
       createEmptySketch(),
       { x: 0, y: 0 },
@@ -89,7 +90,7 @@ describe("ConstraintApplicability", () => {
     const action = selectionConstraintAction(
       created.sketch,
       [created.line.id],
-      "dim-length",
+      "dim-distance",
     );
     expect(action.kind).toBe("apply-maintained");
     if (action.kind === "apply-maintained") {

@@ -83,16 +83,11 @@ const CONSTRAINT_TOOLS: readonly ToolButton[] = [
 ];
 
 const DIMENSION_TOOLS: readonly ToolButton[] = [
-  { id: "dim-length", label: "Length", title: "Line length: pick a line" },
   {
-    id: "dim-horizontal-distance",
-    label: "Horizontal distance",
-    title: "Horizontal distance: pick a line, or two points",
-  },
-  {
-    id: "dim-vertical-distance",
-    label: "Vertical distance",
-    title: "Vertical distance: pick a line, or two points",
+    id: "dim-distance",
+    label: "Distance",
+    title:
+      "Distance: pick a line (length), or two points (H/V if aligned, else Euclidean)",
   },
   { id: "dim-radius", label: "Radius", title: "Radius: pick a circle or arc" },
   { id: "dim-diameter", label: "Diameter", title: "Diameter: pick a circle or arc" },

@@ -449,6 +449,7 @@ type ConstraintFamily =
   | "point-on-object"
   | "fix"
   | "length"
+  | "distance"
   | "h-distance"
   | "v-distance"
   | "size"
@@ -542,6 +543,13 @@ function constraintSignature(
     }
     case "length":
       return { family: "length", handles: entityKey(constraint.references) };
+    case "distance": {
+      const handles = distanceHandles(sketch, constraint.references);
+      if (handles === null) {
+        return null;
+      }
+      return { family: "distance", handles: pairKey(handles) };
+    }
     case "radius":
     case "diameter":
       return { family: "size", handles: entityKey(constraint.references) };

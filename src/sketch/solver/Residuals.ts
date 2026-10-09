@@ -703,6 +703,22 @@ function appendConstraintResiduals(
       });
       return;
     }
+    case "distance": {
+      const handles = distanceHandles(sketch, constraint.references);
+      if (handles === null) {
+        return;
+      }
+      const a = resolveConstraintPoint(sketch, handles[0]);
+      const b = resolveConstraintPoint(sketch, handles[1]);
+      if (a === null || b === null) {
+        return;
+      }
+      out.push({
+        constraintId: constraint.id,
+        value: distance(a, b) - constraint.value,
+      });
+      return;
+    }
     case "horizontal-distance":
     case "vertical-distance": {
       const handles = distanceHandles(sketch, constraint.references);

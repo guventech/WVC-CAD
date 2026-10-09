@@ -234,12 +234,8 @@ export function toolHint(activeTool: ActiveTool): string {
       return "Point on object · click a point/endpoint/center and a line/circle/arc edge · Esc cancels";
     case "fix":
       return "Fix · click a point/endpoint/center, a line, or a circle/arc · locks geometry in place · Esc cancels";
-    case "dim-length":
-      return "Length dimension · click a line · created at current length · edit value in Constraints panel";
-    case "dim-horizontal-distance":
-      return "Horizontal distance · click a line, or two points · edit value in Constraints panel · Esc cancels";
-    case "dim-vertical-distance":
-      return "Vertical distance · click a line, or two points · edit value in Constraints panel · Esc cancels";
+    case "dim-distance":
+      return "Distance · click a line (length), or two points (H/V if aligned, else Euclidean) · Esc cancels";
     case "dim-offset-x-axis":
       return "Offset from X-axis · click a point/corner or horizontal edge · edit value to move sketch · Esc cancels";
     case "dim-offset-y-axis":

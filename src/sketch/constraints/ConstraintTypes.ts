@@ -39,9 +39,10 @@ const FEATURE: readonly ConstraintTypeInfo[] = [
 ];
 
 const DIMENSIONAL: readonly ConstraintTypeInfo[] = [
+  entry("length", "dimensional", "Length", 1, 1, true),
+  entry("distance", "dimensional", "Distance", 2, 2, true),
   entry("horizontal-distance", "dimensional", "Horizontal distance", 2, 2, true),
   entry("vertical-distance", "dimensional", "Vertical distance", 2, 2, true),
-  entry("length", "dimensional", "Length", 1, 1, true),
   entry("radius", "dimensional", "Radius", 1, 1, true),
   entry("diameter", "dimensional", "Diameter", 1, 1, true),
   entry("angle", "dimensional", "Angle", 2, 3, true),
