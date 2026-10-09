@@ -78,13 +78,31 @@ describe("ConstraintPickTool", () => {
     }
   });
 
-  it("Distance on a line creates length", () => {
+  it("Distance: same line twice creates length", () => {
     const created = addLineToSketch(createEmptySketch(), { x: 0, y: 0 }, { x: 40, y: 10 })!;
-    expect(
-      click("dim-distance", created.sketch, { x: 20, y: 5 }).result.createConstraint,
-    ).toEqual({
+    const first = click("dim-distance", created.sketch, { x: 20, y: 5 });
+    expect(first.result.creationSessionActive).toBe(true);
+    const second = click("dim-distance", created.sketch, { x: 20, y: 5 }, first.state);
+    expect(second.result.createConstraint).toEqual({
       type: "length",
       references: [{ entityId: created.line.id, role: "entity" }],
+    });
+  });
+
+  it("Distance: two vertical lines creates horizontal-distance", () => {
+    let sketch = createEmptySketch();
+    const a = addLineToSketch(sketch, { x: 10, y: 0 }, { x: 10, y: 40 })!;
+    sketch = a.sketch;
+    const b = addLineToSketch(sketch, { x: 50, y: 0 }, { x: 50, y: 30 })!;
+    sketch = b.sketch;
+    const first = click("dim-distance", sketch, { x: 10, y: 20 });
+    const second = click("dim-distance", sketch, { x: 50, y: 15 }, first.state);
+    expect(second.result.createConstraint).toEqual({
+      type: "horizontal-distance",
+      references: [
+        { entityId: a.line.id, role: "start" },
+        { entityId: b.line.id, role: "start" },
+      ],
     });
   });
 
@@ -330,21 +348,57 @@ describe("ConstraintPickTool", () => {
     expect(interpretConstraintPick("dim-distance", null, curve).kind).toBe("ignore");
   });
 
-  it("Offset from X-axis: one point pick requests coordinate-y", () => {
+  it("Distance: point + X-axis creates coordinate-y (locate)", () => {
     const created = addPointToSketch(createEmptySketch(), { x: 12, y: 34 });
-    const handled = click("dim-offset-x-axis", created.sketch, { x: 12, y: 34 });
-    expect(handled.result.createConstraint).toEqual({
-      type: "coordinate-y",
-      references: [{ entityId: created.point.id, role: "position" }],
+    const pointPick = {
+      kind: "point-like" as const,
+      ref: { entityId: created.point.id, role: "position" as const },
+    };
+    const axisPick = {
+      kind: "line" as const,
+      ref: { entityId: "datum:axis:x", role: "entity" as const },
+    };
+    expect(
+      interpretConstraintPick(
+        "dim-distance",
+        pointPick,
+        axisPick,
+        null,
+        created.sketch,
+      ),
+    ).toEqual({
+      kind: "create",
+      request: {
+        type: "coordinate-y",
+        references: [{ entityId: created.point.id, role: "position" }],
+      },
     });
   });
 
-  it("Offset from Y-axis: one point pick requests coordinate-x", () => {
-    const created = addPointToSketch(createEmptySketch(), { x: 12, y: 34 });
-    const handled = click("dim-offset-y-axis", created.sketch, { x: 12, y: 34 });
-    expect(handled.result.createConstraint).toEqual({
-      type: "coordinate-x",
-      references: [{ entityId: created.point.id, role: "position" }],
+  it("Distance: vertical line + Y-axis creates coordinate-x (locate)", () => {
+    const created = addLineToSketch(createEmptySketch(), { x: 25, y: 0 }, { x: 25, y: 40 })!;
+    const linePick = {
+      kind: "line" as const,
+      ref: { entityId: created.line.id, role: "entity" as const },
+    };
+    const axisPick = {
+      kind: "line" as const,
+      ref: { entityId: "datum:axis:y", role: "entity" as const },
+    };
+    expect(
+      interpretConstraintPick(
+        "dim-distance",
+        linePick,
+        axisPick,
+        null,
+        created.sketch,
+      ),
+    ).toEqual({
+      kind: "create",
+      request: {
+        type: "coordinate-x",
+        references: [{ entityId: created.line.id, role: "start" }],
+      },
     });
   });
 
@@ -375,19 +429,30 @@ describe("ConstraintPickTool", () => {
     });
   });
 
-  it("Offset from X-axis accepts a horizontal line as one endpoint", () => {
+  it("Distance: horizontal line + X-axis creates coordinate-y", () => {
     const created = addLineToSketch(createEmptySketch(), { x: 10, y: 40 }, { x: 90, y: 40 })!;
-    const handled = click("dim-offset-x-axis", created.sketch, { x: 50, y: 40 });
-    expect(handled.result.createConstraint).toEqual({
-      type: "coordinate-y",
-      references: [{ entityId: created.line.id, role: "start" }],
-    });
-  });
-
-  it("Offset from X-axis ignores a vertical line", () => {
-    const created = addLineToSketch(createEmptySketch(), { x: 10, y: 0 }, { x: 10, y: 40 })!;
+    const linePick = {
+      kind: "line" as const,
+      ref: { entityId: created.line.id, role: "entity" as const },
+    };
+    const axisPick = {
+      kind: "line" as const,
+      ref: { entityId: "datum:axis:x", role: "entity" as const },
+    };
     expect(
-      click("dim-offset-x-axis", created.sketch, { x: 10, y: 20 }).result.createConstraint,
-    ).toBeUndefined();
+      interpretConstraintPick(
+        "dim-distance",
+        linePick,
+        axisPick,
+        null,
+        created.sketch,
+      ),
+    ).toEqual({
+      kind: "create",
+      request: {
+        type: "coordinate-y",
+        references: [{ entityId: created.line.id, role: "start" }],
+      },
+    });
   });
 });

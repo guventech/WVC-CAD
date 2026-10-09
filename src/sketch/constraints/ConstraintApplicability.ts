@@ -8,8 +8,7 @@ import {
 } from "../model/SketchFrame.ts";
 import type { ActiveTool } from "../tools/ActiveTool.ts";
 import { isConstraintPickTool } from "../tools/ActiveTool.ts";
-import { resolveConstraintPoint } from "./ConstraintRef.ts";
-import { classifySmartDistance } from "./SmartDistance.ts";
+import { classifyDistancePicks } from "./SmartDistance.ts";
 
 export type ApplicabilityState = "enabled" | "disabled";
 
@@ -47,8 +46,6 @@ const CONTEXT_TOOLS: readonly ActiveTool[] = [
   "symmetric",
   "point-on-object",
   "fix",
-  "dim-offset-x-axis",
-  "dim-offset-y-axis",
   "dim-distance",
   "dim-radius",
   "dim-diameter",
@@ -267,19 +264,25 @@ function evaluateOne(
       return disabled(toolId, "Needs a point, line, or circle/arc");
     }
     case "dim-distance": {
-      if (lineCount === 1 && pointLikeCount === 0) {
+      if (lineCount === 1 && pointLikeCount === 0 && axisCount === 0) {
         return enabled(toolId, "Distance: apply length to selected line", true);
       }
       if (pointLikeCount === 2) {
         return enabled(toolId, "Distance: apply between two points", true);
       }
+      if (pointLikeCount === 1 && totalLines >= 1) {
+        return enabled(toolId, "Distance: locate vs selected line/axis", true);
+      }
+      if (totalLines >= 2) {
+        return enabled(toolId, "Distance: apply between two lines/axes", true);
+      }
       if (pointLikeCount === 1) {
-        return enabled(toolId, "Distance: pick a second point", false);
+        return enabled(toolId, "Distance: pick a second point, line, or axis", false);
       }
-      if (lineCount > 1) {
-        return disabled(toolId, "Select a single line or two points");
+      if (totalLines === 1) {
+        return enabled(toolId, "Distance: pick another line/axis (or same line for length)", false);
       }
-      return disabled(toolId, "Needs a line or two points");
+      return disabled(toolId, "Needs a line, two points, or a point/line + axis");
     }
     case "dim-radius":
     case "dim-diameter": {
@@ -300,20 +303,6 @@ function evaluateOne(
         return enabled(toolId, "Angle: pick a second line", false);
       }
       return disabled(toolId, "Needs two lines");
-    }
-    case "dim-offset-x-axis":
-    case "dim-offset-y-axis": {
-      const label =
-        toolId === "dim-offset-x-axis"
-          ? "Offset from X-axis"
-          : "Offset from Y-axis";
-      if (pointLikeCount === 1) {
-        return enabled(toolId, `${label}: apply to selected point`, true);
-      }
-      if (lineCount === 1) {
-        return enabled(toolId, `${label}: apply using selected edge`, true);
-      }
-      return disabled(toolId, "Needs a point or a parallel edge");
     }
     default:
       return disabled(toolId, "Not available from selection");
@@ -552,32 +541,43 @@ function buildRequestFromSelection(
       }
       return null;
     case "dim-distance": {
-      if (kinds.lineIds.length === 1 && points.length === 0) {
+      if (kinds.lineIds.length === 1 && points.length === 0 && kinds.axisIds.length === 0) {
         return {
           kind: "apply-maintained",
           request: { type: "length", references: [lineRef(kinds.lineIds[0]!)] },
         };
       }
       if (points.length >= 2) {
-        const aRef = pointRef(points[0]!);
-        const bRef = pointRef(points[1]!);
-        const classified = classifySmartDistance(
-          null,
-          aRef,
-          bRef,
-          resolveConstraintPoint(sketch, aRef),
-          resolveConstraintPoint(sketch, bRef),
+        const request = classifyDistancePicks(
+          sketch,
+          { kind: "point-like", ref: pointRef(points[0]!) },
+          { kind: "point-like", ref: pointRef(points[1]!) },
         );
-        if (classified === null || classified.type === "length") {
-          return null;
-        }
-        return {
-          kind: "apply-maintained",
-          request: {
-            type: classified.type,
-            references: [classified.a, classified.b],
-          },
-        };
+        return request === null
+          ? null
+          : { kind: "apply-maintained", request };
+      }
+      if (points.length >= 1 && (kinds.lineIds.length >= 1 || kinds.axisIds.length >= 1)) {
+        const lineId = kinds.lineIds[0] ?? kinds.axisIds[0]!;
+        const request = classifyDistancePicks(
+          sketch,
+          { kind: "point-like", ref: pointRef(points[0]!) },
+          { kind: "line", ref: lineRef(lineId) },
+        );
+        return request === null
+          ? null
+          : { kind: "apply-maintained", request };
+      }
+      const allLines = [...kinds.lineIds, ...kinds.axisIds];
+      if (allLines.length >= 2) {
+        const request = classifyDistancePicks(
+          sketch,
+          { kind: "line", ref: lineRef(allLines[0]!) },
+          { kind: "line", ref: lineRef(allLines[1]!) },
+        );
+        return request === null
+          ? null
+          : { kind: "apply-maintained", request };
       }
       return null;
     }
@@ -607,27 +607,6 @@ function buildRequestFromSelection(
         };
       }
       return null;
-    case "dim-offset-x-axis":
-    case "dim-offset-y-axis": {
-      const type =
-        toolId === "dim-offset-x-axis" ? "coordinate-y" : "coordinate-x";
-      if (points.length >= 1) {
-        return {
-          kind: "apply-maintained",
-          request: { type, references: [pointRef(points[0]!)] },
-        };
-      }
-      if (kinds.lineIds.length === 1) {
-        return {
-          kind: "apply-maintained",
-          request: {
-            type,
-            references: [{ entityId: kinds.lineIds[0]!, role: "start" }],
-          },
-        };
-      }
-      return null;
-    }
     default:
       return null;
   }

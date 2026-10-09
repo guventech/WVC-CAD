@@ -742,13 +742,15 @@ Status:
 Date: 2026-10-09
 
 Decision:
-Replace separate Length / Horizontal distance / Vertical distance toolbar tools with one **Distance** tool:
-1. Pick a line → create `length` (Euclidean along the line).
-2. Pick two points → create `horizontal-distance`, `vertical-distance`, or Euclidean `distance` based on ~2° axis alignment (commercial smart-dimension style).
-3. Keep H/V types in the schema so saved sketches and smart classification remain honest; do not fake a single residual for all three.
+Replace Length / H distance / V distance **and Offset from X/Y-axis** toolbar tools with one **Distance** tool:
+1. Same line twice → `length`.
+2. Two points → `horizontal-distance` / `vertical-distance` / Euclidean `distance` by ~2° alignment.
+3. Two horizontal lines → `vertical-distance`; two vertical lines → `horizontal-distance`.
+4. Point or user line + world X-axis → `coordinate-y`; + Y-axis → `coordinate-x` (sketch locate).
+5. Keep `coordinate-x` / `coordinate-y` / H/V types in the schema; only remove dedicated Offset UI tools.
 
 Reason:
-Three nearly-identical pick UIs were inconsistent (length accepted only lines; H/V accepted line or two points) and crowded the dimension bar.
+Commercial sketchers use one distance/dimension tool for length, point spans, and axis locate; separate Offset buttons duplicated Distance + axis picks.
 
 Status:
 **Implemented.**

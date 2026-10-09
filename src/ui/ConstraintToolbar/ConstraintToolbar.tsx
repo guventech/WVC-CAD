@@ -70,16 +70,6 @@ const CONSTRAINT_TOOLS: readonly ToolButton[] = [
     title:
       "Fix: pick a point/endpoint/center, a line (both ends), or a circle/arc (center + radius)",
   },
-  {
-    id: "dim-offset-x-axis",
-    label: "Offset from X-axis",
-    title: "Offset from X-axis (coordinate-y): pick a point/corner, or a horizontal edge",
-  },
-  {
-    id: "dim-offset-y-axis",
-    label: "Offset from Y-axis",
-    title: "Offset from Y-axis (coordinate-x): pick a point/corner, or a vertical edge",
-  },
 ];
 
 const DIMENSION_TOOLS: readonly ToolButton[] = [
@@ -87,7 +77,7 @@ const DIMENSION_TOOLS: readonly ToolButton[] = [
     id: "dim-distance",
     label: "Distance",
     title:
-      "Distance: pick a line (length), or two points (H/V if aligned, else Euclidean)",
+      "Distance: line twice=length; two points; two H/V lines; point or line + X/Y axis to locate",
   },
   { id: "dim-radius", label: "Radius", title: "Radius: pick a circle or arc" },
   { id: "dim-diameter", label: "Diameter", title: "Diameter: pick a circle or arc" },

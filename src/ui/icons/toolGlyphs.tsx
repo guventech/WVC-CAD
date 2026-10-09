@@ -60,8 +60,6 @@ export const CONSTRAINT_TOOL_IDS: readonly ActiveTool[] = [
   "symmetric",
   "point-on-object",
   "fix",
-  "dim-offset-x-axis",
-  "dim-offset-y-axis",
 ];
 
 export const DIMENSION_TOOL_IDS: readonly ActiveTool[] = [
@@ -227,20 +225,6 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
       <line x1="9" y1="12" x2="9" y2="15" />
       <line x1="3" y1="9" x2="6" y2="9" />
       <line x1="12" y1="9" x2="15" y2="9" />
-    </Svg>
-  ),
-  "dim-offset-x-axis": () => (
-    <Svg>
-      <line x1="3" y1="14" x2="15" y2="14" />
-      <line x1="9" y1="14" x2="9" y2="5" />
-      <polyline points="7,7 9,5 11,7" />
-    </Svg>
-  ),
-  "dim-offset-y-axis": () => (
-    <Svg>
-      <line x1="4" y1="3" x2="4" y2="15" />
-      <line x1="4" y1="9" x2="13" y2="9" />
-      <polyline points="11,7 13,9 11,11" />
     </Svg>
   ),
   "dim-distance": () => (

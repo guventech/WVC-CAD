@@ -235,11 +235,7 @@ export function toolHint(activeTool: ActiveTool): string {
     case "fix":
       return "Fix · click a point/endpoint/center, a line, or a circle/arc · locks geometry in place · Esc cancels";
     case "dim-distance":
-      return "Distance · click a line (length), or two points (H/V if aligned, else Euclidean) · Esc cancels";
-    case "dim-offset-x-axis":
-      return "Offset from X-axis · click a point/corner or horizontal edge · edit value to move sketch · Esc cancels";
-    case "dim-offset-y-axis":
-      return "Offset from Y-axis · click a point/corner or vertical edge · edit value to move sketch · Esc cancels";
+      return "Distance · line×2=length · two points · two H/V lines · point/line + X/Y axis to locate · Esc cancels";
     case "dim-radius":
       return "Radius dimension · click a circle or arc · edit value in Constraints panel";
     case "dim-diameter":

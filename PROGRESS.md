@@ -56,9 +56,9 @@
 | Area | What landed |
 |------|-------------|
 | Model | Euclidean `distance` type + residuals; H/V distance kept for axis-aligned spans |
-| UI | Single **Distance** tool replaces Length / H distance / V distance |
-| Smart pick | Line → `length`; two points → H / V / Euclidean by ~2° alignment |
-| ADR | ADR-048 |
+| UI | Single **Distance** tool replaces Length / H distance / V distance **and Offset X/Y** |
+| Smart pick | Line×2=`length`; two points; two H/V lines; point/line + X/Y axis → `coordinate-*` locate |
+| ADR | ADR-048 (extended) |
 
 ### Chunk 27 results (2026-10-06) — CAD-like UI refinement
 

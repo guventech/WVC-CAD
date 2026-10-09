@@ -27,8 +27,6 @@ export type ConstraintPickToolId =
   | "point-on-object"
   | "fix"
   | "dim-distance"
-  | "dim-offset-x-axis"
-  | "dim-offset-y-axis"
   | "dim-radius"
   | "dim-diameter"
   | "dim-angle";
@@ -46,8 +44,6 @@ const CONSTRAINT_PICK_TOOLS: readonly ConstraintPickToolId[] = [
   "point-on-object",
   "fix",
   "dim-distance",
-  "dim-offset-x-axis",
-  "dim-offset-y-axis",
   "dim-radius",
   "dim-diameter",
   "dim-angle",

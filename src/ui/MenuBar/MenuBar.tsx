@@ -136,8 +136,6 @@ export function MenuBar({
         toolItem("dim-radius", "Radius", activeTool),
         toolItem("dim-diameter", "Diameter", activeTool),
         toolItem("dim-angle", "Angle", activeTool),
-        toolItem("dim-offset-x-axis", "Offset from X-axis", activeTool),
-        toolItem("dim-offset-y-axis", "Offset from Y-axis", activeTool),
       ],
     },
     {

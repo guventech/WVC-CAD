@@ -1,8 +1,9 @@
 import type { ConstraintCreateRequest } from "../commands/AddMaintainedConstraintCommand.ts";
-import { resolveConstraintPoint } from "../constraints/ConstraintRef.ts";
 import { constraintPickFromHit } from "../constraints/pickConstraintRef.ts";
-import { classifySmartDistance } from "../constraints/SmartDistance.ts";
-import { isApproximatelyEqual, TOLERANCE } from "../geometry/GeometryMath.ts";
+import {
+  classifyDistancePicks,
+  type DistancePick,
+} from "../constraints/SmartDistance.ts";
 import type { ConstraintReference } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { hitTestSketch, type HitResult } from "../selection/HitTesting.ts";
@@ -47,7 +48,8 @@ type PickStep =
  * - Point-on-object: point-like + line/circle/arc object (either order)
  * - Fix: one point-like handle, line, or circle/arc
  * - axis offset: one point-like (or parallel line expanded by the pointer handler)
- * - distance: a line (`length`) or two points (H / V / Euclidean by alignment)
+ * - distance: line (await second: same→length, other line/axis/point→smart);
+ *   two points; point+axis for locate (replaces Offset X/Y tools)
  * - radius / diameter: a circle or arc · angle: two lines
  */
 export function interpretConstraintPick(
@@ -224,61 +226,30 @@ export function interpretConstraintPick(
       return { kind: "create", request: { type, references: [first.ref, pick.ref] } };
     }
     case "dim-distance": {
-      if (first === null) {
-        if (pick.kind === "line") {
-          return {
-            kind: "create",
-            request: { type: "length", references: [pick.ref] },
-          };
+      const asDistancePick = (item: ConstraintToolPick): DistancePick | null => {
+        if (item.kind === "point-like") {
+          return { kind: "point-like", ref: item.ref };
         }
-        return pick.kind === "point-like"
+        if (item.kind === "line") {
+          return { kind: "line", ref: item.ref };
+        }
+        return null;
+      };
+      if (first === null) {
+        return pick.kind === "point-like" || pick.kind === "line"
           ? { kind: "await-second", first: pick }
           : { kind: "ignore" };
       }
-      if (pick.kind !== "point-like" || first.kind !== "point-like") {
+      const a = asDistancePick(first);
+      const b = asDistancePick(pick);
+      if (a === null || b === null || sketch === null) {
         return { kind: "ignore" };
       }
-      if (sketch === null) {
-        return {
-          kind: "create",
-          request: {
-            type: "distance",
-            references: [first.ref, pick.ref],
-          },
-        };
-      }
-      const aWorld = resolveConstraintPoint(sketch, first.ref);
-      const bWorld = resolveConstraintPoint(sketch, pick.ref);
-      const classified = classifySmartDistance(
-        null,
-        first.ref,
-        pick.ref,
-        aWorld,
-        bWorld,
-      );
-      if (classified === null || classified.type === "length") {
+      const request = classifyDistancePicks(sketch, a, b);
+      if (request === null) {
         return { kind: "ignore" };
       }
-      return {
-        kind: "create",
-        request: {
-          type: classified.type,
-          references: [classified.a, classified.b],
-        },
-      };
-    }
-    case "dim-offset-x-axis":
-    case "dim-offset-y-axis": {
-      if (pick.kind !== "point-like") {
-        return { kind: "ignore" };
-      }
-      return {
-        kind: "create",
-        request: {
-          type: tool === "dim-offset-x-axis" ? "coordinate-y" : "coordinate-x",
-          references: [pick.ref],
-        },
-      };
+      return { kind: "create", request };
     }
     case "dim-radius":
     case "dim-diameter":
@@ -363,50 +334,6 @@ export function constraintToolPickFromHit(
   return pick.kind === "line-object" ? { kind: "line", ref: pick.ref } : pick;
 }
 
-/**
- * Axis-offset tools accept a parallel edge as a shorthand for one endpoint.
- * Non-parallel lines are rejected.
- */
-export function expandAxisOffsetPick(
-  sketch: Sketch,
-  tool: "dim-offset-x-axis" | "dim-offset-y-axis",
-  pick: ConstraintToolPick,
-): ConstraintToolPick | null {
-  if (pick.kind === "point-like") {
-    return pick;
-  }
-  if (pick.kind !== "line") {
-    return null;
-  }
-  const line = sketch.geometry.find((entity) => entity.id === pick.ref.entityId);
-  if (line?.type !== "line") {
-    return null;
-  }
-  const horizontal = isApproximatelyEqual(
-    line.start.y,
-    line.end.y,
-    TOLERANCE.coincidence,
-  );
-  const vertical = isApproximatelyEqual(
-    line.start.x,
-    line.end.x,
-    TOLERANCE.coincidence,
-  );
-  if (tool === "dim-offset-x-axis" && horizontal) {
-    return {
-      kind: "point-like",
-      ref: { entityId: line.id, role: "start" },
-    };
-  }
-  if (tool === "dim-offset-y-axis" && vertical) {
-    return {
-      kind: "point-like",
-      ref: { entityId: line.id, role: "start" },
-    };
-  }
-  return null;
-}
-
 export function handleConstraintPickToolPointerDown(
   tool: ConstraintPickToolId,
   context: ToolPointerContext,
@@ -429,10 +356,7 @@ export function handleConstraintPickToolPointerDown(
     return idle(state);
   }
 
-  const pick =
-    tool === "dim-offset-x-axis" || tool === "dim-offset-y-axis"
-      ? expandAxisOffsetPick(context.sketch, tool, rawPick)
-      : rawPick;
+  const pick = rawPick;
   if (pick === null) {
     return idle(state);
   }
