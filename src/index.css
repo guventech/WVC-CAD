@@ -68,7 +68,7 @@ button.is-active {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   height: 100%;
   background: var(--bg-app);
 }
@@ -184,6 +184,12 @@ button.is-active {
   border-bottom: 1px solid var(--border);
 }
 
+.status-bar {
+  flex-wrap: wrap;
+  border-bottom: 0;
+  border-top: 1px solid var(--border);
+}
+
 .document-bar {
   gap: 12px;
 }
@@ -208,6 +214,79 @@ button.is-active {
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.tool-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 3px;
+}
+
+.tool-icon-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.tool-icon-btn:disabled,
+.tool-icon-btn[aria-disabled="true"] {
+  opacity: 0.35;
+}
+
+.constraint-context-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+
+.constraint-context-bar .toolbar-label {
+  margin-right: 4px;
+}
+
+.constraint-context-hint {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.constraint-context-box.is-disabled {
+  opacity: 0.35;
+}
+
+.status-session-toggle {
+  margin-left: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.status-session-toggle:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--bg-elevated);
+}
+
+.constraint-filter-row {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.constraint-filter-row button {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.constraint-row.is-feature {
+  opacity: 0.75;
 }
 
 .toolbar-label {

@@ -1,15 +1,21 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { DimensionEdit } from "../../sketch/commands/EditDimensionCommand.ts";
 import {
   constraintStatusTone,
   formatConstraintStatus,
 } from "../../sketch/constraints/DegreesOfFreedom.ts";
 import { getConstraintTypeInfo } from "../../sketch/constraints/ConstraintTypes.ts";
+import {
+  filterConstraintsForPanel,
+  isFeatureConstraintRow,
+  type ConstraintListFilter,
+} from "../../sketch/constraints/ConstraintPanelFilter.ts";
 import { isSupportedDimensionType } from "../../sketch/constraints/Dimensions.ts";
 import type { ConstraintConflict } from "../../sketch/constraints/OverConstraint.ts";
 import type { UnderConstrainedVisualization } from "../../sketch/constraints/UnderConstrainedViz.ts";
 import type { Constraint } from "../../sketch/model/Constraint.ts";
 import { isDrivingConstraint } from "../../sketch/model/Constraint.ts";
+import type { EntityId } from "../../sketch/model/Geometry.ts";
 import type { Sketch } from "../../sketch/model/Sketch.ts";
 import type { SolverResult } from "../../sketch/solver/SolverResult.ts";
 import { DimensionEditor } from "./DimensionEditor.tsx";
@@ -25,6 +31,7 @@ type ConstraintPanelProps = {
   readonly onEditDimension: (constraintId: string, edit: DimensionEdit) => void;
   readonly onDeleteConstraint: (constraintId: string) => void;
   readonly onParseError?: (reason: string) => void;
+  readonly selectedIds?: readonly EntityId[];
 };
 
 export const ConstraintPanel = memo(function ConstraintPanel({
@@ -37,8 +44,10 @@ export const ConstraintPanel = memo(function ConstraintPanel({
   onEditDimension,
   onDeleteConstraint,
   onParseError,
+  selectedIds = [],
 }: ConstraintPanelProps) {
   const { constraints } = sketch;
+  const [filter, setFilter] = useState<ConstraintListFilter>("related");
   const statusLabel = formatConstraintStatus(solverResult, {
     geometryCount: sketch.geometry.length,
   });
@@ -48,6 +57,13 @@ export const ConstraintPanel = memo(function ConstraintPanel({
       ? underConstrained.summary
       : null;
   const conflictIds = new Set(conflict?.conflictingConstraintIds ?? []);
+  const effectiveFilter: ConstraintListFilter =
+    selectedIds.length === 0 ? "all" : filter;
+  const visible = filterConstraintsForPanel(
+    constraints,
+    selectedIds,
+    effectiveFilter,
+  );
 
   return (
     <section className="panel" aria-label="Constraint status">
@@ -86,44 +102,71 @@ export const ConstraintPanel = memo(function ConstraintPanel({
           )}
         </div>
       )}
+      {constraints.length > 0 && (
+        <div className="constraint-filter-row" role="group" aria-label="Constraint list filter">
+          <button
+            type="button"
+            className={effectiveFilter === "related" ? "is-active" : undefined}
+            disabled={selectedIds.length === 0}
+            onClick={() => setFilter("related")}
+            title="Show constraints that reference the selection"
+            data-testid="constraint-filter-related"
+          >
+            Related
+          </button>
+          <button
+            type="button"
+            className={effectiveFilter === "all" ? "is-active" : undefined}
+            onClick={() => setFilter("all")}
+            title="Show every constraint in the sketch"
+            data-testid="constraint-filter-all"
+          >
+            All
+          </button>
+        </div>
+      )}
       {constraints.length === 0 ? (
         <p>No constraints in sketch.</p>
+      ) : visible.length === 0 ? (
+        <p className="panel-note">No constraints related to the selection.</p>
       ) : (
         <ul className="property-list">
-          {constraints.map((constraint) => (
-            <li
-              key={constraint.id}
-              className={
-                conflictIds.has(constraint.id)
-                  ? "constraint-row constraint-conflict"
-                  : "constraint-row"
-              }
-            >
-              <div className="constraint-row-main">
-                {isSupportedDimensionType(constraint.type) ? (
-                  <DimensionEditor
-                    sketch={sketch}
-                    constraint={constraint}
-                    label={labelOf(constraint)}
-                    onEdit={onEditDimension}
-                    onParseError={onParseError}
-                  />
-                ) : (
-                  formatConstraint(constraint)
-                )}
-              </div>
-              <button
-                type="button"
-                className="constraint-delete"
-                title={`Delete ${labelOf(constraint)}`}
-                aria-label={`Delete ${labelOf(constraint)} ${constraint.id}`}
-                data-testid={`delete-constraint-${constraint.id}`}
-                onClick={() => onDeleteConstraint(constraint.id)}
-              >
-                ×
-              </button>
-            </li>
-          ))}
+          {visible.map((constraint) => {
+            const classes = ["constraint-row"];
+            if (conflictIds.has(constraint.id)) {
+              classes.push("constraint-conflict");
+            }
+            if (isFeatureConstraintRow(constraint)) {
+              classes.push("is-feature");
+            }
+            return (
+              <li key={constraint.id} className={classes.join(" ")}>
+                <div className="constraint-row-main">
+                  {isSupportedDimensionType(constraint.type) ? (
+                    <DimensionEditor
+                      sketch={sketch}
+                      constraint={constraint}
+                      label={labelOf(constraint)}
+                      onEdit={onEditDimension}
+                      onParseError={onParseError}
+                    />
+                  ) : (
+                    formatConstraint(constraint)
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="constraint-delete"
+                  title={`Delete ${labelOf(constraint)}`}
+                  aria-label={`Delete ${labelOf(constraint)} ${constraint.id}`}
+                  data-testid={`delete-constraint-${constraint.id}`}
+                  onClick={() => onDeleteConstraint(constraint.id)}
+                >
+                  ×
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

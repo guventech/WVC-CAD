@@ -1,4 +1,6 @@
 import type { ActiveTool } from "../../sketch/tools/ActiveTool.ts";
+import { ToolIconButton } from "../icons/ToolIconButton.tsx";
+import { GEOMETRY_TOOL_IDS, renderToolGlyph } from "../icons/toolGlyphs.tsx";
 
 const TOOLS: readonly {
   readonly id: ActiveTool;
@@ -13,7 +15,11 @@ const TOOLS: readonly {
   { id: "arc", label: "Arc", title: "Create center-point arcs" },
   { id: "trim", label: "Trim", title: "Trim a line to a crossing boundary" },
   { id: "extend", label: "Extend", title: "Extend a line to a crossing boundary" },
-  { id: "mirror", label: "Mirror", title: "Mirror selected geometry across a line or axis" },
+  {
+    id: "mirror",
+    label: "Mirror",
+    title: "Mirror selected geometry across a line or axis",
+  },
   { id: "fillet", label: "Fillet", title: "Round a corner between two lines" },
   { id: "chamfer", label: "Chamfer", title: "Bevel a corner between two lines" },
 ];
@@ -39,34 +45,37 @@ export function GeometryToolbar({
     <div className="toolbar-group" role="toolbar" aria-label="Geometry">
       <span className="toolbar-label">Geometry</span>
       {TOOLS.map((tool) => (
-        <button
+        <ToolIconButton
           key={tool.id}
-          type="button"
-          aria-pressed={activeTool === tool.id}
-          className={activeTool === tool.id ? "is-active" : undefined}
-          onClick={() => onToolChange(tool.id)}
+          label={tool.label}
           title={tool.title}
-        >
-          {tool.label}
-        </button>
+          icon={renderToolGlyph(tool.id)}
+          pressed={activeTool === tool.id}
+          onClick={() => onToolChange(tool.id)}
+          testId={`tool-${tool.id}`}
+        />
       ))}
-      <button
-        type="button"
-        aria-pressed={createAsConstruction}
-        className={createAsConstruction ? "is-active" : undefined}
-        onClick={() => onCreateAsConstructionChange(!createAsConstruction)}
+      <ToolIconButton
+        label="Construction"
         title="Create new geometry as construction/reference (dashed)"
-      >
-        Construction
-      </button>
-      <button
-        type="button"
+        icon={renderToolGlyph("construction")}
+        pressed={createAsConstruction}
+        onClick={() => onCreateAsConstructionChange(!createAsConstruction)}
+        testId="tool-construction"
+      />
+      <ToolIconButton
+        label="Toggle construction"
+        title="Toggle construction on selected geometry"
+        icon={renderToolGlyph("toggle-construction")}
         disabled={!canToggleConstruction}
         onClick={onToggleConstruction}
-        title="Toggle construction on selected geometry"
-      >
-        Toggle Constr.
-      </button>
+        testId="tool-toggle-construction"
+      />
     </div>
   );
+}
+
+/** Exposed for coverage checks against the glyph catalog. */
+export function geometryToolbarToolIds(): readonly ActiveTool[] {
+  return GEOMETRY_TOOL_IDS;
 }

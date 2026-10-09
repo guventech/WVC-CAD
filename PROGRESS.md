@@ -37,7 +37,19 @@
 
 ## Current
 
-**Post–Chunk 27.** Engineering core + CAD-like shell are in place. Next: packaging (Tauri 2) when requested, or deferred assessment items / polish.
+**Post–Chunk 27 + UX parity U1–U5.** Icon toolbars, selection constraint palette, and chrome declutter shipped. U6 backlog deferred (see below).
+
+### UX parity U1–U5 (2026-10-09) — commercial-style constraint interaction
+
+| Chunk | What landed |
+|-------|-------------|
+| U1 | `ToolIconButton` + original SVG glyphs; Geometry + Document bars icon-only (hover = name) |
+| U2 | Constraint/Dimension toolbars icon-only; Offset labels match catalog (from X/Y-axis) |
+| U3 | Domain `ConstraintApplicability.ts` — enable/disable + reasons from selection |
+| U4 | `ConstraintContextBar` on Select; greyed boxes; apply or continue-pick; coincident failures surfaced |
+| U5 | Constraint panel Related/All filter; feature rows de-emphasized; status Session disclosure |
+
+**U6 backlog (not started):** richer create snaps/auto-constraints; generic point–point distance; fully-constrained entity coloring; polygon/slot/3-pt arc; Tauri packaging.
 
 ### Chunk 27 results (2026-10-06) — CAD-like UI refinement
 

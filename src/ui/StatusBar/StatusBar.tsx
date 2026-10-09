@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Point2D } from "../../sketch/geometry/Point2D.ts";
 import type { Sketch } from "../../sketch/model/Sketch.ts";
 import type { SelectionState } from "../../sketch/selection/SelectionManager.ts";
@@ -34,7 +35,7 @@ type StatusBarProps = {
 
 /**
  * CAD-like status strip: primary engineering fields first (X/Y, DOF, units, Ready),
- * then compact secondary context (tool, snap, zoom, counts).
+ * with optional collapsed session context.
  */
 export function StatusBar({
   sketch,
@@ -54,6 +55,7 @@ export function StatusBar({
   canRedo,
   hasUnsavedChanges = false,
 }: StatusBarProps) {
+  const [sessionOpen, setSessionOpen] = useState(false);
   const grid = cameraScale == null ? null : chooseGridSpacing(cameraScale);
   const selectedCount = countLogicalSelection(
     sketch.constraints,
@@ -101,21 +103,38 @@ export function StatusBar({
           {hasUnsavedChanges ? "Unsaved changes" : "Saved"}
         </span>
         <span className="status-ready">Ready</span>
+        <button
+          type="button"
+          className="status-session-toggle"
+          aria-expanded={sessionOpen}
+          aria-controls="status-session-details"
+          onClick={() => setSessionOpen((open) => !open)}
+          title="Show or hide session details"
+          data-testid="status-session-toggle"
+        >
+          {sessionOpen ? "Session ▾" : "Session ▸"}
+        </button>
       </div>
-      <div className="status-group status-secondary" aria-label="Session context">
-        <span>Tool: {activeTool}</span>
-        <span>Create: {createAsConstruction ? "construction" : "solid"}</span>
-        <span>Snap: {activeSnap?.label ?? "—"}</span>
-        <span>
-          Zoom: {cameraScale == null ? "—" : `${cameraScale.toFixed(2)} px/mm`}
-        </span>
-        <span>Grid: {grid == null ? "—" : `${grid.minorMm} mm`}</span>
-        <span>Selected: {selectedCount}</span>
-        <span>Geometry: {sketch.geometry.length}</span>
-        <span>Constraints: {sketch.constraints.length}</span>
-        <span>Undo: {canUndo ? "yes" : "no"}</span>
-        <span>Redo: {canRedo ? "yes" : "no"}</span>
-      </div>
+      {sessionOpen ? (
+        <div
+          id="status-session-details"
+          className="status-group status-secondary"
+          aria-label="Session context"
+        >
+          <span>Tool: {activeTool}</span>
+          <span>Create: {createAsConstruction ? "construction" : "solid"}</span>
+          <span>Snap: {activeSnap?.label ?? "—"}</span>
+          <span>
+            Zoom: {cameraScale == null ? "—" : `${cameraScale.toFixed(2)} px/mm`}
+          </span>
+          <span>Grid: {grid == null ? "—" : `${grid.minorMm} mm`}</span>
+          <span>Selected: {selectedCount}</span>
+          <span>Geometry: {sketch.geometry.length}</span>
+          <span>Constraints: {sketch.constraints.length}</span>
+          <span>Undo: {canUndo ? "yes" : "no"}</span>
+          <span>Redo: {canRedo ? "yes" : "no"}</span>
+        </div>
+      ) : null}
     </footer>
   );
 }

@@ -1,3 +1,6 @@
+import { ToolIconButton } from "../icons/ToolIconButton.tsx";
+import { renderToolGlyph } from "../icons/toolGlyphs.tsx";
+
 type DocumentBarProps = {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
@@ -38,31 +41,28 @@ export function DocumentBar({
     <div className="document-bar" aria-label="Document">
       <div className="toolbar-group" role="toolbar" aria-label="File">
         {onNew !== undefined ? (
-          <button
-            type="button"
-            onClick={onNew}
+          <ToolIconButton
+            label="New"
             title="New sketch (Ctrl+N)"
-            data-testid="new-button"
-          >
-            New
-          </button>
+            icon={renderToolGlyph("new")}
+            onClick={onNew}
+            testId="new-button"
+          />
         ) : null}
-        <button
-          type="button"
-          onClick={onOpen}
+        <ToolIconButton
+          label="Open"
           title="Open sketch JSON (Ctrl+O)"
-          data-testid="open-button"
-        >
-          Open
-        </button>
-        <button
-          type="button"
-          onClick={onSave}
+          icon={renderToolGlyph("open")}
+          onClick={onOpen}
+          testId="open-button"
+        />
+        <ToolIconButton
+          label="Save"
           title="Save sketch JSON (Ctrl+S)"
-          data-testid="save-button"
-        >
-          Save
-        </button>
+          icon={renderToolGlyph("save")}
+          onClick={onSave}
+          testId="save-button"
+        />
       </div>
       <span
         className={hasUnsavedChanges ? "toolbar-doc is-dirty" : "toolbar-doc"}
@@ -75,32 +75,30 @@ export function DocumentBar({
       </span>
       <div className="toolbar-spacer" />
       <div className="toolbar-group" role="toolbar" aria-label="History">
-        <button
-          type="button"
-          disabled={!canUndo}
-          onClick={onUndo}
+        <ToolIconButton
+          label="Undo"
           title={
             undoLabel !== null
               ? `Undo: ${undoLabel} (Ctrl+Z)`
               : "Undo (Ctrl+Z)"
           }
-          data-testid="undo-button"
-        >
-          Undo
-        </button>
-        <button
-          type="button"
-          disabled={!canRedo}
-          onClick={onRedo}
+          icon={renderToolGlyph("undo")}
+          disabled={!canUndo}
+          onClick={onUndo}
+          testId="undo-button"
+        />
+        <ToolIconButton
+          label="Redo"
           title={
             redoLabel !== null
               ? `Redo: ${redoLabel} (Ctrl+Y)`
               : "Redo (Ctrl+Y)"
           }
-          data-testid="redo-button"
-        >
-          Redo
-        </button>
+          icon={renderToolGlyph("redo")}
+          disabled={!canRedo}
+          onClick={onRedo}
+          testId="redo-button"
+        />
       </div>
     </div>
   );

@@ -18,7 +18,9 @@ import {
 } from "../sketch/serialization/SketchAutosave.ts";
 import type { ActiveTool } from "../sketch/tools/ActiveTool.ts";
 import type { LineMetrics, RectMetrics } from "../sketch/tools/ToolTypes.ts";
+import { selectionConstraintAction } from "../sketch/constraints/ConstraintApplicability.ts";
 import { SketchCanvas } from "../ui/Canvas/SketchCanvas.tsx";
+import { ConstraintContextBar } from "../ui/ConstraintContextBar/ConstraintContextBar.tsx";
 import { ConstraintPanel } from "../ui/ConstraintPanel/ConstraintPanel.tsx";
 import { ConstraintToolbar } from "../ui/ConstraintToolbar/ConstraintToolbar.tsx";
 import { DiagnosticsPanel } from "../ui/DiagnosticsPanel/DiagnosticsPanel.tsx";
@@ -360,6 +362,36 @@ export default function App() {
     setCreationSessionActive(false);
   }, []);
 
+  const handleContextConstraint = useCallback(
+    (toolId: ActiveTool) => {
+      const action = selectionConstraintAction(
+        sketch,
+        selection.selectedIds,
+        toolId,
+      );
+      if (action.kind === "disabled") {
+        return;
+      }
+      if (action.kind === "continue-pick") {
+        setActiveTool(action.tool);
+        return;
+      }
+      if (action.kind === "apply-coincident") {
+        handleCreateCoincident(action.first, action.second);
+        setActiveTool("select");
+        return;
+      }
+      handleCreateConstraint(action.request);
+      setActiveTool("select");
+    },
+    [
+      handleCreateCoincident,
+      handleCreateConstraint,
+      selection.selectedIds,
+      sketch,
+    ],
+  );
+
   return (
     <div className="app-shell">
       {pendingRecovery !== null && (
@@ -406,6 +438,12 @@ export default function App() {
           onToolChange={handleToolChange}
         />
       </div>
+      <ConstraintContextBar
+        sketch={sketch}
+        selectedIds={selection.selectedIds}
+        visible={activeTool === "select"}
+        onAction={handleContextConstraint}
+      />
       <div className="workspace">
         <aside className="side-panels" aria-label="Sketch panels">
           <PropertiesPanel
@@ -424,6 +462,7 @@ export default function App() {
             onEditDimension={handleEditDimension}
             onDeleteConstraint={handleDeleteConstraint}
             onParseError={handleDimensionParseError}
+            selectedIds={selection.selectedIds}
           />
           <DiagnosticsPanel sketch={sketch} />
         </aside>

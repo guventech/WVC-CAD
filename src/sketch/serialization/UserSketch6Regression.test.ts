@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createAddMaintainedConstraintCommand } from "../commands/AddMaintainedConstraintCommand.ts";
 import { createAddRectangleCommand } from "../commands/CreateRectangleCommand.ts";
@@ -13,9 +12,6 @@ import type { LineGeometry } from "../model/Geometry.ts";
 import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import { createEmptySketch, type Sketch } from "../model/Sketch.ts";
 import { solveSketch } from "../solver/Solver.ts";
-import { parseSketchJson } from "./SketchSerializer.ts";
-
-const SKETCH6_PATH = "C:/Users/guven/Downloads/sketch-1.sketch (6).json";
 
 function lineOf(sketch: Sketch, id: string): LineGeometry {
   const entity = sketch.geometry.find((item) => item.id === id);
@@ -237,43 +233,53 @@ describe("orientation uses true line endpoints (filleted rectangle)", () => {
   });
 });
 
-describe("user sketch-1.sketch (6) recovery", () => {
-  it.skipIf(!existsSync(SKETCH6_PATH))(
-    "detects broken V edges on load and restores them via solveSketch",
-    () => {
-      const raw = readFileSync(SKETCH6_PATH, "utf8");
-      const parsed = parseSketchJson(raw);
-      expect(parsed.ok).toBe(true);
-      if (!parsed.ok) {
-        return;
-      }
+describe("filleted rectangle orientation recovery", () => {
+  beforeEach(() => {
+    resetEntityIdCounter();
+  });
 
-      const loaded = parsed.sketch;
-      const left = lineOf(loaded, "line-25");
-      const right = lineOf(loaded, "line-23");
-      expect(Math.abs(left.start.x - left.end.x)).toBeGreaterThan(
-        TOLERANCE.coincidence,
-      );
-      expect(Math.abs(right.start.x - right.end.x)).toBeGreaterThan(
-        TOLERANCE.coincidence,
-      );
+  it("solveSketch restores a skewed vertical edge after top fillet", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 100, y: 50 })!;
+    let sketch = add.apply(createEmptySketch());
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+    const filleted = applyFilletLines(
+      sketch,
+      rect.edges.top,
+      rect.edges.left,
+      { x: 10, y: 40 },
+      8,
+    );
+    expect(filleted.ok).toBe(true);
+    if (!filleted.ok) {
+      return;
+    }
+    sketch = {
+      ...filleted.sketch,
+      geometry: filleted.sketch.geometry.map((entity) => {
+        if (entity.id !== rect.edges.left || entity.type !== "line") {
+          return entity;
+        }
+        return { ...entity, end: { x: entity.end.x - 18, y: entity.end.y } };
+      }),
+    };
 
-      const unsatisfied = listUnsatisfiedConstraints(loaded);
-      expect(unsatisfied).toEqual(
-        expect.arrayContaining(["constraint-29", "constraint-30"]),
-      );
+    const vertical = sketch.constraints.find(
+      (c) =>
+        c.type === "vertical" &&
+        c.references[0]?.entityId === rect.edges.left,
+    )!;
+    expect(listUnsatisfiedConstraints(sketch)).toContain(vertical.id);
 
-      const { sketch, result } = solveSketch(loaded);
-      expect(result.status === "solved" || result.status === "under-constrained").toBe(
-        true,
-      );
-      expect(listUnsatisfiedConstraints(sketch)).toEqual([]);
-      expectAxisAlignedEdges(sketch, [
-        "line-22",
-        "line-23",
-        "line-24",
-        "line-25",
-      ]);
-    },
-  );
+    const { sketch: settled, result } = solveSketch(sketch);
+    expect(
+      result.status === "solved" || result.status === "under-constrained",
+    ).toBe(true);
+    expect(listUnsatisfiedConstraints(settled)).toEqual([]);
+    const left = lineOf(settled, rect.edges.left);
+    expect(Math.abs(left.start.x - left.end.x)).toBeLessThan(
+      TOLERANCE.coincidence,
+    );
+  });
 });

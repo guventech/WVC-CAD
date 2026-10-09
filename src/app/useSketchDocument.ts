@@ -271,8 +271,14 @@ export function useSketchDocument({
           second,
         );
         if (command === null) {
+          setConstraintMessage(
+            "Coincident could not be added. The picks are invalid or conflict with existing constraints.",
+          );
+          setConstraintConflict(null);
           return current;
         }
+        setConstraintMessage(null);
+        setConstraintConflict(null);
         const result = executeCommand(current.history, current.sketch, command);
         return { sketch: result.sketch, history: result.history };
       });

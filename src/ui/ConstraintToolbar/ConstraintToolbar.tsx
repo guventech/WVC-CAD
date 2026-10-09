@@ -1,4 +1,6 @@
 import type { ActiveTool } from "../../sketch/tools/ActiveTool.ts";
+import { ToolIconButton } from "../icons/ToolIconButton.tsx";
+import { renderToolGlyph } from "../icons/toolGlyphs.tsx";
 
 type ToolButton = {
   readonly id: ActiveTool;
@@ -70,13 +72,13 @@ const CONSTRAINT_TOOLS: readonly ToolButton[] = [
   },
   {
     id: "dim-offset-x-axis",
-    label: "Offset X",
-    title: "Offset from X-axis: pick a point/corner, or a horizontal edge",
+    label: "Offset from X-axis",
+    title: "Offset from X-axis (coordinate-y): pick a point/corner, or a horizontal edge",
   },
   {
     id: "dim-offset-y-axis",
-    label: "Offset Y",
-    title: "Offset from Y-axis: pick a point/corner, or a vertical edge",
+    label: "Offset from Y-axis",
+    title: "Offset from Y-axis (coordinate-x): pick a point/corner, or a vertical edge",
   },
 ];
 
@@ -84,12 +86,12 @@ const DIMENSION_TOOLS: readonly ToolButton[] = [
   { id: "dim-length", label: "Length", title: "Line length: pick a line" },
   {
     id: "dim-horizontal-distance",
-    label: "H distance",
+    label: "Horizontal distance",
     title: "Horizontal distance: pick a line, or two points",
   },
   {
     id: "dim-vertical-distance",
-    label: "V distance",
+    label: "Vertical distance",
     title: "Vertical distance: pick a line, or two points",
   },
   { id: "dim-radius", label: "Radius", title: "Radius: pick a circle or arc" },
@@ -124,6 +126,10 @@ export function ConstraintToolbar({
   );
 }
 
+export function constraintToolbarEntries(): readonly ToolButton[] {
+  return [...CONSTRAINT_TOOLS, ...DIMENSION_TOOLS];
+}
+
 function ToolGroup({
   label,
   tools,
@@ -137,16 +143,15 @@ function ToolGroup({
     <div className="toolbar-group" role="toolbar" aria-label={label}>
       <span className="toolbar-label">{label}</span>
       {tools.map((tool) => (
-        <button
+        <ToolIconButton
           key={tool.id}
-          type="button"
-          aria-pressed={activeTool === tool.id}
-          className={activeTool === tool.id ? "is-active" : undefined}
-          onClick={() => onToolChange(tool.id)}
+          label={tool.label}
           title={tool.title}
-        >
-          {tool.label}
-        </button>
+          icon={renderToolGlyph(tool.id)}
+          pressed={activeTool === tool.id}
+          onClick={() => onToolChange(tool.id)}
+          testId={`tool-${tool.id}`}
+        />
       ))}
     </div>
   );

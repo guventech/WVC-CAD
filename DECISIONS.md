@@ -716,3 +716,21 @@ AGENTS Chunk 27 requires a CAD-like layout after the engineering core is stable,
 
 Status:
 **Implemented (Chunk 27).**
+
+---
+
+## ADR-047 — Icon chrome and selection constraint palette (UX U1–U5)
+
+Date: 2026-10-09
+
+Decision:
+1. Geometry, constraint, dimension, and document toolbars use original SVG icon buttons with full names in `title` / `aria-label` (no proprietary CAD icons).
+2. Constraint enablement for selection is computed in domain module `ConstraintApplicability.ts`; React only renders greyed/enabled boxes.
+3. With Select tool active, `ConstraintContextBar` shows all user constraints/dims; click applies when selection is complete or switches to pick mode for remaining picks.
+4. Constraint panel defaults to Related-to-selection (All available); feature constraints are visually secondary; status secondary fields collapse behind Session.
+
+Reason:
+Align interaction with commercial sketchers (icons + selection-driven constraints) without moving CAD logic into UI.
+
+Status:
+**Implemented (UX U1–U5).** U6 backlog remains deferred.
