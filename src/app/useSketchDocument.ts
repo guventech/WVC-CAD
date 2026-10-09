@@ -46,6 +46,7 @@ import {
 import { createToggleConstructionCommand } from "../sketch/commands/ToggleConstructionCommand.ts";
 import type { Point2D } from "../sketch/geometry/Point2D.ts";
 import type { ConstraintReference } from "../sketch/model/Constraint.ts";
+import type { SnapCandidate } from "../sketch/selection/SnapTypes.ts";
 import { createEmptySketch, type Sketch } from "../sketch/model/Sketch.ts";
 import type { ConstraintConflict } from "../sketch/constraints/OverConstraint.ts";
 import { analyzeUnderConstrainedVisualization } from "../sketch/constraints/UnderConstrainedViz.ts";
@@ -191,10 +192,19 @@ export function useSketchDocument({
   );
 
   const handleCreateRectangle = useCallback(
-    (cornerA: Point2D, cornerB: Point2D) => {
+    (
+      cornerA: Point2D,
+      cornerB: Point2D,
+      options?: {
+        readonly cornerASnap?: SnapCandidate | null;
+        readonly cornerBSnap?: SnapCandidate | null;
+      },
+    ) => {
       setDocumentState((current) => {
         const command = createAddRectangleCommand(cornerA, cornerB, {
           construction: createAsConstruction,
+          cornerASnap: options?.cornerASnap,
+          cornerBSnap: options?.cornerBSnap,
         });
         if (command === null) {
           return current;
@@ -210,12 +220,16 @@ export function useSketchDocument({
     (
       center: Point2D,
       radiusPoint: Point2D,
-      options?: { readonly centerMidpointOf?: string },
+      options?: {
+        readonly centerMidpointOf?: string;
+        readonly centerSnap?: SnapCandidate | null;
+      },
     ) => {
       setDocumentState((current) => {
         const command = createAddCircleCommand(center, radiusPoint, {
           construction: createAsConstruction,
           centerMidpointOf: options?.centerMidpointOf,
+          centerSnap: options?.centerSnap,
         });
         if (command === null) {
           return current;

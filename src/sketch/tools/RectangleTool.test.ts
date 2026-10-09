@@ -43,9 +43,10 @@ describe("RectangleTool", () => {
     );
     const end = handleRectangleToolPointerDown(contextAt(50, 30), start.state);
 
-    expect(end.result.createRectangle).toEqual({
+    expect(end.result.createRectangle).toMatchObject({
       cornerA: { x: 0, y: 0 },
       cornerB: { x: 50, y: 30 },
+      cornerASnap: expect.objectContaining({ type: "origin" }),
     });
     expect(end.state.phase).toBe("idle");
     expect(end.result.creationSessionActive).toBe(false);

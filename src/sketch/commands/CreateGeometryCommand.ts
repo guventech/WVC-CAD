@@ -21,6 +21,11 @@ import {
   createMidpointConstraint,
   createVerticalConstraint,
 } from "../constraints/ConstraintFactory.ts";
+import {
+  createDatumSnapConstraint,
+  datumSnapFromCandidate,
+} from "../constraints/DatumSnap.ts";
+import type { SnapCandidate } from "../selection/SnapTypes.ts";
 import type { SketchCommand } from "./Command.ts";
 
 export function createPointGeometry(
@@ -394,6 +399,8 @@ export function createAddCircleCommand(
     readonly construction?: boolean;
     /** Auto midpoint: new circle center ↔ this line. */
     readonly centerMidpointOf?: EntityId;
+    /** Origin/axis snap at center → coincident to datum (ADR-050). */
+    readonly centerSnap?: SnapCandidate | null;
   },
 ): SketchCommand | null {
   const circle = createCircleGeometryFromPoints(center, radiusPoint, options);
@@ -409,21 +416,37 @@ export function createAddCircleCommand(
         )
       : null;
   const midpointId = midpoint?.id ?? null;
+  const datumBind = datumSnapFromCandidate(options?.centerSnap);
+  // Midpoint wins over datum if both somehow present (same center can't be both).
+  const datumConstraint =
+    midpoint === null && datumBind !== null
+      ? createDatumSnapConstraint(
+          { entityId: circle.id, role: "center" },
+          datumBind,
+        )
+      : null;
+  const datumId = datumConstraint?.id ?? null;
 
   return {
     label:
       midpoint !== null
         ? `Add circle ${circle.id} at midpoint`
-        : `Add circle ${circle.id}`,
+        : datumConstraint !== null
+          ? `Add circle ${circle.id} on datum`
+          : `Add circle ${circle.id}`,
     apply(sketch) {
       if (sketch.geometry.some((existing) => existing.id === circle.id)) {
         return sketch;
       }
       let next = addGeometry(sketch, circle);
-      if (midpoint !== null) {
+      const extras = [
+        ...(midpoint !== null ? [midpoint] : []),
+        ...(datumConstraint !== null ? [datumConstraint] : []),
+      ];
+      if (extras.length > 0) {
         next = {
           ...next,
-          constraints: [...next.constraints, midpoint],
+          constraints: [...next.constraints, ...extras],
         };
       }
       return next;
@@ -435,6 +458,7 @@ export function createAddCircleCommand(
         constraints: sketch.constraints.filter(
           (constraint) =>
             constraint.id !== midpointId &&
+            constraint.id !== datumId &&
             !constraint.references.some((ref) => ref.entityId === circle.id),
         ),
       };

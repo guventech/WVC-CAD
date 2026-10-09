@@ -10,6 +10,8 @@ export const VIEWPORT_COLORS = {
   inference: "#7fd99a",
   geometry: "#c8c8c8",
   construction: "#6f8f9f",
+  /** Fully constrained solid geometry (no free solver variables). */
+  fullyConstrained: "#3dcc7a",
   selected: "#ffa657",
   handle: "#e6e6e6",
   dimension: "#9cdcfe",

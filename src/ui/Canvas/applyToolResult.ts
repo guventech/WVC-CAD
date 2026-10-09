@@ -42,11 +42,21 @@ export type ToolResultCallbacks = CreationChromeCallbacks & {
       readonly endMidpointOf?: string;
     },
   ) => void;
-  readonly onCreateRectangle: (cornerA: Point2D, cornerB: Point2D) => void;
+  readonly onCreateRectangle: (
+    cornerA: Point2D,
+    cornerB: Point2D,
+    options?: {
+      readonly cornerASnap?: SnapCandidate | null;
+      readonly cornerBSnap?: SnapCandidate | null;
+    },
+  ) => void;
   readonly onCreateCircle: (
     center: Point2D,
     radiusPoint: Point2D,
-    options?: { readonly centerMidpointOf?: string },
+    options?: {
+      readonly centerMidpointOf?: string;
+      readonly centerSnap?: SnapCandidate | null;
+    },
   ) => void;
   readonly onCreateArc: (
     center: Point2D,
@@ -142,13 +152,20 @@ export function applyToolResult(
     callbacks.onCreateRectangle(
       result.createRectangle.cornerA,
       result.createRectangle.cornerB,
+      {
+        cornerASnap: result.createRectangle.cornerASnap,
+        cornerBSnap: result.createRectangle.cornerBSnap,
+      },
     );
   }
   if (result.createCircle !== undefined) {
     callbacks.onCreateCircle(
       result.createCircle.center,
       result.createCircle.radiusPoint,
-      { centerMidpointOf: result.createCircle.centerMidpointOf },
+      {
+        centerMidpointOf: result.createCircle.centerMidpointOf,
+        centerSnap: result.createCircle.centerSnap,
+      },
     );
   }
   if (result.createArc !== undefined) {

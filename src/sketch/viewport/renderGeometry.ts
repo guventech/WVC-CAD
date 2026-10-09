@@ -1,7 +1,7 @@
 import { arcSweepRadians } from "../geometry/GeometryMath.ts";
 import { listHandlePoints, pointOnCircle } from "../geometry/EntityFeatures.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
-import type { Geometry } from "../model/Geometry.ts";
+import type { EntityId, Geometry } from "../model/Geometry.ts";
 import type { SelectionState } from "../selection/SelectionManager.ts";
 import type { Camera } from "../viewport/Camera.ts";
 import { worldToScreen } from "../viewport/Camera.ts";
@@ -10,6 +10,7 @@ import { VIEWPORT_COLORS } from "./viewportColors.ts";
 const COLORS = {
   normal: VIEWPORT_COLORS.geometry,
   construction: VIEWPORT_COLORS.construction,
+  fullyConstrained: VIEWPORT_COLORS.fullyConstrained,
   hover: VIEWPORT_COLORS.preview,
   selected: VIEWPORT_COLORS.selected,
   handle: VIEWPORT_COLORS.handle,
@@ -19,13 +20,20 @@ export interface GeometryRenderOptions {
   readonly camera: Camera;
   readonly geometry: readonly Geometry[];
   readonly selection: SelectionState;
+  /** Entities with no free solver DOF — drawn green when not construction/hover/selected. */
+  readonly fullyConstrainedIds?: ReadonlySet<EntityId>;
 }
 
 export function renderGeometry(
   ctx: CanvasRenderingContext2D,
   options: GeometryRenderOptions,
 ): void {
-  const { camera, geometry, selection } = options;
+  const {
+    camera,
+    geometry,
+    selection,
+    fullyConstrainedIds = new Set<EntityId>(),
+  } = options;
 
   for (const entity of geometry) {
     if (selection.selectedIds.includes(entity.id)) {
@@ -34,7 +42,13 @@ export function renderGeometry(
     if (selection.hoveredId === entity.id) {
       continue;
     }
-    drawEntity(ctx, entity, camera, entity.construction ? COLORS.construction : COLORS.normal, 1.25);
+    drawEntity(
+      ctx,
+      entity,
+      camera,
+      strokeForEntity(entity, fullyConstrainedIds),
+      1.25,
+    );
   }
 
   if (selection.hoveredId !== null && !selection.selectedIds.includes(selection.hoveredId)) {
@@ -51,6 +65,19 @@ export function renderGeometry(
       drawHandles(ctx, selected, camera);
     }
   }
+}
+
+function strokeForEntity(
+  entity: Geometry,
+  fullyConstrainedIds: ReadonlySet<EntityId>,
+): string {
+  if (entity.construction) {
+    return COLORS.construction;
+  }
+  if (fullyConstrainedIds.has(entity.id)) {
+    return COLORS.fullyConstrained;
+  }
+  return COLORS.normal;
 }
 
 function drawEntity(

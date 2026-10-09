@@ -6,7 +6,7 @@ import type {
   ConstraintType,
 } from "../model/Constraint.ts";
 import { isDrivingConstraint } from "../model/Constraint.ts";
-import type { LineGeometry } from "../model/Geometry.ts";
+import type { EntityId, LineGeometry } from "../model/Geometry.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import {
   findEntity,
@@ -213,6 +213,22 @@ export function validateDimensionValue(
     case "coordinate-y":
       return null;
   }
+}
+
+/**
+ * True when a driving radius or diameter dimension references this entity.
+ * Used to hard-lock rim/radius drag; size changes go through dimension edit.
+ */
+export function entityHasDrivingRadiusDimension(
+  sketch: Sketch,
+  entityId: EntityId,
+): boolean {
+  return sketch.constraints.some(
+    (constraint) =>
+      (constraint.type === "radius" || constraint.type === "diameter") &&
+      isDrivingConstraint(constraint) &&
+      constraint.references.some((ref) => ref.entityId === entityId),
+  );
 }
 
 /** Point or circle/arc center used by coordinate-x / coordinate-y. */

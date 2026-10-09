@@ -206,6 +206,10 @@ Typical absolute lock: coincident a corner/center to `datum:origin`, **or** driv
 
 Free solver variables (non-pivot Jacobian columns) map to geometry handles. Amber diamond markers show where motion remains; single-axis freedom adds a short H or V tick. Constraints panel + status tooltip explain the remaining DOF in plain language (not color alone). Dimension labels stay text-only for now (arrowed technical dimensions are polish, not this chunk).
 
+**Fully-constrained entity coloring (ADR-049):** `fullyConstrainedEntityIds` marks entities whose body cannot leave its supporting place (free columns expanded through coincident clusters + rectangle corner topology; H/V edges may stay green under length-only freedom). Construction / hover / selected colors override. Driving `radius` / `diameter` hard-lock rim drag (size via dimension edit; center drag remains).
+
+**Datum create snaps (ADR-050):** Rectangle/Circle commits with origin or axis snaps add coincident-to-origin or point-on-axis constraints (not Parallel).
+
 ## Over-constraint detection (Chunk 16 / ADR-024)
 
 Failed add/edit operations leave the sketch unchanged and return a `ConstraintConflict` (proposed id + implicated existing ids + human reason). Constraints panel shows the alert, lists involved constraints, highlights them, and offers **Dismiss**.

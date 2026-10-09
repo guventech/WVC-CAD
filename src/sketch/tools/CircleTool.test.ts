@@ -44,9 +44,10 @@ describe("CircleTool", () => {
       createCircleToolState(),
     );
     const end = handleCircleToolPointerDown(contextAt(0, 30), start.state);
-    expect(end.result.createCircle).toEqual({
+    expect(end.result.createCircle).toMatchObject({
       center: { x: 0, y: 0 },
       radiusPoint: { x: 0, y: 30 },
+      centerSnap: expect.objectContaining({ type: "origin" }),
     });
     expect(end.state.phase).toBe("idle");
   });

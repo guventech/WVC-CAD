@@ -4,6 +4,11 @@ import {
   createRectangleFeatureConstraint,
   createVerticalConstraint,
 } from "../constraints/ConstraintFactory.ts";
+import {
+  datumConstraintsForEdgesOnAxes,
+  datumConstraintsForRectangleCorner,
+  datumSnapFromCandidate,
+} from "../constraints/DatumSnap.ts";
 import { axisAlignedCornersFromDiagonal } from "../geometry/RectangleMath.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
 import type { Constraint } from "../model/Constraint.ts";
@@ -13,6 +18,7 @@ import type {
   LineGeometry,
   PointGeometry,
 } from "../model/Geometry.ts";
+import type { SnapCandidate } from "../selection/SnapTypes.ts";
 import type { SketchCommand } from "./Command.ts";
 import { createLineGeometry, createPointGeometry } from "./CreateGeometryCommand.ts";
 
@@ -104,6 +110,10 @@ export function createAddRectangleCommand(
   cornerB: Point2D,
   options?: {
     readonly construction?: boolean;
+    /** Snap used for the first corner click (origin/axis → auto coincident). */
+    readonly cornerASnap?: SnapCandidate | null;
+    /** Snap used for the opposite corner click. */
+    readonly cornerBSnap?: SnapCandidate | null;
   },
 ): SketchCommand | null {
   const created = buildRectangleEntities(cornerA, cornerB, options);
@@ -121,7 +131,6 @@ export function createAddRectangleCommand(
     created.edges.top.id,
     created.edges.left.id,
   ]);
-  const constraintIds = new Set(created.constraints.map((item) => item.id));
 
   return {
     label: `Add rectangle ${created.corners.bl.id}`,
@@ -129,6 +138,38 @@ export function createAddRectangleCommand(
       if (sketch.geometry.some((entity) => geometryIds.has(entity.id))) {
         return sketch;
       }
+      const cornerPoints = {
+        bl: created.corners.bl,
+        br: created.corners.br,
+        tr: created.corners.tr,
+        tl: created.corners.tl,
+      };
+      const hadDatumSnap =
+        datumSnapFromCandidate(options?.cornerASnap) !== null ||
+        datumSnapFromCandidate(options?.cornerBSnap) !== null;
+      const datumConstraints = dedupeConstraints([
+        ...datumConstraintsForRectangleCorner(
+          cornerPoints,
+          cornerA,
+          options?.cornerASnap,
+        ),
+        ...datumConstraintsForRectangleCorner(
+          cornerPoints,
+          cornerB,
+          options?.cornerBSnap,
+        ),
+        // Only when the user snapped to a datum — do not silently pin every
+        // rectangle that happens to touch an axis (ADR-050).
+        ...(hadDatumSnap
+          ? datumConstraintsForEdgesOnAxes(sketch.frame, cornerPoints, {
+              bottom: created.edges.bottom.id,
+              right: created.edges.right.id,
+              top: created.edges.top.id,
+              left: created.edges.left.id,
+            })
+          : []),
+      ]);
+      const allConstraints = [...created.constraints, ...datumConstraints];
       return {
         ...sketch,
         geometry: [
@@ -142,7 +183,7 @@ export function createAddRectangleCommand(
           created.edges.top,
           created.edges.left,
         ],
-        constraints: [...sketch.constraints, ...created.constraints],
+        constraints: [...sketch.constraints, ...allConstraints],
       };
     },
     undo(sketch) {
@@ -150,11 +191,29 @@ export function createAddRectangleCommand(
         ...sketch,
         geometry: sketch.geometry.filter((entity) => !geometryIds.has(entity.id)),
         constraints: sketch.constraints.filter(
-          (constraint) => !constraintIds.has(constraint.id),
+          (constraint) =>
+            !constraint.references.some((ref) => geometryIds.has(ref.entityId)),
         ),
       };
     },
   };
+}
+
+function dedupeConstraints(constraints: readonly Constraint[]): Constraint[] {
+  const seen = new Set<string>();
+  const out: Constraint[] = [];
+  for (const constraint of constraints) {
+    const key = constraint.references
+      .map((ref) => `${ref.entityId}:${ref.role}`)
+      .sort()
+      .join("+");
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    out.push(constraint);
+  }
+  return out;
 }
 
 function buildRectangleConstraints(

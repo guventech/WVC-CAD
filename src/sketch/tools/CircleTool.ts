@@ -74,6 +74,7 @@ export function handleCircleToolPointerDown(
         state.center,
         snapped.point,
         centerMidpointOf,
+        state.centerSnap,
       ),
       previewPoint: null,
       previewCircle: null,
@@ -89,11 +90,13 @@ function circleCreate(
   center: Point2D,
   radiusPoint: Point2D,
   centerMidpointOf: EntityId | null,
+  centerSnap: SnapCandidate | null,
 ): CirclePreview {
   return {
     center,
     radiusPoint,
     ...(centerMidpointOf !== null ? { centerMidpointOf } : {}),
+    ...(centerSnap !== null ? { centerSnap } : {}),
   };
 }
 

@@ -754,3 +754,58 @@ Commercial sketchers use one distance/dimension tool for length, point spans, an
 
 Status:
 **Implemented.**
+
+---
+
+## ADR-049 — Fully-constrained entity green + driving radius locks rim drag
+
+Date: 2026-10-09
+
+Decision:
+1. An entity is drawn green when its **body** cannot leave its supporting place: free Jacobian columns expand through coincident clusters and rectangle corner↔edge topology; H/V edges tolerate length-only freedom (so a height-free rectangle keeps bottom/left/right green while the top stays grey). Construction, hover, and selection colors still override. When sketch DOF is 0, all geometry is green.
+2. When a **driving** `radius` or `diameter` dimension references a circle/arc, Select-tool rim drag does not start; size changes only via dimension edit (double-click). Center drag remains allowed. Reference (non-driving) dimensions do not lock.
+
+Reason:
+Matches mainstream parametric sketcher UX (green = fully fixed; driving dimensions own size). Raw free-column membership and whole-feature free expansion both mis-color partially constrained rectangles.
+
+Status:
+**Implemented (U6 partial).**
+
+---
+
+## ADR-050 — Origin/axis create snaps become datum coincidents
+
+Date: 2026-10-09
+
+Decision:
+When Rectangle or Circle creation commits with an active **origin** or **axis** snap:
+1. Origin → coincident (point/center ↔ `datum:origin`).
+2. Axis → coincident point-on-line (point/center ↔ world X or Y axis).
+3. If a new rectangle edge lies on a world axis, both corners of that edge are pinned the same way (origin preferred when the corner is at 0,0).
+4. Do **not** auto-add Parallel to axes — rectangle edges already have H/V; locate uses coincident / point-on-axis (FreeCAD-style Auto constraints).
+
+Reason:
+Commercial sketchers turn datum snaps into permanent constraints on create; parallel-to-axis is redundant with horizontal/vertical.
+
+Status:
+**Implemented.**
+
+---
+
+## ADR-051 — Fillet preserves rectangle axis locate
+
+Date: 2026-10-09
+
+Decision:
+When filleting/chamfering a rectangle corner:
+1. Datum coincidents on the deleted corner point migrate to driving **coordinate locate on the surviving edges** (`coordinate-x=0` / `coordinate-y=0`), matching Fusion/SolidWorks practice of dimensioning to axes/edges rather than consumed corner points.
+2. Rectangle create with datum snap also emits those edge coordinates (in addition to corner coincidents).
+3. Rectangle topology residuals remain for every non-null corner (not disabled when any corner opens).
+4. Driving `length` on filleted rectangle edges is **promoted** to opposite-edge outer spans (`horizontal-distance` / `vertical-distance`) before LM and before length-restore. Segment-length restore must not shove rectangle edges (sketch-13 drift).
+5. `settleLoadedSketch` may promote lengths and convert edge↔axis coincidents to coordinates. It must **not invent** missing opposite-axis locate on load — fix the create/fillet pipeline; treat broken saves as documentary fixtures.
+
+Reason:
+sketch-1 (10)/(11)/(12)/(13) drifted after fillets because segment lengths fought trims and locate lived only on corner points. Recreate-from-scratch tests are the acceptance path.
+
+Status:
+**Implemented.**

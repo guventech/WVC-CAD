@@ -10,6 +10,9 @@ import { resetEntityIdCounter } from "../model/EntityId.ts";
 import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import { DATUM_AXIS_X_ID, DATUM_ORIGIN_ID } from "../model/SketchFrame.ts";
 import { createEmptySketch } from "../model/Sketch.ts";
+import { parseSketchJson } from "../serialization/SketchSerializer.ts";
+import fixtureFreeRectangleJson from "../../tests/fixtures/free-rectangle-green-false-positive.sketch.json?raw";
+import fixturePartialRectangleJson from "../../tests/fixtures/partial-rectangle-green-top-free.sketch.json?raw";
 import {
   analyzeUnderConstrainedVisualization,
   formatUnderConstrainedSummary,
@@ -26,6 +29,7 @@ describe("under-constrained visualization (Chunk 17)", () => {
     expect(viz.degreesOfFreedom).toBe(4);
     expect(viz.freeHandles.length).toBeGreaterThanOrEqual(2);
     expect(viz.freeHandles.every((handle) => handle.freeX && handle.freeY)).toBe(true);
+    expect(viz.fullyConstrainedEntityIds.has(created.line.id)).toBe(false);
     expect(viz.summary).toMatch(/4 DOF/);
     expect(viz.summary).toMatch(/move freely|Drag amber/i);
   });
@@ -90,7 +94,93 @@ describe("under-constrained visualization (Chunk 17)", () => {
     const viz = analyzeUnderConstrainedVisualization(sketch);
     expect(viz.degreesOfFreedom).toBe(0);
     expect(viz.freeHandles).toEqual([]);
+    expect(viz.fullyConstrainedEntityIds.size).toBe(sketch.geometry.length);
     expect(viz.summary).toMatch(/fully constrained/i);
+  });
+
+  it("does not mark any edge green on a free floating rectangle", () => {
+    const sketch = createAddRectangleCommand(
+      { x: 54, y: 20 },
+      { x: 214, y: 80 },
+    )!.apply(createEmptySketch());
+    const viz = analyzeUnderConstrainedVisualization(sketch);
+    expect(viz.degreesOfFreedom).toBeGreaterThan(0);
+    const lines = sketch.geometry.filter((entity) => entity.type === "line");
+    expect(lines.length).toBe(4);
+    for (const line of lines) {
+      expect(viz.fullyConstrainedEntityIds.has(line.id)).toBe(false);
+    }
+  });
+
+  it("regression: sketch-1 (8) free rectangle has no green edges", () => {
+    const parsed = parseSketchJson(fixtureFreeRectangleJson);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    const viz = analyzeUnderConstrainedVisualization(parsed.sketch);
+    expect(viz.degreesOfFreedom).toBeGreaterThan(0);
+    const lines = parsed.sketch.geometry.filter((e) => e.type === "line");
+    expect(lines.length).toBe(4);
+    for (const line of lines) {
+      expect(viz.fullyConstrainedEntityIds.has(line.id)).toBe(false);
+    }
+  });
+
+  it("regression: sketch-1 (9) only top edge stays non-green when height is free", () => {
+    const parsed = parseSketchJson(fixturePartialRectangleJson);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    const feature = parsed.sketch.constraints
+      .map(parseRectangleFeature)
+      .find((item) => item !== null)!;
+    const viz = analyzeUnderConstrainedVisualization(parsed.sketch);
+    expect(viz.degreesOfFreedom).toBeGreaterThan(0);
+    expect(viz.fullyConstrainedEntityIds.has(feature.edges.bottom)).toBe(true);
+    expect(viz.fullyConstrainedEntityIds.has(feature.edges.left)).toBe(true);
+    expect(viz.fullyConstrainedEntityIds.has(feature.edges.right)).toBe(true);
+    expect(viz.fullyConstrainedEntityIds.has(feature.edges.top)).toBe(false);
+  });
+
+  it("marks a fully fixed line green while a free point stays unconstrained", () => {
+    const lineCreated = addLineToSketch(
+      createEmptySketch(),
+      { x: 0, y: 0 },
+      { x: 40, y: 0 },
+    )!;
+    let sketch = addCoincidentToSketch(
+      lineCreated.sketch,
+      { entityId: lineCreated.line.id, role: "start" },
+      { entityId: DATUM_ORIGIN_ID, role: "position" },
+    )!;
+
+    const horiz = prepareAddConstraint(sketch, {
+      type: "horizontal",
+      references: [{ entityId: lineCreated.line.id, role: "entity" }],
+    });
+    expect(horiz.ok).toBe(true);
+    if (!horiz.ok) {
+      return;
+    }
+    sketch = horiz.sketch;
+
+    const length = prepareAddConstraint(sketch, {
+      type: "length",
+      references: [{ entityId: lineCreated.line.id, role: "entity" }],
+    });
+    expect(length.ok).toBe(true);
+    if (!length.ok) {
+      return;
+    }
+    sketch = length.sketch;
+
+    const freePoint = addPointToSketch(sketch, { x: 80, y: 80 });
+    const viz = analyzeUnderConstrainedVisualization(freePoint.sketch);
+    expect(viz.degreesOfFreedom).toBeGreaterThan(0);
+    expect(viz.fullyConstrainedEntityIds.has(lineCreated.line.id)).toBe(true);
+    expect(viz.fullyConstrainedEntityIds.has(freePoint.point.id)).toBe(false);
   });
 
   it("formats summary without inventing DOF from handle counts alone", () => {

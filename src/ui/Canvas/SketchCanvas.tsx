@@ -69,11 +69,21 @@ type SketchCanvasProps = {
       readonly endMidpointOf?: string;
     },
   ) => void;
-  readonly onCreateRectangle: (cornerA: Point2D, cornerB: Point2D) => void;
+  readonly onCreateRectangle: (
+    cornerA: Point2D,
+    cornerB: Point2D,
+    options?: {
+      readonly cornerASnap?: SnapCandidate | null;
+      readonly cornerBSnap?: SnapCandidate | null;
+    },
+  ) => void;
   readonly onCreateCircle: (
     center: Point2D,
     radiusPoint: Point2D,
-    options?: { readonly centerMidpointOf?: string },
+    options?: {
+      readonly centerMidpointOf?: string;
+      readonly centerSnap?: SnapCandidate | null;
+    },
   ) => void;
   readonly onCreateArc: (
     center: Point2D,
@@ -269,14 +279,15 @@ export const SketchCanvas = memo(function SketchCanvas({
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     const showPreview = isCreationTool(activeTool) || isDraggingPoint;
-    const freeHandles = analyzeUnderConstrainedVisualization(displaySketch).freeHandles;
+    const underConstrained = analyzeUnderConstrainedVisualization(displaySketch);
     renderViewport(context, {
       camera,
       viewport: size,
       gridVisible: sketch.settings.gridVisible,
       geometry: displaySketch.geometry,
       annotationSketch: displaySketch,
-      freeHandles,
+      freeHandles: underConstrained.freeHandles,
+      fullyConstrainedIds: underConstrained.fullyConstrainedEntityIds,
       selection,
       previewPoint: isCreationTool(activeTool) ? previewPoint : null,
       previewLine:

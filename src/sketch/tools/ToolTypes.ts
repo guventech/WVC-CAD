@@ -68,11 +68,17 @@ export interface CirclePreview {
   readonly radiusPoint: Point2D;
   /** Auto midpoint constraint: new circle center ↔ this line's midpoint. */
   readonly centerMidpointOf?: EntityId;
+  /** Origin/axis snap at center → datum coincident (ADR-050). */
+  readonly centerSnap?: SnapCandidate | null;
 }
 
 export interface RectanglePreview {
   readonly cornerA: Point2D;
   readonly cornerB: Point2D;
+  /** Snap at first corner (origin/axis → auto datum coincident). */
+  readonly cornerASnap?: SnapCandidate | null;
+  /** Snap at opposite corner. */
+  readonly cornerBSnap?: SnapCandidate | null;
 }
 
 export interface ArcPreview {

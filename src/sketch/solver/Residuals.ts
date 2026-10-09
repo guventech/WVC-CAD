@@ -407,17 +407,9 @@ function appendRectangleTopologyResiduals(
   if (feature === null) {
     return;
   }
-  // Once any corner is opened for fillet/chamfer, topology residuals for the
-  // remaining corners fight Length/Offset-driven blend rebuilds. Group locate
-  // still uses the feature id list; edge H/V + blend rebuild keep the shape.
-  if (
-    feature.corners.bl === null ||
-    feature.corners.br === null ||
-    feature.corners.tr === null ||
-    feature.corners.tl === null
-  ) {
-    return;
-  }
+  // Keep topology residuals for every *remaining* corner. Opened (null) corners
+  // are omitted so fillet/chamfer can trim; closed corners stay glued to edges
+  // (needed when datum locate lives on the corner point).
   const pairs = [
     [feature.corners.bl, feature.edges.bottom, "start"],
     [feature.corners.br, feature.edges.bottom, "end"],
@@ -429,6 +421,9 @@ function appendRectangleTopologyResiduals(
     [feature.corners.bl, feature.edges.left, "end"],
   ] as const;
   for (const [cornerId, edgeId, which] of pairs) {
+    if (cornerId === null) {
+      continue;
+    }
     pushPointPairResidual(
       sketch,
       constraint.id,

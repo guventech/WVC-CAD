@@ -1,5 +1,9 @@
 import type { Constraint, ConstraintId } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
+import {
+  promoteFilletedRectangleEdgeLengths,
+  restoreFilletedRectangleAxisCoordinates,
+} from "../model/RectangleFillet.ts";
 import { solveSketch } from "../solver/Solver.ts";
 import {
   constraintResidual,
@@ -72,10 +76,15 @@ export function maintainConstraints(
 }
 
 /**
- * After load/restore, settle any residual violations that were saved while a
- * residual path was incorrect (or drifted). No-op when already satisfied.
+ * After load/restore, settle residual violations. No-op when already satisfied.
  * On failure returns the original sketch unchanged.
+ *
+ * ADR-051: promotes filleted rectangle edge `length` → outer H/V spans, and
+ * converts edge↔axis coincidents to coordinates. Does not invent missing
+ * axis locate (broken saves stay documentary; recreate/fix the live path).
  */
 export function settleLoadedSketch(sketch: Sketch): Sketch {
-  return maintainConstraints(sketch).sketch;
+  const promoted = promoteFilletedRectangleEdgeLengths(sketch);
+  const located = restoreFilletedRectangleAxisCoordinates(promoted);
+  return maintainConstraints(located).sketch;
 }

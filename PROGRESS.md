@@ -49,7 +49,19 @@
 | U4 | `ConstraintContextBar` on Select; greyed boxes; apply or continue-pick; coincident failures surfaced |
 | U5 | Constraint panel Related/All filter; feature rows de-emphasized; status Session disclosure |
 
-**U6 backlog (not started):** richer create snaps/auto-constraints; fully-constrained entity coloring; polygon/slot/3-pt arc; Tauri packaging.
+**U6 (partial):** fully-constrained entity green stroke + hard-lock rim drag when driving radius/diameter exists; origin/axis create auto-coincidents for rectangle/circle (2026-10-09). Remaining U6 backlog: richer create snaps beyond datum/midpoint; polygon/slot/3-pt arc; Tauri packaging.
+
+### Fully-constrained green + radius rim lock (2026-10-09)
+
+| Area | What landed |
+|------|-------------|
+| Domain | `fullyConstrainedEntityIds` from Jacobian free-column analysis (same pass as DOF markers) |
+| Viewport | Solid geometry with no free solver vars drawn green (`VIEWPORT_COLORS.fullyConstrained`); construction / hover / selected override |
+| Radius lock | Driving `radius` / `diameter` → SelectTool refuses rim drag; `GeometryEdit` early-out; center drag + dimension double-click unchanged |
+| ADR | ADR-049 |
+| Fix | Body-freedom green (H/V length-only OK); free floating rect none green; height-free rect only top non-green |
+| Auto-create | Rectangle/Circle origin & axis snaps → datum coincident (ADR-050); edges on axes pin both corners |
+| Fillet+axes | Edge `coordinate-x/y=0` locate; filleted `length` → outer H/V spans; length-restore skips rectangles; no invent-on-load; recreate tests for sketch-13 (ADR-051) |
 
 ### Unified Distance dimension (2026-10-09)
 

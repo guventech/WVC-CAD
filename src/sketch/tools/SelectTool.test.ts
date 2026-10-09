@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { prepareAddConstraint } from "../commands/AddMaintainedConstraintCommand.ts";
 import {
   addArcToSketch,
   addCircleToSketch,
@@ -149,5 +150,79 @@ describe("SelectTool geometry drag", () => {
       kind: "arc-radius",
       entityId: created.arc.id,
     });
+  });
+
+  it("does not begin rim drag when a driving radius dimension exists", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 40)!;
+    const added = prepareAddConstraint(created.sketch, {
+      type: "radius",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
+    expect(added.ok).toBe(true);
+    if (!added.ok) {
+      return;
+    }
+    const result = handleSelectPointerDown(
+      contextFor(added.sketch, { x: 40, y: 0 }),
+    );
+    expect(result.beginPointDrag).toBeUndefined();
+    expect(result.selection?.selectedIds).toContain(created.circle.id);
+  });
+
+  it("does not begin rim drag when a driving diameter dimension exists", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 25)!;
+    const added = prepareAddConstraint(created.sketch, {
+      type: "diameter",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
+    expect(added.ok).toBe(true);
+    if (!added.ok) {
+      return;
+    }
+    const result = handleSelectPointerDown(
+      contextFor(added.sketch, { x: 25, y: 0 }),
+    );
+    expect(result.beginPointDrag).toBeUndefined();
+  });
+
+  it("still begins center drag when radius is dimensioned", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 10, y: 20 }, 40)!;
+    const added = prepareAddConstraint(created.sketch, {
+      type: "radius",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
+    expect(added.ok).toBe(true);
+    if (!added.ok) {
+      return;
+    }
+    const result = handleSelectPointerDown(
+      contextFor(added.sketch, { x: 10, y: 20 }),
+    );
+    expect(result.beginPointDrag?.target).toEqual({
+      kind: "circle-center",
+      entityId: created.circle.id,
+    });
+  });
+
+  it("does not begin arc rim drag when a driving radius exists", () => {
+    const created = addArcToSketch(
+      createEmptySketch(),
+      { x: 0, y: 0 },
+      30,
+      0,
+      Math.PI / 2,
+    )!;
+    const added = prepareAddConstraint(created.sketch, {
+      type: "radius",
+      references: [{ entityId: created.arc.id, role: "entity" }],
+    });
+    expect(added.ok).toBe(true);
+    if (!added.ok) {
+      return;
+    }
+    const result = handleSelectPointerDown(
+      contextFor(added.sketch, { x: 21.213, y: 21.213 }),
+    );
+    expect(result.beginPointDrag).toBeUndefined();
   });
 });

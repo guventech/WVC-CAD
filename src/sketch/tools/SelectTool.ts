@@ -27,6 +27,7 @@ import type {
   EntityId,
   LineGeometry,
 } from "../model/Geometry.ts";
+import { entityHasDrivingRadiusDimension } from "../constraints/Dimensions.ts";
 import {
   snapInContext,
   type PointDragState,
@@ -181,6 +182,10 @@ function beginRadialDrag(
   }
 
   if (part === "edge") {
+    // Driving radius/diameter owns size — edit via dimension, not rim drag.
+    if (entityHasDrivingRadiusDimension(context.sketch, entity.id)) {
+      return null;
+    }
     return beginDragResult(
       context,
       {

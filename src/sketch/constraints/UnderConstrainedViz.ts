@@ -1,11 +1,17 @@
 import { pointOnCircle } from "../geometry/EntityFeatures.ts";
-import { TOLERANCE } from "../geometry/GeometryMath.ts";
+import {
+  isApproximatelyEqual,
+  TOLERANCE,
+} from "../geometry/GeometryMath.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
-import type { EntityId } from "../model/Geometry.ts";
+import type { ConstraintReference } from "../model/Constraint.ts";
+import type { EntityId, Geometry, LineGeometry } from "../model/Geometry.ts";
+import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { assembleSystem } from "../solver/Jacobian.ts";
 import { matrixPivotColumns, vecNormInf } from "../solver/LinearAlgebra.ts";
 import type { SolverVariable } from "../solver/SolverVariables.ts";
+import { buildCoincidentClusters } from "./Coincident.ts";
 import { analyzeDegreesOfFreedom } from "./DegreesOfFreedom.ts";
 
 export type FreeHandleRole = "position" | "start" | "end" | "center" | "radius";
@@ -24,6 +30,13 @@ export interface FreeHandle {
 export interface UnderConstrainedVisualization {
   readonly degreesOfFreedom: number;
   readonly freeHandles: readonly FreeHandle[];
+  /**
+   * Geometry entities whose body is fixed in the plane (CAD “green” stroke).
+   * Free Jacobian columns expand through coincident clusters and rectangle
+   * corner↔edge topology. Length-only freedom on an otherwise fixed H/V edge
+   * does not un-green that edge (top can move while left/right stay green).
+   */
+  readonly fullyConstrainedEntityIds: ReadonlySet<EntityId>;
   /** Short engineering sentence for panel / status tooltip. */
   readonly summary: string;
 }
@@ -36,14 +49,22 @@ export function analyzeUnderConstrainedVisualization(
   sketch: Sketch,
 ): UnderConstrainedVisualization {
   const dof = analyzeDegreesOfFreedom(sketch);
-  if (sketch.geometry.length === 0 || dof.degreesOfFreedom === 0) {
+  if (sketch.geometry.length === 0) {
     return {
       degreesOfFreedom: dof.degreesOfFreedom,
       freeHandles: [],
-      summary:
-        sketch.geometry.length === 0
-          ? "No geometry."
-          : "Sketch is fully constrained.",
+      fullyConstrainedEntityIds: new Set(),
+      summary: "No geometry.",
+    };
+  }
+  if (dof.degreesOfFreedom === 0) {
+    return {
+      degreesOfFreedom: 0,
+      freeHandles: [],
+      fullyConstrainedEntityIds: new Set(
+        sketch.geometry.map((entity) => entity.id),
+      ),
+      summary: "Sketch is fully constrained.",
     };
   }
 
@@ -60,8 +81,241 @@ export function analyzeUnderConstrainedVisualization(
   return {
     degreesOfFreedom: dof.degreesOfFreedom,
     freeHandles,
+    fullyConstrainedEntityIds: fullyConstrainedEntityIdsFromVariables(
+      sketch,
+      variables,
+      freeVars,
+    ),
     summary: formatUnderConstrainedSummary(dof.degreesOfFreedom, freeHandles),
   };
+}
+
+type HandleFreedom = {
+  freeX: boolean;
+  freeY: boolean;
+  freeRadius: boolean;
+};
+
+const NO_FREEDOM: HandleFreedom = {
+  freeX: false,
+  freeY: false,
+  freeRadius: false,
+};
+
+/**
+ * Entities that participate in the solver and whose body cannot move under
+ * remaining DOF (length-only change on a fixed H/V supporting line is OK).
+ */
+function fullyConstrainedEntityIdsFromVariables(
+  sketch: Sketch,
+  variables: readonly SolverVariable[],
+  freeVars: readonly SolverVariable[],
+): Set<EntityId> {
+  const freedoms = expandHandleFreedoms(sketch, freeVars);
+  const entityIdsWithVars = new Set(
+    variables.map((variable) => variable.entityId),
+  );
+  const fullyConstrained = new Set<EntityId>();
+  for (const entity of sketch.geometry) {
+    if (
+      entityIdsWithVars.has(entity.id) &&
+      !entityHasBodyFreedom(entity, freedoms)
+    ) {
+      fullyConstrained.add(entity.id);
+    }
+  }
+  return fullyConstrained;
+}
+
+function handleKey(entityId: string, role: string): string {
+  return `${entityId}:${role}`;
+}
+
+function mergeFreedom(into: HandleFreedom, add: HandleFreedom): boolean {
+  const nextX = into.freeX || add.freeX;
+  const nextY = into.freeY || add.freeY;
+  const nextR = into.freeRadius || add.freeRadius;
+  if (
+    nextX === into.freeX &&
+    nextY === into.freeY &&
+    nextR === into.freeRadius
+  ) {
+    return false;
+  }
+  into.freeX = nextX;
+  into.freeY = nextY;
+  into.freeRadius = nextR;
+  return true;
+}
+
+/** Propagate free axes through coincident clusters and rectangle corner topology. */
+function expandHandleFreedoms(
+  sketch: Sketch,
+  freeVars: readonly SolverVariable[],
+): Map<string, HandleFreedom> {
+  const freedoms = new Map<string, HandleFreedom>();
+  const ensure = (key: string): HandleFreedom => {
+    const existing = freedoms.get(key);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const created: HandleFreedom = { ...NO_FREEDOM };
+    freedoms.set(key, created);
+    return created;
+  };
+
+  for (const variable of freeVars) {
+    const mapped = mapVariableToHandle(variable);
+    if (mapped === null) {
+      continue;
+    }
+    const slot = ensure(handleKey(mapped.entityId, mapped.role));
+    if (mapped.axis === "x") {
+      slot.freeX = true;
+    } else if (mapped.axis === "y") {
+      slot.freeY = true;
+    } else {
+      slot.freeRadius = true;
+    }
+  }
+
+  const clusters = buildCoincidentClusters(sketch);
+  const topologyPairs = rectangleTopologyHandlePairs(sketch);
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [key, freedom] of [...freedoms.entries()]) {
+      if (!freedom.freeX && !freedom.freeY && !freedom.freeRadius) {
+        continue;
+      }
+      const sep = key.lastIndexOf(":");
+      const role = key.slice(sep + 1);
+      if (role === "radius") {
+        continue;
+      }
+      const ref: ConstraintReference = {
+        entityId: key.slice(0, sep),
+        role: role as ConstraintReference["role"],
+      };
+      for (const member of clusters.membersOf(ref)) {
+        if (
+          mergeFreedom(ensure(handleKey(member.entityId, member.role)), freedom)
+        ) {
+          changed = true;
+        }
+      }
+    }
+    for (const [a, b] of topologyPairs) {
+      const fa = freedoms.get(handleKey(a.entityId, a.role));
+      const fb = freedoms.get(handleKey(b.entityId, b.role));
+      if (fa !== undefined) {
+        if (mergeFreedom(ensure(handleKey(b.entityId, b.role)), fa)) {
+          changed = true;
+        }
+      }
+      if (fb !== undefined) {
+        if (mergeFreedom(ensure(handleKey(a.entityId, a.role)), fb)) {
+          changed = true;
+        }
+      }
+    }
+  }
+
+  return freedoms;
+}
+
+function rectangleTopologyHandlePairs(
+  sketch: Sketch,
+): readonly (readonly [ConstraintReference, ConstraintReference])[] {
+  const pairs: [ConstraintReference, ConstraintReference][] = [];
+  for (const constraint of sketch.constraints) {
+    const feature = parseRectangleFeature(constraint);
+    if (feature === null) {
+      continue;
+    }
+    if (
+      feature.corners.bl === null ||
+      feature.corners.br === null ||
+      feature.corners.tr === null ||
+      feature.corners.tl === null
+    ) {
+      continue;
+    }
+    const links: readonly (readonly [EntityId, EntityId, "start" | "end"])[] = [
+      [feature.corners.bl, feature.edges.bottom, "start"],
+      [feature.corners.br, feature.edges.bottom, "end"],
+      [feature.corners.br, feature.edges.right, "start"],
+      [feature.corners.tr, feature.edges.right, "end"],
+      [feature.corners.tr, feature.edges.top, "start"],
+      [feature.corners.tl, feature.edges.top, "end"],
+      [feature.corners.tl, feature.edges.left, "start"],
+      [feature.corners.bl, feature.edges.left, "end"],
+    ];
+    for (const [cornerId, edgeId, which] of links) {
+      pairs.push([
+        { entityId: cornerId, role: "position" },
+        { entityId: edgeId, role: which },
+      ]);
+    }
+  }
+  return pairs;
+}
+
+/** True when the entity can still leave its supporting place / size meaningfully. */
+function entityHasBodyFreedom(
+  entity: Geometry,
+  freedoms: ReadonlyMap<string, HandleFreedom>,
+): boolean {
+  switch (entity.type) {
+    case "point": {
+      const f = freedoms.get(handleKey(entity.id, "position")) ?? NO_FREEDOM;
+      return f.freeX || f.freeY;
+    }
+    case "line":
+      return lineHasBodyFreedom(entity, freedoms);
+    case "circle":
+    case "arc": {
+      const center = freedoms.get(handleKey(entity.id, "center")) ?? NO_FREEDOM;
+      const radius = freedoms.get(handleKey(entity.id, "radius")) ?? NO_FREEDOM;
+      return center.freeX || center.freeY || radius.freeRadius;
+    }
+  }
+}
+
+function lineHasBodyFreedom(
+  line: LineGeometry,
+  freedoms: ReadonlyMap<string, HandleFreedom>,
+): boolean {
+  const start = freedoms.get(handleKey(line.id, "start")) ?? NO_FREEDOM;
+  const end = freedoms.get(handleKey(line.id, "end")) ?? NO_FREEDOM;
+  const orientation = lineBodyOrientation(line);
+  if (orientation === "horizontal") {
+    // Perpendicular (Y) freedom moves the edge; both ends free in X can slide.
+    if (start.freeY || end.freeY) {
+      return true;
+    }
+    return start.freeX && end.freeX;
+  }
+  if (orientation === "vertical") {
+    if (start.freeX || end.freeX) {
+      return true;
+    }
+    return start.freeY && end.freeY;
+  }
+  return start.freeX || start.freeY || end.freeX || end.freeY;
+}
+
+function lineBodyOrientation(
+  line: LineGeometry,
+): "horizontal" | "vertical" | "diagonal" {
+  if (isApproximatelyEqual(line.start.y, line.end.y, TOLERANCE.coincidence)) {
+    return "horizontal";
+  }
+  if (isApproximatelyEqual(line.start.x, line.end.x, TOLERANCE.coincidence)) {
+    return "vertical";
+  }
+  return "diagonal";
 }
 
 export function formatUnderConstrainedSummary(

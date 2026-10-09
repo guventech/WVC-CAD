@@ -29,7 +29,10 @@ import {
 } from "../model/RectangleFeature.ts";
 import { createEmptySketch, type Sketch } from "../model/Sketch.ts";
 import { listUnsatisfiedConstraints } from "./ConstraintMaintenance.ts";
-import { measureDimension } from "./Dimensions.ts";
+import {
+  entityHasDrivingRadiusDimension,
+  measureDimension,
+} from "./Dimensions.ts";
 
 const DEG = Math.PI / 180;
 
@@ -279,6 +282,9 @@ describe("dimensional constraints (Chunk 13)", () => {
       type: "radius",
       references: [{ entityId: created.circle.id, role: "entity" }],
     });
+    expect(entityHasDrivingRadiusDimension(sketch, created.circle.id)).toBe(
+      true,
+    );
     const moved = applyGeometryDragWithConstraints(
       sketch,
       { kind: "circle-radius", entityId: created.circle.id },
@@ -287,6 +293,42 @@ describe("dimensional constraints (Chunk 13)", () => {
     const circle = entity(moved, created.circle.id);
     expect(circle.type === "circle" && circle.radius).toBeCloseTo(10, 5);
     expect(moved).toBe(sketch);
+  });
+
+  it("rejects dragging the rim of a diameter-dimensioned circle", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 15)!;
+    const sketch = add(created.sketch, {
+      type: "diameter",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
+    expect(entityHasDrivingRadiusDimension(sketch, created.circle.id)).toBe(
+      true,
+    );
+    const moved = applyGeometryDragWithConstraints(
+      sketch,
+      { kind: "circle-radius", entityId: created.circle.id },
+      { x: 40, y: 0 },
+    );
+    expect(moved).toBe(sketch);
+  });
+
+  it("does not lock rim drag for a reference (non-driving) radius", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 10)!;
+    const sketch = {
+      ...created.sketch,
+      constraints: [
+        {
+          id: "ref-r",
+          type: "radius" as const,
+          references: [{ entityId: created.circle.id, role: "entity" as const }],
+          value: 10,
+          driving: false,
+        },
+      ],
+    };
+    expect(entityHasDrivingRadiusDimension(sketch, created.circle.id)).toBe(
+      false,
+    );
   });
 
   it("rejects a conflicting dimension and leaves the sketch unchanged (Fixture E)", () => {

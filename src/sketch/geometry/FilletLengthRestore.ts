@@ -2,6 +2,14 @@ import { listUnsatisfiedConstraints } from "../constraints/ConstraintMaintenance
 import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { EntityId, LineGeometry } from "../model/Geometry.ts";
 import { listFilletFeaturesForEntity } from "../model/FilletChamferFeature.ts";
+import {
+  findRectangleFeatureForEntity,
+  type RectangleFeatureIds,
+} from "../model/RectangleFeature.ts";
+import {
+  findFrameAxis,
+  isDatumOriginId,
+} from "../model/SketchFrame.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Point2D } from "./Point2D.ts";
 import { distance, TOLERANCE } from "./GeometryMath.ts";
@@ -115,6 +123,11 @@ export function applyLengthToFilletedEdge(
 /**
  * For each unsatisfied driving length on a filleted line, shift a partner edge
  * so a subsequent rebuild yields the constrained remaining length.
+ *
+ * Skip restore when the line belongs to an **axis-located** rectangle (edge
+ * coordinates or remaining corner↔datum pins). Partner-shove was a primary
+ * cause of fillet-after-create drift (sketch-13). Free filleted rectangles and
+ * non-rectangle lines still restore segment length.
  */
 export function restoreUnsatisfiedFilletedLengths(sketch: Sketch): Sketch {
   let next = sketch;
@@ -135,12 +148,64 @@ export function restoreUnsatisfiedFilletedLengths(sketch: Sketch): Sketch {
     if (listFilletFeaturesForEntity(next.constraints, lineId).length === 0) {
       continue;
     }
+    const feature = findRectangleFeatureForEntity(next.constraints, lineId);
+    if (feature !== null && rectangleHasAxisLocate(next, feature)) {
+      continue;
+    }
     const restored = applyLengthToFilletedEdge(next, lineId, constraint.value);
     if (restored !== null) {
       next = restored;
     }
   }
   return next;
+}
+
+function rectangleHasAxisLocate(
+  sketch: Sketch,
+  feature: RectangleFeatureIds,
+): boolean {
+  const edgeIds = new Set([
+    feature.edges.bottom,
+    feature.edges.right,
+    feature.edges.top,
+    feature.edges.left,
+  ]);
+  const cornerIds = new Set(
+    [feature.corners.bl, feature.corners.br, feature.corners.tr, feature.corners.tl].filter(
+      (id): id is EntityId => id !== null,
+    ),
+  );
+  for (const constraint of sketch.constraints) {
+    if (
+      (constraint.type === "coordinate-x" || constraint.type === "coordinate-y") &&
+      isDrivingConstraint(constraint) &&
+      constraint.references[0] !== undefined &&
+      edgeIds.has(constraint.references[0].entityId)
+    ) {
+      return true;
+    }
+    if (constraint.type !== "coincident") {
+      continue;
+    }
+    const touchesCorner = constraint.references.some((ref) =>
+      cornerIds.has(ref.entityId),
+    );
+    const touchesEdge = constraint.references.some((ref) =>
+      edgeIds.has(ref.entityId),
+    );
+    if (!touchesCorner && !touchesEdge) {
+      continue;
+    }
+    for (const ref of constraint.references) {
+      if (isDatumOriginId(sketch.frame, ref.entityId)) {
+        return true;
+      }
+      if (findFrameAxis(sketch.frame, ref.entityId) !== null) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 /**
  * Place a filleted edge onto the tangent points implied by its end fillets and

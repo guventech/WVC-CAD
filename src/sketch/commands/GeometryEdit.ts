@@ -5,6 +5,7 @@ import {
 import {
   resolveLineObjectSegment,
 } from "../constraints/ConstraintRef.ts";
+import { entityHasDrivingRadiusDimension } from "../constraints/Dimensions.ts";
 import {
   isApproximatelyEqual,
   pointsApproximatelyEqual,
@@ -56,6 +57,13 @@ export function applyGeometryDragWithConstraints(
   target: GeometryDragTarget,
   position: Point2D,
 ): Sketch {
+  if (
+    (target.kind === "circle-radius" || target.kind === "arc-radius") &&
+    entityHasDrivingRadiusDimension(sketch, target.entityId)
+  ) {
+    return sketch;
+  }
+
   const projected = projectDragPositionOntoDatums(sketch, target, position);
   const moved = applyGeometryDrag(sketch, target, projected);
   if (moved === sketch) {

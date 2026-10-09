@@ -1,6 +1,6 @@
 import type { Camera } from "./Camera.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
-import type { Geometry } from "../model/Geometry.ts";
+import type { EntityId, Geometry } from "../model/Geometry.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { FreeHandle } from "../constraints/UnderConstrainedViz.ts";
 import { drawConstraintAnnotations } from "./drawConstraintAnnotations.ts";
@@ -41,6 +41,8 @@ export interface ViewportRenderOptions {
   readonly frame?: SketchFrame;
   /** Free handles for under-constrained visualization (Chunk 17). */
   readonly freeHandles?: readonly FreeHandle[];
+  /** Fully constrained entities drawn green (U6). */
+  readonly fullyConstrainedIds?: ReadonlySet<EntityId>;
   readonly selection?: SelectionState;
   readonly previewPoint?: Point2D | null;
   readonly previewLine?: LinePreview | null;
@@ -63,6 +65,7 @@ export function renderViewport(
     annotationSketch = null,
     frame,
     freeHandles = [],
+    fullyConstrainedIds,
     selection,
     previewPoint = null,
     previewLine = null,
@@ -89,7 +92,12 @@ export function renderViewport(
   drawSketchFrame(ctx, camera, viewport, sketchFrame, selection);
 
   if (geometry.length > 0 && selection !== undefined) {
-    renderGeometry(ctx, { camera, geometry, selection });
+    renderGeometry(ctx, {
+      camera,
+      geometry,
+      selection,
+      fullyConstrainedIds,
+    });
   }
 
   if (freeHandles.length > 0) {

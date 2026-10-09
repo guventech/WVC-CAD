@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Sketch 1",
+  "geometry": [
+    {
+      "id": "point-426",
+      "type": "point",
+      "position": {
+        "x": 54,
+        "y": 20
+      },
+      "construction": false
+    },
+    {
+      "id": "point-427",
+      "type": "point",
+      "position": {
+        "x": 214,
+        "y": 20
+      },
+      "construction": false
+    },
+    {
+      "id": "point-428",
+      "type": "point",
+      "position": {
+        "x": 214,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "point-429",
+      "type": "point",
+      "position": {
+        "x": 54,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-430",
+      "type": "line",
+      "start": {
+        "x": 54,
+        "y": 20
+      },
+      "end": {
+        "x": 214,
+        "y": 20
+      },
+      "construction": false
+    },
+    {
+      "id": "line-431",
+      "type": "line",
+      "start": {
+        "x": 214,
+        "y": 20
+      },
+      "end": {
+        "x": 214,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-432",
+      "type": "line",
+      "start": {
+        "x": 214,
+        "y": 80
+      },
+      "end": {
+        "x": 54,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-433",
+      "type": "line",
+      "start": {
+        "x": 54,
+        "y": 80
+      },
+      "end": {
+        "x": 54,
+        "y": 20
+      },
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-434",
+      "type": "rectangle",
+      "references": [
+        {
+          "entityId": "point-426",
+          "role": "corner-bl"
+        },
+        {
+          "entityId": "point-427",
+          "role": "corner-br"
+        },
+        {
+          "entityId": "point-428",
+          "role": "corner-tr"
+        },
+        {
+          "entityId": "point-429",
+          "role": "corner-tl"
+        },
+        {
+          "entityId": "line-430",
+          "role": "edge-bottom"
+        },
+        {
+          "entityId": "line-431",
+          "role": "edge-right"
+        },
+        {
+          "entityId": "line-432",
+          "role": "edge-top"
+        },
+        {
+          "entityId": "line-433",
+          "role": "edge-left"
+        }
+      ]
+    },
+    {
+      "id": "constraint-435",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-430",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-436",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-432",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-437",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-433",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-438",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-431",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-439",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-430",
+          "role": "end"
+        },
+        {
+          "entityId": "line-431",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-440",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-431",
+          "role": "end"
+        },
+        {
+          "entityId": "line-432",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-441",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-432",
+          "role": "end"
+        },
+        {
+          "entityId": "line-433",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-442",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-433",
+          "role": "end"
+        },
+        {
+          "entityId": "line-430",
+          "role": "start"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-09T20:03:35.578Z",
+    "app": "sketcher"
+  }
+}

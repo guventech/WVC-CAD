@@ -3,6 +3,7 @@ import {
   rectangleMetrics,
 } from "../geometry/RectangleMath.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
+import type { SnapCandidate } from "../selection/SnapTypes.ts";
 import {
   cancelTwoClickSession,
   snapInContext,
@@ -16,12 +17,14 @@ import {
 export interface RectangleToolState {
   readonly phase: TwoClickToolPhase;
   readonly cornerA: Point2D | null;
+  readonly cornerASnap: SnapCandidate | null;
 }
 
 export function createRectangleToolState(): RectangleToolState {
   return {
     phase: "idle",
     cornerA: null,
+    cornerASnap: null,
   };
 }
 
@@ -36,6 +39,7 @@ export function handleRectangleToolPointerDown(
       state: {
         phase: "drawing",
         cornerA: snapped.point,
+        cornerASnap: snapped.snap,
       },
       result: {
         previewPoint: snapped.point,
@@ -58,6 +62,8 @@ export function handleRectangleToolPointerDown(
         previewRectangle: {
           cornerA: state.cornerA,
           cornerB: snapped.point,
+          cornerASnap: state.cornerASnap,
+          cornerBSnap: snapped.snap,
         },
         rectMetrics: degenerateMetrics(state.cornerA, snapped.point),
         activeSnap: snapped.snap,
@@ -73,6 +79,8 @@ export function handleRectangleToolPointerDown(
       createRectangle: {
         cornerA: state.cornerA,
         cornerB: snapped.point,
+        cornerASnap: state.cornerASnap,
+        cornerBSnap: snapped.snap,
       },
       previewPoint: null,
       previewRectangle: null,

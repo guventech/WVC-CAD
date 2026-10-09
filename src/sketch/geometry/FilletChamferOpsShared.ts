@@ -1,10 +1,13 @@
 import { maintainConstraints } from "../constraints/ConstraintMaintenance.ts";
 import { angleBetweenLines } from "../constraints/Dimensions.ts";
 import { createLineGeometry } from "../commands/CreateGeometryCommand.ts";
+import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { ArcGeometry, EntityId, LineGeometry } from "../model/Geometry.ts";
 import {
   dissolveRectangleAtCorner,
   linesShareRectangle,
+  promoteFilletedRectangleEdgeLengths,
+  promoteRectangleEdgeLengthsToOuterSpans,
 } from "../model/RectangleFillet.ts";
 import { findRectangleFeatureForEntity } from "../model/RectangleFeature.ts";
 import {
@@ -122,7 +125,58 @@ export function finalizeAfterCornerEdit(
     line2Id,
     cornerPoint,
   );
-  return finalize(dissolved);
+  const feature = findRectangleFeatureForEntity(
+    dissolved.constraints,
+    line1Id,
+  );
+  // Rectangle edge lengths were overall size (100×100). After trim they fight
+  // the fillet and shove axis-locked sides — promote to opposite-edge spans.
+  // Promote every filleted edge on the feature (not only this corner) so a
+  // second fillet cannot leave a stale segment length on a prior edge.
+  // Non-rectangle parents: retarget length to the remaining segment.
+  const sized =
+    feature !== null
+      ? promoteFilletedRectangleEdgeLengths(
+          promoteRectangleEdgeLengthsToOuterSpans(dissolved, [
+            line1Id,
+            line2Id,
+          ]),
+        )
+      : retargetDrivingLengthsOnLines(dissolved, [line1Id, line2Id]);
+  return finalize(sized);
+}
+
+/** Set driving length constraints on these lines to their current segment length. */
+export function retargetDrivingLengthsOnLines(
+  sketch: Sketch,
+  lineIds: readonly EntityId[],
+): Sketch {
+  const targets = new Set(lineIds);
+  let changed = false;
+  const constraints = sketch.constraints.map((constraint) => {
+    if (
+      constraint.type !== "length" ||
+      !isDrivingConstraint(constraint) ||
+      constraint.references[0] === undefined ||
+      !targets.has(constraint.references[0].entityId)
+    ) {
+      return constraint;
+    }
+    const line = findLine(sketch, constraint.references[0].entityId);
+    if (line === null) {
+      return constraint;
+    }
+    const measured = distance(line.start, line.end);
+    if (
+      constraint.value !== undefined &&
+      Math.abs(constraint.value - measured) <= TOLERANCE.coincidence
+    ) {
+      return constraint;
+    }
+    changed = true;
+    return { ...constraint, value: measured };
+  });
+  return changed ? { ...sketch, constraints } : sketch;
 }
 
 export function blockRectangle(
@@ -244,9 +298,19 @@ export function applyChamferPlan(
 }
 
 export function finalize(sketch: Sketch): FilletOutcome {
-  const maintained = maintainConstraints(sketch);
+  // Defense in depth: outer-span promote before LM (also done in finalizeAfterCornerEdit).
+  let working = promoteFilletedRectangleEdgeLengths(sketch);
+  const maintained = maintainConstraints(working);
   if (!maintained.satisfied) {
     return { ok: false, reason: "Constraints would become unsatisfied" };
+  }
+  working = promoteFilletedRectangleEdgeLengths(maintained.sketch);
+  if (working.constraints !== maintained.sketch.constraints) {
+    const again = maintainConstraints(working);
+    if (!again.satisfied) {
+      return { ok: false, reason: "Constraints would become unsatisfied" };
+    }
+    return { ok: true, sketch: again.sketch };
   }
   return { ok: true, sketch: maintained.sketch };
 }
