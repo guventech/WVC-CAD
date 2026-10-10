@@ -809,3 +809,54 @@ sketch-1 (10)/(11)/(12)/(13) drifted after fillets because segment lengths fough
 
 Status:
 **Implemented.**
+
+---
+
+## ADR-052 — Solver residual scaling deferred; honesty unchanged
+
+Date: 2026-10-10
+
+Decision:
+1. Keep mixed mm and radian residuals in one unscaled vector for LM and Jacobian rank. Do **not** invent column/residual scaling until a concrete rank or large-edit failure forces it.
+2. Do **not** add fake “fully constrained” shortcuts (dimension counts, green-only heuristics, or profile-closed ⇒ DOF 0).
+3. Fillet large-move sign/branch retry remains deferred; recreate-from-scratch + promote/migrate (ADR-051) is the acceptance path for axis locate after fillets.
+4. `isReadyForPad` is a **topology** gate only (outer loop, no open solid wire, no self-intersection, no non-manifold). It does not claim solver DOF is zero.
+
+Reason:
+Premature residual scaling changes DOF fixtures and can hide real under-constraint. Pad handoff needs honest profiles + honest DOF, not scaled cosmetics.
+
+Status:
+**Accepted (scaling deferred; honesty documented).**
+
+---
+
+## ADR-053 — Sketch → 3D feature contract via ProfileAnalyzer only
+
+Date: 2026-10-10
+
+Decision:
+1. Future Pad/Pocket/Revolve modules consume **`analyzeProfiles(sketch)`** (and optionally `isReadyForPad`) as the only geometry bridge from the sketcher. No React types, no canvas paths, no ad-hoc loop tracing in the 3D layer.
+2. Invariants: units mm; construction excluded from solid loops; at most one outer loop per solid profile set with holes nested via `parentLoopId`; areas in mm².
+3. Diagnostics may show “Ready for pad” when `isReadyForPad` is true; that label is advisory UI over the same domain gate.
+
+Reason:
+Keeps 3D features independent of the sketcher UI and prevents duplicate topology math.
+
+Status:
+**Accepted.**
+
+---
+
+## ADR-054 — Intersection snap + three-point arc
+
+Date: 2026-10-10
+
+Decision:
+1. Snap engine gains `intersection` candidates (line–line infinite, line–circle/arc, circle–circle; arcs filtered by CCW sweep) at priority between endpoint and midpoint.
+2. **Arc3** tool: three clicks (start → through → end) via `circleFromThreePoints`; commits the same `createArc` path as center-point arc. Center-point **Arc** tool remains.
+
+Reason:
+Intersection snap unblocks accurate trim/extend/fillet clicks; 3-point arc is the next high-value create mode without starting splines.
+
+Status:
+**Implemented.**

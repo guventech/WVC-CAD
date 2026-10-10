@@ -9,6 +9,7 @@ export type SnapType =
   | "point"
   | "midpoint"
   | "center"
+  | "intersection"
   | "onEntity"
   | "horizontal"
   | "vertical";

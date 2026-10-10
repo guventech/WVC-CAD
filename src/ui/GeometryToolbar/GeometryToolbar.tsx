@@ -13,6 +13,7 @@ const TOOLS: readonly {
   { id: "rectangle", label: "Rectangle", title: "Create rectangles" },
   { id: "circle", label: "Circle", title: "Create circles" },
   { id: "arc", label: "Arc", title: "Create center-point arcs" },
+  { id: "arc3", label: "3-pt Arc", title: "Create three-point arcs" },
   { id: "trim", label: "Trim", title: "Trim a line to a crossing boundary" },
   { id: "extend", label: "Extend", title: "Extend a line to a crossing boundary" },
   {

@@ -24,6 +24,7 @@ import type {
 import type { Sketch } from "../model/Sketch.ts";
 
 export type { ProfileAnalysis, ProfileLoop, LoopOrientation } from "./ProfileTypes.ts";
+export { isReadyForPad } from "./ProfileTypes.ts";
 
 interface HalfEdge {
   readonly entityId: EntityId;
@@ -65,6 +66,7 @@ export function analyzeProfiles(sketch: Sketch): ProfileAnalysis {
 
   const selfIntersectionCount = countLineSelfIntersections(lines);
   const { nodes, halfEdgesAt, entityById } = buildWire(lines, arcs);
+  const nonManifoldJunctionCount = countNonManifoldJunctions(halfEdgesAt);
 
   const usedEntityIds = new Set<EntityId>();
   const drafts: WireLoopDraft[] = [];
@@ -152,9 +154,23 @@ export function analyzeProfiles(sketch: Sketch): ProfileAnalysis {
     loops: nested,
     openEntityIds,
     selfIntersectionCount,
+    nonManifoldJunctionCount,
     outerLoopCount,
     holeLoopCount,
   };
+}
+
+function countNonManifoldJunctions(
+  halfEdgesAt: Map<number, HalfEdge[]>,
+): number {
+  let count = 0;
+  for (const edges of halfEdgesAt.values()) {
+    // Each undirected edge appears once as an outgoing half-edge from a node.
+    if (edges.length > 2) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 function nextLoopId(serial: number): string {
@@ -302,11 +318,17 @@ function arcSamplesAlongHalfEdge(
   const forward =
     pointsApproximatelyEqual(fromPt, ends.start, TOLERANCE.coincidence);
   const sweep = arcSweepRadians(arc.startAngle, arc.endAngle);
-  // Sample mid-sweep in the travel direction of this half-edge.
-  const midAngle = forward
-    ? arc.startAngle + sweep / 2
-    : arc.endAngle - sweep / 2;
-  return [pointOnCircle(arc.center, arc.radius, midAngle)];
+  // ~15° steps (min 2 interior samples) so shoelace areas stay accurate for fillets.
+  const steps = Math.max(2, Math.ceil(Math.abs(sweep) / (Math.PI / 12)));
+  const samples: Point2D[] = [];
+  for (let i = 1; i < steps; i += 1) {
+    const t = i / steps;
+    const angle = forward
+      ? arc.startAngle + sweep * t
+      : arc.endAngle - sweep * t;
+    samples.push(pointOnCircle(arc.center, arc.radius, angle));
+  }
+  return samples;
 }
 
 function nextHalfEdge(

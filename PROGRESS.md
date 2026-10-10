@@ -37,7 +37,19 @@
 
 ## Current
 
-**Post–Chunk 27 + UX parity U1–U5.** Icon toolbars, selection constraint palette, and chrome declutter shipped. U6 backlog deferred (see below).
+**Post–Chunk 27 + 2D-before-3D Tier A/B/C (2026-10-10).** Profile handoff + intersection snap + 3-pt arc + Playwright smoke shipped. Remaining U6/product gaps: polygon/slot/offset, dimension graphics, Tauri installer.
+
+### 2D-before-3D backlog (2026-10-10)
+
+| Tier | What landed |
+|------|-------------|
+| A Profile | Stronger arc loop densify; non-manifold + self-intersection counts; construction exclusion; `isReadyForPad` + diagnostics “Ready for pad”; fixtures in `ProfileAnalyzer.test.ts` |
+| A Solver | Residual/column scaling **deferred** with honesty docs (ADR-052); no fake fully-constrained; Jacobian comment |
+| A Contract | ARCHITECTURE “Sketch → feature contract”; bridge = `analyzeProfiles` / `isReadyForPad` only (ADR-053) |
+| B Snap/Arc | Intersection snap (`intersectionSnap.ts`); **Arc3** three-point tool + glyph/toolbar/menu (ADR-054) |
+| C E2E | Playwright `e2e/critical-path.spec.ts` — rect → profile → fillet → ready-for-pad → save download (`npm run test:e2e`) |
+
+**Post–Chunk 27 + UX parity U1–U5.** Icon toolbars, selection constraint palette, and chrome declutter shipped.
 
 ### UX parity U1–U5 (2026-10-09) — commercial-style constraint interaction
 
@@ -49,7 +61,7 @@
 | U4 | `ConstraintContextBar` on Select; greyed boxes; apply or continue-pick; coincident failures surfaced |
 | U5 | Constraint panel Related/All filter; feature rows de-emphasized; status Session disclosure |
 
-**U6 (partial):** fully-constrained entity green stroke + hard-lock rim drag when driving radius/diameter exists; origin/axis create auto-coincidents for rectangle/circle (2026-10-09). Remaining U6 backlog: richer create snaps beyond datum/midpoint; polygon/slot/3-pt arc; Tauri packaging.
+**U6 (partial):** fully-constrained entity green stroke + hard-lock rim drag when driving radius/diameter exists; origin/axis create auto-coincidents for rectangle/circle (2026-10-09). Remaining U6 backlog: polygon/slot/offset; dimension extension lines; Tauri packaging; mirror constraint copy.
 
 ### Fully-constrained green + radius rim lock (2026-10-09)
 

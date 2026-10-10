@@ -187,4 +187,31 @@ describe("findSnap", () => {
     expect(snap?.type).toBe("grid");
     expect(snap?.point).toEqual({ x: 20, y: 20 });
   });
+
+  it("snaps to a line–line intersection away from endpoints", () => {
+    const camera = createCamera(800, 600, 2);
+    const crossing: readonly Geometry[] = [
+      {
+        id: "h",
+        type: "line",
+        start: { x: 0, y: 40 },
+        end: { x: 100, y: 40 },
+        construction: false,
+      },
+      {
+        id: "v",
+        type: "line",
+        start: { x: 60, y: 0 },
+        end: { x: 60, y: 80 },
+        construction: false,
+      },
+    ];
+    const snap = findSnap({ x: 61, y: 39 }, crossing, {
+      camera,
+      gridSpacingMm: 50,
+    });
+
+    expect(snap?.type).toBe("intersection");
+    expect(snap?.point).toEqual({ x: 60, y: 40 });
+  });
 });

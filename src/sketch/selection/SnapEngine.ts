@@ -12,6 +12,7 @@ import {
   type SketchFrame,
 } from "../model/SketchFrame.ts";
 import type { Camera } from "../viewport/Camera.ts";
+import { collectIntersectionCandidates } from "./intersectionSnap.ts";
 import { collectOnEntityCandidate } from "./onEntitySnap.ts";
 import type { SnapCandidate } from "./SnapTypes.ts";
 
@@ -174,6 +175,8 @@ export function collectSnapCandidates(
       candidates.push(onEntity);
     }
   }
+
+  candidates.push(...collectIntersectionCandidates(geometry, exclude));
 
   return candidates;
 }

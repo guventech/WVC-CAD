@@ -2,7 +2,7 @@ import {
   collectGeometryIssues,
   invalidGeometryEntityIds,
 } from "./GeometryDiagnostics.ts";
-import { analyzeProfiles } from "./ProfileAnalyzer.ts";
+import { analyzeProfiles, isReadyForPad } from "./ProfileAnalyzer.ts";
 import { analyzeSolidLineTopology } from "./TopologyDiagnostics.ts";
 import type {
   DiagnosticFinding,
@@ -35,6 +35,8 @@ export interface SketchDiagnosticsSummary {
   readonly outerLoopCount: number;
   readonly holeLoopCount: number;
   readonly openWireCount: number;
+  /** One clean outer solid loop — safe handoff signal for a future Pad. */
+  readonly readyForPad: boolean;
 }
 
 export interface SketchDiagnosticsReport {
@@ -83,6 +85,11 @@ export function analyzeSketchDiagnostics(
       outerLoopCount: profiles.outerLoopCount,
       holeLoopCount: profiles.holeLoopCount,
       openWireCount: profiles.openEntityIds.length,
+      readyForPad:
+        isReadyForPad(profiles) &&
+        solverResult.status !== "over-constrained" &&
+        solverResult.status !== "inconsistent" &&
+        solverResult.status !== "failed",
     },
     solverResult,
     dof,
@@ -246,6 +253,16 @@ function collectProfileFindings(
     });
   }
 
+  if (profiles.nonManifoldJunctionCount > 0) {
+    findings.push({
+      id: "prof-non-manifold",
+      severity: "error",
+      category: "profiles",
+      code: "profile-non-manifold",
+      message: `${profiles.nonManifoldJunctionCount} non-manifold junction${profiles.nonManifoldJunctionCount === 1 ? "" : "s"}`,
+    });
+  }
+
   if (profiles.openEntityIds.length > 0) {
     findings.push({
       id: "prof-open-wire",
@@ -276,6 +293,16 @@ function collectProfileFindings(
       category: "profiles",
       code: "open-profile",
       message: "No closed profile detected",
+    });
+  }
+
+  if (isReadyForPad(profiles)) {
+    findings.push({
+      id: "prof-ready-pad",
+      severity: "ok",
+      category: "profiles",
+      code: "ready-for-pad",
+      message: "Ready for pad (1 outer solid loop)",
     });
   }
 

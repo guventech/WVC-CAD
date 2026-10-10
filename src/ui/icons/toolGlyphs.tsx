@@ -40,6 +40,7 @@ export const GEOMETRY_TOOL_IDS: readonly ActiveTool[] = [
   "rectangle",
   "circle",
   "arc",
+  "arc3",
   "trim",
   "extend",
   "mirror",
@@ -112,6 +113,14 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
     <Svg>
       <path d="M3.5 12 A6 6 0 0 1 14.5 12" />
       <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
+    </Svg>
+  ),
+  arc3: () => (
+    <Svg>
+      <path d="M3 11 A6.5 6.5 0 0 1 15 11" />
+      <circle cx="3" cy="11" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="4.5" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="11" r="1.4" fill="currentColor" stroke="none" />
     </Svg>
   ),
   trim: () => (

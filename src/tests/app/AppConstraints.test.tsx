@@ -3,6 +3,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import App from "../../app/App.tsx";
 import { resetEntityIdCounter } from "../../sketch/model/EntityId.ts";
 
+function openSessionStatus(): void {
+  const toggle = screen.getByTestId("status-session-toggle");
+  if (toggle.getAttribute("aria-expanded") !== "true") {
+    fireEvent.click(toggle);
+  }
+}
+
 // Default camera: world origin at screen (400, 300), 2 px/mm, Y up.
 function drawLine(canvas: HTMLElement, from: [number, number], to: [number, number]) {
   fireEvent.click(screen.getByRole("button", { name: "Line" }));
@@ -24,6 +31,7 @@ describe("App constraints and dimensions (Chunks 12–13)", () => {
 
     // World (0,0) → (40,20): slanted line.
     drawLine(canvas, [400, 300], [480, 260]);
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Geometry: 1");
 
     fireEvent.click(screen.getByRole("button", { name: "Horizontal" }));
@@ -31,8 +39,9 @@ describe("App constraints and dimensions (Chunks 12–13)", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Constraints: 1");
     expect(within(panel).getByText(/Horizontal/)).toBeInTheDocument();
 
-    // After H the line sits at y = 10 mm (screen y 280).
-    fireEvent.click(screen.getByRole("button", { name: "Length" }));
+    // After H the line sits at y = 10 mm (screen y 280). Distance tool: same line twice → length.
+    fireEvent.click(screen.getByRole("button", { name: "Distance" }));
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 440, clientY: 280 });
     fireEvent.pointerDown(canvas, { button: 0, clientX: 440, clientY: 280 });
     expect(screen.getByRole("status")).toHaveTextContent("Constraints: 2");
 
@@ -66,6 +75,7 @@ describe("App constraints and dimensions (Chunks 12–13)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Vertical" }));
     fireEvent.pointerDown(canvas, { button: 0, clientX: 440, clientY: 300 });
 
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Constraints: 1");
     expect(screen.getByRole("alert")).toHaveTextContent(/No changes were made/);
   });

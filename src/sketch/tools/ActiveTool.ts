@@ -5,6 +5,7 @@ export type ActiveTool =
   | "rectangle"
   | "circle"
   | "arc"
+  | "arc3"
   | "trim"
   | "extend"
   | "mirror"

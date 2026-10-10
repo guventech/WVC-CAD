@@ -84,6 +84,11 @@ export const DiagnosticsPanel = memo(function DiagnosticsPanel({
                   : ""}
               </li>
             )}
+            {summary.readyForPad && (
+              <li className="diagnostic-ok" data-testid="ready-for-pad">
+                Ready for pad
+              </li>
+            )}
             {profileFindings.map((finding) => (
               <FindingItem key={finding.id} finding={finding} />
             ))}

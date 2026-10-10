@@ -27,6 +27,7 @@ describe("Chunk 27 menu bar", () => {
       "aria-pressed",
       "true",
     );
+    fireEvent.click(screen.getByTestId("status-session-toggle"));
     expect(screen.getByRole("status")).toHaveTextContent("Tool: line");
   });
 

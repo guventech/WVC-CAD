@@ -206,7 +206,7 @@ export function drawSnapMarker(
   } else if (snap.type === "center") {
     ctx.moveTo(screen.x + size, screen.y);
     ctx.arc(screen.x, screen.y, size, 0, Math.PI * 2);
-  } else if (snap.type === "onEntity") {
+  } else if (snap.type === "onEntity" || snap.type === "intersection") {
     ctx.moveTo(screen.x - size * 0.6, screen.y - size * 0.6);
     ctx.lineTo(screen.x + size * 0.6, screen.y + size * 0.6);
     ctx.moveTo(screen.x + size * 0.6, screen.y - size * 0.6);

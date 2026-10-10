@@ -112,7 +112,8 @@ export function MenuBar({
         toolItem("line", "Line", activeTool),
         toolItem("rectangle", "Rectangle", activeTool),
         toolItem("circle", "Circle", activeTool),
-        toolItem("arc", "Arc", activeTool),
+        toolItem("arc", "Arc (center)", activeTool),
+        toolItem("arc3", "Arc (3-point)", activeTool),
       ],
     },
     {

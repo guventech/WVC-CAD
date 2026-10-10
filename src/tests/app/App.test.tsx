@@ -3,6 +3,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 import App from "../../app/App.tsx";
 import { resetEntityIdCounter } from "../../sketch/model/EntityId.ts";
 
+/** Session Tool/Geometry/Create live behind the Chunk 27 disclosure. */
+function openSessionStatus(): void {
+  const toggle = screen.getByTestId("status-session-toggle");
+  if (toggle.getAttribute("aria-expanded") !== "true") {
+    fireEvent.click(toggle);
+  }
+}
+
 describe("App point tool", () => {
   beforeEach(() => {
     resetEntityIdCounter();
@@ -13,6 +21,7 @@ describe("App point tool", () => {
 
     expect(screen.getByRole("region", { name: "Sketch canvas" })).toBeInTheDocument();
     expect(screen.getByText(/Empty sketch/)).toBeInTheDocument();
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Geometry: 0");
     expect(screen.getByRole("status")).toHaveTextContent("Tool: select");
 
@@ -47,6 +56,7 @@ describe("App point tool", () => {
       "aria-pressed",
       "true",
     );
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: select");
   });
 });
@@ -64,6 +74,7 @@ describe("App line tool", () => {
       "aria-pressed",
       "true",
     );
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: line");
 
     const canvas = screen.getByLabelText("Sketch viewport");
@@ -113,6 +124,7 @@ describe("App line tool", () => {
       "aria-pressed",
       "true",
     );
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Geometry: 0");
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -132,6 +144,7 @@ describe("App rectangle tool", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Rectangle" }));
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: rectangle");
 
     const canvas = screen.getByLabelText("Sketch viewport");
@@ -172,6 +185,7 @@ describe("App circle tool", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Circle" }));
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: circle");
 
     const canvas = screen.getByLabelText("Sketch viewport");
@@ -209,6 +223,7 @@ describe("App construction mode", () => {
   it("toggles create-as-construction mode from the toolbar", () => {
     render(<App />);
 
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Create: solid");
     fireEvent.click(screen.getByRole("button", { name: "Construction" }));
     expect(screen.getByRole("button", { name: "Construction" })).toHaveAttribute(
@@ -228,6 +243,7 @@ describe("App arc tool", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Arc" }));
+    openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: arc");
 
     const canvas = screen.getByLabelText("Sketch viewport");

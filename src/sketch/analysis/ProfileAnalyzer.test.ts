@@ -9,7 +9,7 @@ import { applyFilletLines } from "../geometry/FilletChamferOps.ts";
 import { resetEntityIdCounter } from "../model/EntityId.ts";
 import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import { createEmptySketch } from "../model/Sketch.ts";
-import { analyzeProfiles } from "./ProfileAnalyzer.ts";
+import { analyzeProfiles, isReadyForPad } from "./ProfileAnalyzer.ts";
 import { analyzeSketchDiagnostics } from "./SketchDiagnostics.ts";
 
 describe("ProfileAnalyzer (Chunk 23)", () => {
@@ -112,7 +112,37 @@ describe("ProfileAnalyzer (Chunk 23)", () => {
 
     const report = analyzeSketchDiagnostics(sketch);
     expect(report.summary.closedProfileDetected).toBe(true);
+    expect(report.summary.readyForPad).toBe(true);
     expect(report.findings.some((f) => f.code === "closed-profile")).toBe(true);
+    expect(report.findings.some((f) => f.code === "ready-for-pad")).toBe(true);
     expect(report.findings.some((f) => f.code === "open-profile")).toBe(false);
+  });
+
+  it("excludes construction geometry from solid profiles", () => {
+    const add = createAddRectangleCommand(
+      { x: 0, y: 0 },
+      { x: 40, y: 30 },
+      { construction: true },
+    )!;
+    const sketch = add.apply(createEmptySketch());
+    const analysis = analyzeProfiles(sketch);
+    expect(analysis.outerLoopCount).toBe(0);
+    expect(analysis.openEntityIds).toHaveLength(0);
+    expect(analysis.loops).toHaveLength(0);
+  });
+
+  it("isReadyForPad is false for an open chain", () => {
+    let sketch = createEmptySketch();
+    sketch = addLineToSketch(sketch, { x: 0, y: 0 }, { x: 40, y: 0 })!.sketch;
+    sketch = addLineToSketch(sketch, { x: 40, y: 0 }, { x: 40, y: 30 })!.sketch;
+    expect(isReadyForPad(analyzeProfiles(sketch))).toBe(false);
+  });
+
+  it("isReadyForPad is true for a solid rectangle", () => {
+    const sketch = createAddRectangleCommand(
+      { x: 0, y: 0 },
+      { x: 100, y: 50 },
+    )!.apply(createEmptySketch());
+    expect(isReadyForPad(analyzeProfiles(sketch))).toBe(true);
   });
 });

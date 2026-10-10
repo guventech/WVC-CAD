@@ -11,11 +11,12 @@ Do not claim features work without automated coverage for the critical path.
 ```bash
 npm run typecheck
 npm run test
+npm run test:e2e
 npm run lint
 npm run build
 ```
 
-E2E (Playwright) is **not set up yet**. Plan to add when multi-step tools and save/load exist.
+E2E: Playwright (`e2e/critical-path.spec.ts`) — rectangle → closed profile → fillet → ready-for-pad → save download. Requires `npx playwright install chromium` once.
 
 ## Tolerances
 
@@ -44,7 +45,9 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 | Camera vs model | `src/sketch/viewport/CameraSketchIsolation.test.ts` | pan/zoom do not mutate Sketch |
 | Hit testing | `src/sketch/selection/HitTesting.test.ts` | line/circle/arc/point, zoom in/out, overlap |
 | Selection | `src/sketch/selection/SelectionManager.test.ts` | single/multi/clear/hover |
-| Snap | `src/sketch/selection/SnapEngine.test.ts` | origin, grid, endpoint/point, midpoint, center, onEntity, H/V compose |
+| Snap | `src/sketch/selection/SnapEngine.test.ts` | origin, grid, endpoint/point, midpoint, center, intersection, onEntity, H/V compose |
+| 3-pt arc | `src/sketch/tools/Arc3Tool.test.ts` | circle-from-3-pts, reject collinear, three-click commit |
+| Profiles / pad | `src/sketch/analysis/ProfileAnalyzer.test.ts` | open/hole/fillet/construction; `isReadyForPad` |
 | Construction | `src/sketch/commands/ToggleConstructionCommand.test.ts` | create-as-construction, toggle, rectangle expand, profile filter |
 | Point commands | `src/sketch/commands/PointCommands.test.ts` | create / move / delete |
 | Line commands | `src/sketch/commands/LineCommands.test.ts` | create, endpoint/body move, reject zero-length, undo |

@@ -16,6 +16,11 @@ import {
   type ArcToolState,
 } from "../../sketch/tools/ArcTool.ts";
 import {
+  cancelArc3ToolSession,
+  createArc3ToolState,
+  type Arc3ToolState,
+} from "../../sketch/tools/Arc3Tool.ts";
+import {
   cancelCircleToolSession,
   createCircleToolState,
   type CircleToolState,
@@ -58,6 +63,7 @@ export function useCreationToolSession(
   const rectangleToolRef = useRef<RectangleToolState>(createRectangleToolState());
   const circleToolRef = useRef<CircleToolState>(createCircleToolState());
   const arcToolRef = useRef<ArcToolState>(createArcToolState());
+  const arc3ToolRef = useRef<Arc3ToolState>(createArc3ToolState());
   const coincidentToolRef = useRef<CoincidentToolState>(createCoincidentToolState());
   const constraintPickToolRef = useRef<ConstraintPickToolState>(
     createConstraintPickToolState(),
@@ -94,6 +100,7 @@ export function useCreationToolSession(
     rectangleToolRef.current = createRectangleToolState();
     circleToolRef.current = createCircleToolState();
     arcToolRef.current = createArcToolState();
+    arc3ToolRef.current = createArc3ToolState();
     coincidentToolRef.current = createCoincidentToolState();
     constraintPickToolRef.current = createConstraintPickToolState();
     filletChamferToolRef.current = createFilletChamferToolState();
@@ -125,6 +132,10 @@ export function useCreationToolSession(
       const result = cancelArcToolSession(arcToolRef.current);
       arcToolRef.current = result.state;
       cancelled = result.cancelled;
+    } else if (activeTool === "arc3") {
+      const result = cancelArc3ToolSession(arc3ToolRef.current);
+      arc3ToolRef.current = result.state;
+      cancelled = result.cancelled;
     } else if (activeTool === "coincident") {
       const result = cancelCoincidentToolSession(coincidentToolRef.current);
       coincidentToolRef.current = result.state;
@@ -151,6 +162,7 @@ export function useCreationToolSession(
     rectangleToolRef,
     circleToolRef,
     arcToolRef,
+    arc3ToolRef,
     coincidentToolRef,
     constraintPickToolRef,
     filletChamferToolRef,

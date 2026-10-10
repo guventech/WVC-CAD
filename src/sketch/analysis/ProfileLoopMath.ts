@@ -1,6 +1,21 @@
 import type { Point2D } from "../geometry/Point2D.ts";
 import { TOLERANCE } from "../geometry/GeometryMath.ts";
 
+/**
+ * Signed circular-segment area for a CCW arc of radius R and sweep θ (radians).
+ * Segment = sector − triangle; used to correct shoelace chord areas for arcs.
+ */
+export function signedCircularSegmentArea(
+  radius: number,
+  sweepRadians: number,
+): number {
+  if (!(radius > TOLERANCE.coincidence) || !(Math.abs(sweepRadians) > TOLERANCE.angular)) {
+    return 0;
+  }
+  const theta = sweepRadians;
+  return 0.5 * radius * radius * (theta - Math.sin(theta));
+}
+
 /** Signed area via shoelace (world Y up). Positive ⇒ CCW. */
 export function signedPolygonArea(vertices: readonly Point2D[]): number {
   if (vertices.length < 3) {

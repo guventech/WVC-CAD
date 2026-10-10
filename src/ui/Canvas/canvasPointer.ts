@@ -44,6 +44,8 @@ export function toolClassName(activeTool: ActiveTool): string {
       return " is-circle-tool";
     case "arc":
       return " is-arc-tool";
+    case "arc3":
+      return " is-arc-tool";
     case "trim":
       return " is-trim-tool";
     case "extend":

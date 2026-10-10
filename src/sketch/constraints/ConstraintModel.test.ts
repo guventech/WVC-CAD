@@ -39,7 +39,7 @@ describe("constraint data model (Chunk 10)", () => {
     expect(CONSTRAINT_TYPE_CATALOG.length).toBeGreaterThanOrEqual(21);
     expect(listConstraintTypes("geometric").length).toBe(12);
     expect(listConstraintTypes("feature").length).toBe(3);
-    expect(listConstraintTypes("dimensional").length).toBe(8);
+    expect(listConstraintTypes("dimensional").length).toBe(9);
     expect(getConstraintTypeInfo("coincident")?.minReferences).toBe(2);
     expect(getConstraintTypeInfo("length")?.requiresValue).toBe(true);
     expect(getConstraintTypeInfo("rectangle")?.category).toBe("feature");

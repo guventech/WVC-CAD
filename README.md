@@ -10,12 +10,15 @@ Internal units: millimetres. The sketch model is the source of truth; React is a
 
 ```bash
 npm install
+npx playwright install chromium   # once, for E2E
 npm run dev
 npm run typecheck
 npm run test
+npm run test:e2e
 npm run lint
 npm run build
 ```
+
 
 ## Controls
 
@@ -27,6 +30,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **Rectangle** — opposite corners (W/H); selecting any member shows rectangle W×H; corner/edge drag stays rectangular
 - **Circle** — click center → click radius (R); drag center to move; drag rim to resize
 - **Arc** — center → start → end (CCW sweep; R + Sweep); drag center to move; drag arc to resize
+- **3-pt Arc** — start → through → end (circle through three points)
 - **Trim** — click the portion of a line to remove (needs a crossing line or world axis)
 - **Extend** — click near a line end to grow to the nearest crossing line or world axis
 - **Mirror** — select geometry, then click a line or world axis to copy mirrored geometry
@@ -40,8 +44,9 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **File** — New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S); versioned `*.sketch.json`
 - **Autosave** — dirty sketches autosave to a local recovery slot; restore prompt after crash/reload
 - **Undo / Redo** — Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z)
-- Snaps: grid, origin, endpoints/points, midpoints, centers, on-entity; temporary H/V (+ grid compose)
+- Snaps: grid, origin, endpoints/points, midpoints, centers, intersections, on-entity; temporary H/V (+ grid compose)
 - Middle-drag or Alt+left-drag pans · wheel zooms around the cursor
+- **Sketch Analysis** — closed profiles + “Ready for pad” topology gate (does not fake DOF)
 
 ## Windows installer (planned)
 
@@ -49,12 +54,12 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 ## Current limitations
 
-- Three-point / tangent arcs not implemented yet
-- Advanced snaps (intersection, parallel inference, etc.) not yet
+- Tangent arcs, polygon, slot, and offset not implemented yet
 - Dimension labels are text-only (no technical-drawing arrows yet)
-- Playwright E2E and Windows installer are not set up yet
+- Windows installer not scaffolded yet (Playwright smoke: `npm run test:e2e`)
 - Dense solver is comfortable for tens–low hundreds of constraints (see ARCHITECTURE.md)
-- See [PROGRESS.md](./PROGRESS.md) and [assessments.md](./assessments.md) for deferred items
+- Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./PROGRESS.md) and [assessments.md](./assessments.md)
+
 
 ## Docs
 

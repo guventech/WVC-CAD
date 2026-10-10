@@ -16,6 +16,12 @@ import {
   type ArcToolState,
 } from "../../sketch/tools/ArcTool.ts";
 import {
+  handleArc3ToolPointerDown,
+  handleArc3ToolPointerLeave,
+  handleArc3ToolPointerMove,
+  type Arc3ToolState,
+} from "../../sketch/tools/Arc3Tool.ts";
+import {
   handleCircleToolPointerDown,
   handleCircleToolPointerLeave,
   handleCircleToolPointerMove,
@@ -78,6 +84,7 @@ export type CreationToolRefs = {
   readonly rectangleToolRef: MutableRefObject<RectangleToolState>;
   readonly circleToolRef: MutableRefObject<CircleToolState>;
   readonly arcToolRef: MutableRefObject<ArcToolState>;
+  readonly arc3ToolRef: MutableRefObject<Arc3ToolState>;
   readonly coincidentToolRef: MutableRefObject<CoincidentToolState>;
   readonly constraintPickToolRef: MutableRefObject<ConstraintPickToolState>;
   readonly filletChamferToolRef: MutableRefObject<FilletChamferToolState>;
@@ -115,6 +122,11 @@ export function dispatchToolPointerDown(
   if (activeTool === "arc") {
     const handled = handleArcToolPointerDown(context, refs.arcToolRef.current);
     refs.arcToolRef.current = handled.state;
+    return handled.result;
+  }
+  if (activeTool === "arc3") {
+    const handled = handleArc3ToolPointerDown(context, refs.arc3ToolRef.current);
+    refs.arc3ToolRef.current = handled.state;
     return handled.result;
   }
   if (activeTool === "coincident") {
@@ -191,6 +203,9 @@ export function dispatchToolPointerMove(
   if (activeTool === "arc") {
     return handleArcToolPointerMove(context, refs.arcToolRef.current);
   }
+  if (activeTool === "arc3") {
+    return handleArc3ToolPointerMove(context, refs.arc3ToolRef.current);
+  }
   if (activeTool === "coincident") {
     return handleCoincidentToolPointerMove(
       context,
@@ -245,6 +260,9 @@ export function dispatchToolPointerLeave(
   }
   if (activeTool === "arc") {
     return handleArcToolPointerLeave(refs.arcToolRef.current);
+  }
+  if (activeTool === "arc3") {
+    return handleArc3ToolPointerLeave(refs.arc3ToolRef.current);
   }
   if (activeTool === "coincident") {
     return handleCoincidentToolPointerLeave(refs.coincidentToolRef.current);

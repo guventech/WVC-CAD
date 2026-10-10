@@ -206,6 +206,8 @@ export function toolHint(activeTool: ActiveTool): string {
       return "Circle · click center · click radius · Esc cancels · drag center to move · drag rim to resize";
     case "arc":
       return "Arc · center → start → end (CCW sweep) · Esc cancels · drag center to move · drag arc to resize";
+    case "arc3":
+      return "3-point arc · click start · through point · end · Esc cancels";
     case "trim":
       return "Trim · click the portion of a line to remove (needs a crossing line or axis) · Esc to select";
     case "extend":

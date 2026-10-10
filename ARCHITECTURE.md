@@ -74,8 +74,9 @@ Pan and zoom never change geometry coordinates.
 
 - Hit tolerance and snap tolerance are **screen pixels**, independent of zoom.
 - Priority (hit): endpoint > center > point > edge.
-- Snap / inference (Chunk 9 subset): origin, endpoints, points, midpoints, centers, on-entity (line/circle/arc), grid (1/2/5×10ⁿ mm), temporary H/V (+ H/V·grid compose).
+- Snap / inference (Chunk 9 + ADR-054): origin, endpoints, points, midpoints, centers, **intersections**, on-entity (line/circle/arc), grid (1/2/5×10ⁿ mm), temporary H/V (+ H/V·grid compose).
 - Line/circle/arc placement may pass `alignTo` into `SnapEngine` for temporary horizontal/vertical inference. Inferences are visual only — they do not create constraints.
+- Arc tools: center-point **Arc** and three-point **Arc3** (`circleFromThreePoints`); both commit via the same `createArc` command path.
 - **Composition rule:** H/V inference emits pure H/V *and* H/V+grid (free axis snapped to nearest grid line). Do not let an orientation candidate use only the raw cursor free-axis value at a priority that always beats grid — that drops grid snaps on exact horizontals/verticals (see ADR-009).
 - Construction geometry (Chunk 8): `construction: true` on entities; dashed render; create-as-construction mode; toggle command; excluded from `listSolidProfileGeometry` for future profiles.
 
@@ -142,7 +143,7 @@ constraints/
 - **Rejection rule:** add, edit, and drag accept residual-OK `solved` or `under-constrained` results; over-constrained / inconsistent / failed keep the previous sketch.
 - Degenerate “solutions” (zero-length line, zero radius) are rejected even if F≈0 (blocks H+V collapse-to-point).
 - `solve(sketch)` does **not** mutate and does **not** run LM — it diagnoses **stored** geometry (residual gates + Jacobian rank). Interactive edits use `solveSketch` / `maintainConstraints`. After load, status reflects stored geometry until the next settling edit (or an explicit `solveSketch`).
-- **Jacobian / DOF:** central finite differences; residuals mix mm and radians in one unscaled vector — mixed length+angle DOF fixtures lock current behavior; column/residual scaling is a future improvement when rank edge-cases appear.
+- **Jacobian / DOF:** central finite differences; residuals mix mm and radians in one unscaled vector — mixed length+angle DOF fixtures lock current behavior. **Residual/column scaling is deferred** (ADR-052) until a concrete rank or large-edit failure requires it; DOF is never faked from dimension counts or closed-profile status.
 - **Practical scale:** dense `JᵀJ` + per-variable residual rebuilds. Interactive solving is comfortable for tens–low hundreds of constraints; AGENTS §10’s 1,000-constraint target needs sparse/analytic Jacobians. Baseline: `SolverPerformance.test.ts` (~100 constraints).
 - **Fillet geometry re-seating:** after LM, `reconcileCornerFeaturesAfterSolve` rebuilds derived blend arcs / restores driving lengths, then re-runs LM. It is not a second solver — residual satisfaction remains the acceptance gate (ADR-045).
 
@@ -238,13 +239,32 @@ Driving dimension values edit from the Constraints panel or by double-clicking a
 
 `analyzeProfiles(sketch)` returns `ProfileLoop` records: `entityIds`, `closed`, `orientation` (CW/CCW), signed `area`, optional `parentLoopId` for holes. Solid **lines** and **arcs** form loops via degree-2 wire tracing (filleted rectangles count as closed); solid **circles** are atomic loops; nesting uses containment (circle/circle, circle inside polygon). Construction geometry is excluded. No 3D feature generation.
 
+## Sketch → feature contract (pre-3D / ADR-053)
+
+Future Pad / Pocket / Revolve modules must consume the sketcher **only** through:
+
+```ts
+analyzeProfiles(sketch) → ProfileAnalysis  // loops + open wire + intersection / non-manifold counts
+isReadyForPad(analysis) → boolean          // topology gate for a single outer solid profile
+```
+
+| Invariant | Rule |
+|-----------|------|
+| Units | Millimetres; areas mm² |
+| Construction | Never in solid loops (`listSolidProfileGeometry`) |
+| Outer / holes | One preferred outer; holes nest via `parentLoopId` |
+| Honesty | `readyForPad` does not imply DOF = 0; solver status stays separate |
+| Bridge | No React, canvas, or SVG types cross this boundary |
+
+Diagnostics may surface “Ready for pad” when `summary.readyForPad` is true (same domain gate).
+
 ## Line orientation on create
 
 When the Line tool commits a segment that is perfectly horizontal or vertical (within coincidence tolerance), `createAddLineCommand` also inserts an H or V constraint — same idea as rectangle edges.
 
 ## Solver honesty
 
-`solve(sketch)` reports residual satisfaction plus Jacobian-rank DOF (`under-constrained` / `solved` = fully constrained / `over-constrained` / `inconsistent`). DOF is never invented from dimension counts. Reference (non-driving) dimensions do not reduce DOF. Status bar and Constraints panel show text labels (e.g. `UNDER-CONSTRAINED — 3 DOF`, `FULLY CONSTRAINED`), not color alone. Parallel, perpendicular, tangent, etc. remain catalog-only / future tools.
+`solve(sketch)` reports residual satisfaction plus Jacobian-rank DOF (`under-constrained` / `solved` = fully constrained / `over-constrained` / `inconsistent`). DOF is never invented from dimension counts. Reference (non-driving) dimensions do not reduce DOF. Status bar and Constraints panel show text labels (e.g. `UNDER-CONSTRAINED — 3 DOF`, `FULLY CONSTRAINED`), not color alone. Closed-profile / “Ready for pad” status never overrides solver status (ADR-052).
 
 ## Fix constraint
 

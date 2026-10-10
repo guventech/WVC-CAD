@@ -16,6 +16,9 @@ import {
  * Numerical Jacobian ∂F/∂X via central differences (±step).
  * Absolute floor avoids zero-scale stalls. Central differences give O(step²)
  * truncation error, better matched to solverResidual (1e-8) than one-sided FD.
+ *
+ * Residuals mix mm and radians unscaled (ADR-052). Do not add ad-hoc column
+ * scaling here without updating DOF fixtures and documenting the change.
  */
 const FD_RELATIVE = 1e-7;
 const FD_ABSOLUTE = 1e-8;

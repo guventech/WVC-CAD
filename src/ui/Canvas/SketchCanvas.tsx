@@ -128,6 +128,7 @@ function isCreationTool(activeTool: ActiveTool): boolean {
     activeTool === "rectangle" ||
     activeTool === "circle" ||
     activeTool === "arc" ||
+    activeTool === "arc3" ||
     activeTool === "trim" ||
     activeTool === "extend" ||
     activeTool === "mirror" ||
@@ -295,7 +296,11 @@ export const SketchCanvas = memo(function SketchCanvas({
       previewRectangle: activeTool === "rectangle" ? previewRectangle : null,
       previewCircle: activeTool === "circle" ? previewCircle : null,
       previewArc:
-        activeTool === "arc" || activeTool === "fillet" ? previewArc : null,
+        activeTool === "arc" ||
+        activeTool === "arc3" ||
+        activeTool === "fillet"
+          ? previewArc
+          : null,
       activeSnap: showPreview ? activeSnap : null,
     });
   }, [
