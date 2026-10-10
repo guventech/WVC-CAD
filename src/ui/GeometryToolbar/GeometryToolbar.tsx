@@ -1,8 +1,9 @@
 import type { ActiveTool } from "../../sketch/tools/ActiveTool.ts";
 import { ToolIconButton } from "../icons/ToolIconButton.tsx";
 import { GEOMETRY_TOOL_IDS, renderToolGlyph } from "../icons/toolGlyphs.tsx";
+import { ShapeToolFlyout } from "./ShapeToolFlyout.tsx";
 
-const TOOLS: readonly {
+const BEFORE_SHAPE: readonly {
   readonly id: ActiveTool;
   readonly label: string;
   readonly title: string;
@@ -10,12 +11,28 @@ const TOOLS: readonly {
   { id: "select", label: "Select", title: "Select and move geometry" },
   { id: "point", label: "Point", title: "Create points" },
   { id: "line", label: "Line", title: "Create lines" },
-  { id: "rectangle", label: "Rectangle", title: "Create rectangles" },
+];
+
+const AFTER_SHAPE: readonly {
+  readonly id: ActiveTool;
+  readonly label: string;
+  readonly title: string;
+}[] = [
   { id: "circle", label: "Circle", title: "Create circles" },
   { id: "arc", label: "Arc", title: "Create center-point arcs" },
   { id: "arc3", label: "3-pt Arc", title: "Create three-point arcs" },
+  {
+    id: "arcTangent",
+    label: "Tan Arc",
+    title: "Create an arc tangent to a line at an endpoint",
+  },
   { id: "trim", label: "Trim", title: "Trim a line to a crossing boundary" },
   { id: "extend", label: "Extend", title: "Extend a line to a crossing boundary" },
+  {
+    id: "offset",
+    label: "Offset",
+    title: "Offset a line or closed loop in parallel",
+  },
   {
     id: "mirror",
     label: "Mirror",
@@ -32,6 +49,8 @@ type GeometryToolbarProps = {
   readonly onCreateAsConstructionChange: (value: boolean) => void;
   readonly canToggleConstruction: boolean;
   readonly onToggleConstruction: () => void;
+  readonly polygonSides?: number | null;
+  readonly onPolygonSidesDelta?: (delta: number) => void;
 };
 
 export function GeometryToolbar({
@@ -41,11 +60,52 @@ export function GeometryToolbar({
   onCreateAsConstructionChange,
   canToggleConstruction,
   onToggleConstruction,
+  polygonSides = null,
+  onPolygonSidesDelta,
 }: GeometryToolbarProps) {
   return (
     <div className="toolbar-group" role="toolbar" aria-label="Geometry">
       <span className="toolbar-label">Geometry</span>
-      {TOOLS.map((tool) => (
+      {BEFORE_SHAPE.map((tool) => (
+        <ToolIconButton
+          key={tool.id}
+          label={tool.label}
+          title={tool.title}
+          icon={renderToolGlyph(tool.id)}
+          pressed={activeTool === tool.id}
+          onClick={() => onToolChange(tool.id)}
+          testId={`tool-${tool.id}`}
+        />
+      ))}
+      <ShapeToolFlyout activeTool={activeTool} onToolChange={onToolChange} />
+      {activeTool === "polygon" && onPolygonSidesDelta !== undefined ? (
+        <span className="polygon-sides-stepper" aria-label="Polygon sides">
+          <button
+            type="button"
+            className="tool-icon-btn"
+            title="Fewer sides ([)"
+            aria-label="Fewer polygon sides"
+            data-testid="polygon-sides-dec"
+            onClick={() => onPolygonSidesDelta(-1)}
+          >
+            −
+          </button>
+          <span data-testid="polygon-sides-value" title="Side count (3–32)">
+            N={polygonSides ?? "—"}
+          </span>
+          <button
+            type="button"
+            className="tool-icon-btn"
+            title="More sides (])"
+            aria-label="More polygon sides"
+            data-testid="polygon-sides-inc"
+            onClick={() => onPolygonSidesDelta(1)}
+          >
+            +
+          </button>
+        </span>
+      ) : null}
+      {AFTER_SHAPE.map((tool) => (
         <ToolIconButton
           key={tool.id}
           label={tool.label}

@@ -9,6 +9,7 @@ import {
 import type { ActiveTool } from "../tools/ActiveTool.ts";
 import { isConstraintPickTool } from "../tools/ActiveTool.ts";
 import { classifyDistancePicks } from "./SmartDistance.ts";
+import { classifyRadialPick } from "./SmartRadial.ts";
 
 export type ApplicabilityState = "enabled" | "disabled";
 
@@ -47,8 +48,7 @@ const CONTEXT_TOOLS: readonly ActiveTool[] = [
   "point-on-object",
   "fix",
   "dim-distance",
-  "dim-radius",
-  "dim-diameter",
+  "dim-radial",
   "dim-angle",
 ];
 
@@ -284,11 +284,13 @@ function evaluateOne(
       }
       return disabled(toolId, "Needs a line, two points, or a point/line + axis");
     }
-    case "dim-radius":
-    case "dim-diameter": {
-      const label = toolId === "dim-radius" ? "Radius" : "Diameter";
+    case "dim-radial": {
       if (curveCount === 1) {
-        return enabled(toolId, `${label}: apply to selected curve`, true);
+        return enabled(
+          toolId,
+          "Size: circle → diameter (Shift = radius); arc → radius",
+          true,
+        );
       }
       if (curveCount > 1) {
         return disabled(toolId, "Select a single circle or arc");
@@ -581,18 +583,15 @@ function buildRequestFromSelection(
       }
       return null;
     }
-    case "dim-radius":
-    case "dim-diameter":
-      if (curves.length === 1) {
-        return {
-          kind: "apply-maintained",
-          request: {
-            type: toolId === "dim-radius" ? "radius" : "diameter",
-            references: [curveRef(curves[0]!)],
-          },
-        };
+    case "dim-radial": {
+      if (curves.length !== 1) {
+        return null;
       }
-      return null;
+      const request = classifyRadialPick(sketch, curves[0]!);
+      return request === null
+        ? null
+        : { kind: "apply-maintained", request };
+    }
     case "dim-angle":
       if (kinds.lineIds.length >= 2) {
         return {

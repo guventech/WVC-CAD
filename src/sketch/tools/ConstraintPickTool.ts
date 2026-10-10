@@ -4,6 +4,7 @@ import {
   classifyDistancePicks,
   type DistancePick,
 } from "../constraints/SmartDistance.ts";
+import { classifyRadialPick } from "../constraints/SmartRadial.ts";
 import type { ConstraintReference } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { hitTestSketch, type HitResult } from "../selection/HitTesting.ts";
@@ -50,7 +51,7 @@ type PickStep =
  * - axis offset: one point-like (or parallel line expanded by the pointer handler)
  * - distance: line (await second: same→length, other line/axis/point→smart);
  *   two points; point+axis for locate (replaces Offset X/Y tools)
- * - radius / diameter: a circle or arc · angle: two lines
+ * - radial: circle → diameter (Shift → radius); arc → radius · angle: two lines
  */
 export function interpretConstraintPick(
   tool: ConstraintPickToolId,
@@ -58,6 +59,7 @@ export function interpretConstraintPick(
   pick: ConstraintToolPick,
   second: ConstraintToolPick | null = null,
   sketch: Sketch | null = null,
+  preferRadius: boolean = false,
 ): PickStep {
   switch (tool) {
     case "fix":
@@ -251,17 +253,19 @@ export function interpretConstraintPick(
       }
       return { kind: "create", request };
     }
-    case "dim-radius":
-    case "dim-diameter":
-      return pick.kind === "curve"
-        ? {
-            kind: "create",
-            request: {
-              type: tool === "dim-radius" ? "radius" : "diameter",
-              references: [pick.ref],
-            },
-          }
-        : { kind: "ignore" };
+    case "dim-radial": {
+      if (pick.kind !== "curve" || sketch === null) {
+        return { kind: "ignore" };
+      }
+      const request = classifyRadialPick(
+        sketch,
+        pick.ref.entityId,
+        preferRadius,
+      );
+      return request === null
+        ? { kind: "ignore" }
+        : { kind: "create", request };
+    }
     case "dim-angle":
       if (pick.kind !== "line") {
         return { kind: "ignore" };
@@ -302,8 +306,7 @@ export function constraintToolPickFromHit(
       : datumPick;
   }
   const wantsCurve =
-    tool === "dim-radius" ||
-    tool === "dim-diameter" ||
+    tool === "dim-radial" ||
     tool === "fix" ||
     tool === "tangent" ||
     tool === "concentric" ||
@@ -367,6 +370,7 @@ export function handleConstraintPickToolPointerDown(
     pick,
     state.second,
     context.sketch,
+    context.modifiers.shift,
   );
   if (step.kind === "ignore") {
     return idle(state);

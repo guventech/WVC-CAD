@@ -40,6 +40,7 @@ function clearCreationChrome(
   setRectMetrics: (metrics: RectMetrics | null) => void,
   setCircleRadiusMm: (radius: number | null) => void,
   setArcSweepDegrees: (sweep: number | null) => void,
+  setPolygonSides: (sides: number | null) => void,
   setCreationSessionActive: (active: boolean) => void,
 ): void {
   setActiveSnap(null);
@@ -47,6 +48,7 @@ function clearCreationChrome(
   setRectMetrics(null);
   setCircleRadiusMm(null);
   setArcSweepDegrees(null);
+  setPolygonSides(null);
   setCreationSessionActive(false);
 }
 
@@ -57,6 +59,11 @@ export default function App() {
   const [rectMetrics, setRectMetrics] = useState<RectMetrics | null>(null);
   const [circleRadiusMm, setCircleRadiusMm] = useState<number | null>(null);
   const [arcSweepDegrees, setArcSweepDegrees] = useState<number | null>(null);
+  const [polygonSides, setPolygonSides] = useState<number | null>(null);
+  const [polygonSidesNudge, setPolygonSidesNudge] = useState({
+    seq: 0,
+    delta: 0,
+  });
   const [cameraScale, setCameraScale] = useState<number | null>(null);
   const [selection, setSelection] = useState<SelectionState>(() =>
     createSelectionState(),
@@ -89,6 +96,9 @@ export default function App() {
     handleCreateLine,
     handleCreateRectangle,
     handleCreateCircle,
+    handleCreatePolygon,
+    handleCreateOffsetSegments,
+    handleCreateSlot,
     handleCreateArc,
     handleCommitPointMove,
     handleCreateCoincident,
@@ -127,7 +137,7 @@ export default function App() {
     handleDiscardRecovery,
   } = autosave;
 
-  const { handleSave, handleOpen } = useSketchFileIo({
+  const { handleSave, handleOpen, handleExportDxf } = useSketchFileIo({
     sketch,
     documentFileName,
     setDocumentFileName,
@@ -148,8 +158,16 @@ export default function App() {
       setRectMetrics,
       setCircleRadiusMm,
       setArcSweepDegrees,
+      setPolygonSides,
       setCreationSessionActive,
     );
+  }, []);
+
+  const nudgePolygonSides = useCallback((delta: number) => {
+    setPolygonSidesNudge((current) => ({
+      seq: current.seq + 1,
+      delta,
+    }));
   }, []);
 
   const handleNewSketch = useCallback(() => {
@@ -178,6 +196,7 @@ export default function App() {
       setRectMetrics,
       setCircleRadiusMm,
       setArcSweepDegrees,
+      setPolygonSides,
       setCreationSessionActive,
     );
   }, [
@@ -203,6 +222,10 @@ export default function App() {
       }
       if (action === "file-save") {
         handleSave();
+        return;
+      }
+      if (action === "file-export-dxf") {
+        handleExportDxf();
         return;
       }
       if (action === "edit-undo") {
@@ -238,6 +261,7 @@ export default function App() {
     },
     [
       handleDeleteSelectedGeometry,
+      handleExportDxf,
       handleNew,
       handleOpen,
       handleRedo,
@@ -312,6 +336,7 @@ export default function App() {
           setRectMetrics,
           setCircleRadiusMm,
           setArcSweepDegrees,
+          setPolygonSides,
           setCreationSessionActive,
         );
         setSelection((current) => clearSelection(current));
@@ -432,6 +457,8 @@ export default function App() {
           onCreateAsConstructionChange={setCreateAsConstruction}
           canToggleConstruction={selection.selectedIds.length > 0}
           onToggleConstruction={toggleSelectedConstruction}
+          polygonSides={polygonSides}
+          onPolygonSidesDelta={nudgePolygonSides}
         />
         <ConstraintToolbar
           activeTool={activeTool}
@@ -476,6 +503,9 @@ export default function App() {
           onCreateLine={handleCreateLine}
           onCreateRectangle={handleCreateRectangle}
           onCreateCircle={handleCreateCircle}
+          onCreatePolygon={handleCreatePolygon}
+          onCreateOffsetSegments={handleCreateOffsetSegments}
+          onCreateSlot={handleCreateSlot}
           onCreateArc={handleCreateArc}
           onCreateCoincident={handleCreateCoincident}
           onCreateConstraint={handleCreateConstraint}
@@ -491,10 +521,12 @@ export default function App() {
           onRectMetricsChange={setRectMetrics}
           onCircleRadiusChange={setCircleRadiusMm}
           onArcSweepChange={setArcSweepDegrees}
+          onPolygonSidesChange={setPolygonSides}
           onCreationSessionChange={setCreationSessionActive}
           onCameraScaleChange={setCameraScale}
           creationCancelRequest={creationCancelRequest}
           onCreationCancelled={handleCreationCancelled}
+          polygonSidesNudge={polygonSidesNudge}
         />
       </div>
       <StatusBar
@@ -510,6 +542,7 @@ export default function App() {
         rectMetrics={rectMetrics}
         circleRadiusMm={circleRadiusMm}
         arcSweepDegrees={arcSweepDegrees}
+        polygonSides={polygonSides}
         createAsConstruction={createAsConstruction}
         canUndo={documentCanUndo}
         canRedo={documentCanRedo}

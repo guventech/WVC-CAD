@@ -11,6 +11,7 @@ import type {
   ArcPreview,
   CirclePreview,
   LinePreview,
+  PolylinePreview,
   RectanglePreview,
 } from "../tools/ToolTypes.ts";
 import {
@@ -18,6 +19,7 @@ import {
   drawPreviewCircle,
   drawPreviewLine,
   drawPreviewPoint,
+  drawPreviewPolyline,
   drawPreviewRectangle,
   drawSnapMarker,
 } from "./drawToolPreviews.ts";
@@ -49,6 +51,7 @@ export interface ViewportRenderOptions {
   readonly previewRectangle?: RectanglePreview | null;
   readonly previewCircle?: CirclePreview | null;
   readonly previewArc?: ArcPreview | null;
+  readonly previewPolyline?: PolylinePreview | null;
   readonly activeSnap?: SnapCandidate | null;
   readonly backgroundColor?: string;
 }
@@ -72,6 +75,7 @@ export function renderViewport(
     previewRectangle = null,
     previewCircle = null,
     previewArc = null,
+    previewPolyline = null,
     activeSnap = null,
     backgroundColor = VIEWPORT_COLORS.background,
   } = options;
@@ -122,6 +126,10 @@ export function renderViewport(
 
   if (previewArc !== null) {
     drawPreviewArc(ctx, camera, previewArc);
+  }
+
+  if (previewPolyline !== null) {
+    drawPreviewPolyline(ctx, camera, previewPolyline);
   }
 
   if (previewPoint !== null) {

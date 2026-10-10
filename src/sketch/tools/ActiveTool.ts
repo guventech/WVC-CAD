@@ -3,11 +3,15 @@ export type ActiveTool =
   | "point"
   | "line"
   | "rectangle"
+  | "polygon"
+  | "slot"
   | "circle"
   | "arc"
   | "arc3"
+  | "arcTangent"
   | "trim"
   | "extend"
+  | "offset"
   | "mirror"
   | "fillet"
   | "chamfer"
@@ -28,8 +32,7 @@ export type ConstraintPickToolId =
   | "point-on-object"
   | "fix"
   | "dim-distance"
-  | "dim-radius"
-  | "dim-diameter"
+  | "dim-radial"
   | "dim-angle";
 
 const CONSTRAINT_PICK_TOOLS: readonly ConstraintPickToolId[] = [
@@ -45,8 +48,7 @@ const CONSTRAINT_PICK_TOOLS: readonly ConstraintPickToolId[] = [
   "point-on-object",
   "fix",
   "dim-distance",
-  "dim-radius",
-  "dim-diameter",
+  "dim-radial",
   "dim-angle",
 ];
 

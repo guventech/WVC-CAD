@@ -21,6 +21,11 @@ import {
   type Arc3ToolState,
 } from "../../sketch/tools/Arc3Tool.ts";
 import {
+  cancelArcTangentToolSession,
+  createArcTangentToolState,
+  type ArcTangentToolState,
+} from "../../sketch/tools/ArcTangentTool.ts";
+import {
   cancelCircleToolSession,
   createCircleToolState,
   type CircleToolState,
@@ -41,14 +46,30 @@ import {
   type LineToolState,
 } from "../../sketch/tools/LineTool.ts";
 import {
+  cancelOffsetToolSession,
+  createOffsetToolState,
+  type OffsetToolState,
+} from "../../sketch/tools/OffsetTool.ts";
+import {
+  cancelPolygonToolSession,
+  createPolygonToolState,
+  type PolygonToolState,
+} from "../../sketch/tools/PolygonTool.ts";
+import {
   cancelRectangleToolSession,
   createRectangleToolState,
   type RectangleToolState,
 } from "../../sketch/tools/RectangleTool.ts";
+import {
+  cancelSlotToolSession,
+  createSlotToolState,
+  type SlotToolState,
+} from "../../sketch/tools/SlotTool.ts";
 import type {
   ArcPreview,
   CirclePreview,
   LinePreview,
+  PolylinePreview,
   RectanglePreview,
 } from "../../sketch/tools/ToolTypes.ts";
 import type { CreationChromeCallbacks } from "./applyToolResult.ts";
@@ -61,9 +82,15 @@ export function useCreationToolSession(
 ) {
   const lineToolRef = useRef<LineToolState>(createLineToolState());
   const rectangleToolRef = useRef<RectangleToolState>(createRectangleToolState());
+  const polygonToolRef = useRef<PolygonToolState>(createPolygonToolState());
+  const slotToolRef = useRef<SlotToolState>(createSlotToolState());
   const circleToolRef = useRef<CircleToolState>(createCircleToolState());
   const arcToolRef = useRef<ArcToolState>(createArcToolState());
   const arc3ToolRef = useRef<Arc3ToolState>(createArc3ToolState());
+  const arcTangentToolRef = useRef<ArcTangentToolState>(
+    createArcTangentToolState(),
+  );
+  const offsetToolRef = useRef<OffsetToolState>(createOffsetToolState());
   const coincidentToolRef = useRef<CoincidentToolState>(createCoincidentToolState());
   const constraintPickToolRef = useRef<ConstraintPickToolState>(
     createConstraintPickToolState(),
@@ -79,6 +106,8 @@ export function useCreationToolSession(
     useState<RectanglePreview | null>(null);
   const [previewCircle, setPreviewCircle] = useState<CirclePreview | null>(null);
   const [previewArc, setPreviewArc] = useState<ArcPreview | null>(null);
+  const [previewPolyline, setPreviewPolyline] =
+    useState<PolylinePreview | null>(null);
   const [activeSnap, setActiveSnap] = useState<SnapCandidate | null>(null);
 
   const clearCreationPreview = () => {
@@ -87,25 +116,33 @@ export function useCreationToolSession(
     setPreviewRectangle(null);
     setPreviewCircle(null);
     setPreviewArc(null);
+    setPreviewPolyline(null);
     setActiveSnap(null);
     callbacks.onLineMetricsChange?.(null);
     callbacks.onRectMetricsChange?.(null);
     callbacks.onCircleRadiusChange?.(null);
     callbacks.onArcSweepChange?.(null);
+    callbacks.onPolygonSidesChange?.(null);
     callbacks.onCreationSessionChange?.(false);
   };
 
   useEffect(() => {
     lineToolRef.current = createLineToolState();
     rectangleToolRef.current = createRectangleToolState();
+    polygonToolRef.current = createPolygonToolState();
+    slotToolRef.current = createSlotToolState();
     circleToolRef.current = createCircleToolState();
     arcToolRef.current = createArcToolState();
     arc3ToolRef.current = createArc3ToolState();
+    arcTangentToolRef.current = createArcTangentToolState();
+    offsetToolRef.current = createOffsetToolState();
     coincidentToolRef.current = createCoincidentToolState();
     constraintPickToolRef.current = createConstraintPickToolState();
     filletChamferToolRef.current = createFilletChamferToolState();
     clearCreationPreview();
-    // Only reset when the active tool changes — not when parent callbacks are recreated.
+    if (activeTool === "polygon") {
+      callbacks.onPolygonSidesChange?.(polygonToolRef.current.sides);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
   }, [activeTool]);
 
@@ -124,6 +161,14 @@ export function useCreationToolSession(
       const result = cancelRectangleToolSession(rectangleToolRef.current);
       rectangleToolRef.current = result.state;
       cancelled = result.cancelled;
+    } else if (activeTool === "polygon") {
+      const result = cancelPolygonToolSession(polygonToolRef.current);
+      polygonToolRef.current = result.state;
+      cancelled = result.cancelled;
+    } else if (activeTool === "slot") {
+      const result = cancelSlotToolSession(slotToolRef.current);
+      slotToolRef.current = result.state;
+      cancelled = result.cancelled;
     } else if (activeTool === "circle") {
       const result = cancelCircleToolSession(circleToolRef.current);
       circleToolRef.current = result.state;
@@ -135,6 +180,14 @@ export function useCreationToolSession(
     } else if (activeTool === "arc3") {
       const result = cancelArc3ToolSession(arc3ToolRef.current);
       arc3ToolRef.current = result.state;
+      cancelled = result.cancelled;
+    } else if (activeTool === "arcTangent") {
+      const result = cancelArcTangentToolSession(arcTangentToolRef.current);
+      arcTangentToolRef.current = result.state;
+      cancelled = result.cancelled;
+    } else if (activeTool === "offset") {
+      const result = cancelOffsetToolSession(offsetToolRef.current);
+      offsetToolRef.current = result.state;
       cancelled = result.cancelled;
     } else if (activeTool === "coincident") {
       const result = cancelCoincidentToolSession(coincidentToolRef.current);
@@ -160,9 +213,13 @@ export function useCreationToolSession(
   const toolRefs: CreationToolRefs = {
     lineToolRef,
     rectangleToolRef,
+    polygonToolRef,
+    slotToolRef,
     circleToolRef,
     arcToolRef,
     arc3ToolRef,
+    arcTangentToolRef,
+    offsetToolRef,
     coincidentToolRef,
     constraintPickToolRef,
     filletChamferToolRef,
@@ -180,6 +237,8 @@ export function useCreationToolSession(
     setPreviewCircle,
     previewArc,
     setPreviewArc,
+    previewPolyline,
+    setPreviewPolyline,
     activeSnap,
     setActiveSnap,
   };

@@ -17,6 +17,9 @@ import {
   createAddLineCommand,
   createAddPointCommand,
 } from "../sketch/commands/CreateGeometryCommand.ts";
+import { createAddOffsetSegmentsCommand } from "../sketch/commands/CreateOffsetCommand.ts";
+import { createAddPolygonCommand } from "../sketch/commands/CreatePolygonCommand.ts";
+import { createAddSlotCommand } from "../sketch/commands/CreateSlotCommand.ts";
 import { createAddRectangleCommand } from "../sketch/commands/CreateRectangleCommand.ts";
 import { createDeleteGeometryCommand } from "../sketch/commands/DeleteGeometryCommand.ts";
 import { createAddCoincidentCommand } from "../sketch/commands/AddCoincidentCommand.ts";
@@ -230,6 +233,55 @@ export function useSketchDocument({
           construction: createAsConstruction,
           centerMidpointOf: options?.centerMidpointOf,
           centerSnap: options?.centerSnap,
+        });
+        if (command === null) {
+          return current;
+        }
+        const result = executeCommand(current.history, current.sketch, command);
+        return { sketch: result.sketch, history: result.history };
+      });
+    },
+    [createAsConstruction],
+  );
+
+  const handleCreatePolygon = useCallback(
+    (center: Point2D, radiusPoint: Point2D, sides: number) => {
+      setDocumentState((current) => {
+        const command = createAddPolygonCommand(center, radiusPoint, {
+          construction: createAsConstruction,
+          sides,
+        });
+        if (command === null) {
+          return current;
+        }
+        const result = executeCommand(current.history, current.sketch, command);
+        return { sketch: result.sketch, history: result.history };
+      });
+    },
+    [createAsConstruction],
+  );
+
+  const handleCreateOffsetSegments = useCallback(
+    (segments: readonly { readonly start: Point2D; readonly end: Point2D }[]) => {
+      setDocumentState((current) => {
+        const command = createAddOffsetSegmentsCommand(segments, {
+          construction: createAsConstruction,
+        });
+        if (command === null) {
+          return current;
+        }
+        const result = executeCommand(current.history, current.sketch, command);
+        return { sketch: result.sketch, history: result.history };
+      });
+    },
+    [createAsConstruction],
+  );
+
+  const handleCreateSlot = useCallback(
+    (centerA: Point2D, centerB: Point2D, halfWidth: number) => {
+      setDocumentState((current) => {
+        const command = createAddSlotCommand(centerA, centerB, halfWidth, {
+          construction: createAsConstruction,
         });
         if (command === null) {
           return current;
@@ -541,6 +593,9 @@ export function useSketchDocument({
     handleCreateLine,
     handleCreateRectangle,
     handleCreateCircle,
+    handleCreatePolygon,
+    handleCreateOffsetSegments,
+    handleCreateSlot,
     handleCreateArc,
     handleCommitPointMove,
     handleCreateCoincident,

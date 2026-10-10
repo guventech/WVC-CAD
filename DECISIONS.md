@@ -147,7 +147,7 @@ Reason:
 Installer size and RAM matter for weak PCs. Tauri avoids bundling Chromium. See [PACKAGING.md](./PACKAGING.md).
 
 Status:
-**Decided; not scaffolded yet.** Add `src-tauri` after core tools/save are further along. Do not introduce Electron.
+**Scaffolded (2026-10-10).** `src-tauri/` + `@tauri-apps/cli`; `npm run tauri:dev` / `tauri:build` require a local Rust toolchain. CAD math remains in `src/sketch/**`. Do not introduce Electron.
 
 ---
 
@@ -857,6 +857,51 @@ Decision:
 
 Reason:
 Intersection snap unblocks accurate trim/extend/fillet clicks; 3-point arc is the next high-value create mode without starting splines.
+
+Status:
+**Implemented.**
+
+---
+
+## ADR-055 — Unified Size (radial) dimension tool
+
+Date: 2026-10-10
+
+Decision:
+Replace separate Radius / Diameter toolbar tools with one **Size** tool (`dim-radial`):
+1. Arc → always `radius`
+2. Circle → `diameter` by default; Shift → `radius`
+3. Keep schema types `radius` / `diameter`; only the pick UX unifies (ADR-048 pattern via `SmartRadial.ts`).
+
+Status:
+**Implemented.**
+
+---
+
+## ADR-056 — DXF export as geometry interchange
+
+Date: 2026-10-10
+
+Decision:
+1. Native parametric format remains versioned `.sketch.json`.
+2. **File → Export DXF…** writes AutoCAD R12 ASCII (LINE/CIRCLE/ARC/POINT; construction on layer CONSTRUCTION).
+3. Constraints / dimensions / features are not represented in DXF. Import deferred.
+
+Status:
+**Implemented (export-only).**
+
+---
+
+## ADR-057 — Polygon N-sides + loop/chain offset
+
+Date: 2026-10-10
+
+Decision:
+1. Regular polygon tool stores side count **N ∈ [3, 32]** (default 6), adjustable with `[` / `]` / `−` / `+` / toolbar steppers; last N is remembered for the session.
+2. Offset tool prefers a closed profile loop containing the pick, else an open degree-2 line chain, else a single segment; circles offset concentrically. Loop/chain commit is one undo step (`createOffsetSegments`).
+
+Reason:
+Fixed hexagon and single-line offset were known leftovers after the 2D gap recheck; keep math in `PolygonMath` / `OffsetMath` / `OffsetSource`, not React.
 
 Status:
 **Implemented.**

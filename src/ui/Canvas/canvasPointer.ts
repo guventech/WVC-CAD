@@ -40,16 +40,24 @@ export function toolClassName(activeTool: ActiveTool): string {
       return " is-line-tool";
     case "rectangle":
       return " is-rectangle-tool";
+    case "polygon":
+      return " is-circle-tool";
+    case "slot":
+      return " is-line-tool";
     case "circle":
       return " is-circle-tool";
     case "arc":
       return " is-arc-tool";
     case "arc3":
       return " is-arc-tool";
+    case "arcTangent":
+      return " is-arc-tool";
     case "trim":
       return " is-trim-tool";
     case "extend":
       return " is-extend-tool";
+    case "offset":
+      return " is-line-tool";
     case "mirror":
       return " is-mirror-tool";
     case "fillet":

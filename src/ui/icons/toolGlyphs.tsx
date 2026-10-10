@@ -38,11 +38,15 @@ export const GEOMETRY_TOOL_IDS: readonly ActiveTool[] = [
   "point",
   "line",
   "rectangle",
+  "polygon",
+  "slot",
   "circle",
   "arc",
   "arc3",
+  "arcTangent",
   "trim",
   "extend",
+  "offset",
   "mirror",
   "fillet",
   "chamfer",
@@ -65,8 +69,7 @@ export const CONSTRAINT_TOOL_IDS: readonly ActiveTool[] = [
 
 export const DIMENSION_TOOL_IDS: readonly ActiveTool[] = [
   "dim-distance",
-  "dim-radius",
-  "dim-diameter",
+  "dim-radial",
   "dim-angle",
 ];
 
@@ -103,6 +106,16 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
       <rect x="3.5" y="4.5" width="11" height="9" />
     </Svg>
   ),
+  polygon: () => (
+    <Svg>
+      <polygon points="9,2.5 14.5,5.5 14.5,12.5 9,15.5 3.5,12.5 3.5,5.5" />
+    </Svg>
+  ),
+  slot: () => (
+    <Svg>
+      <path d="M5.5 5.5 H12.5 A3.5 3.5 0 0 1 12.5 12.5 H5.5 A3.5 3.5 0 0 1 5.5 5.5 Z" />
+    </Svg>
+  ),
   circle: () => (
     <Svg>
       <circle cx="9" cy="9" r="5.5" />
@@ -121,6 +134,18 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
       <circle cx="3" cy="11" r="1.4" fill="currentColor" stroke="none" />
       <circle cx="9" cy="4.5" r="1.4" fill="currentColor" stroke="none" />
       <circle cx="15" cy="11" r="1.4" fill="currentColor" stroke="none" />
+    </Svg>
+  ),
+  arcTangent: () => (
+    <Svg>
+      <line x1="3" y1="14" x2="9" y2="8" />
+      <path d="M9 8 A5 5 0 0 1 15 5" />
+    </Svg>
+  ),
+  offset: () => (
+    <Svg>
+      <line x1="3" y1="12" x2="15" y2="6" />
+      <line x1="3" y1="15" x2="15" y2="9" strokeDasharray="2 2" />
     </Svg>
   ),
   trim: () => (
@@ -244,16 +269,11 @@ const GLYPHS: Record<GlyphId, (props?: SvgProps) => ReactElement> = {
       <polyline points="13.5,6.5 14,8 12,8.5" />
     </Svg>
   ),
-  "dim-radius": () => (
+  "dim-radial": () => (
     <Svg>
       <circle cx="9" cy="9" r="5.5" />
       <line x1="9" y1="9" x2="13.5" y2="5.5" />
-    </Svg>
-  ),
-  "dim-diameter": () => (
-    <Svg>
-      <circle cx="9" cy="9" r="5.5" />
-      <line x1="4.5" y1="9" x2="13.5" y2="9" />
+      <line x1="4.5" y1="12.5" x2="13.5" y2="12.5" />
     </Svg>
   ),
   "dim-angle": () => (

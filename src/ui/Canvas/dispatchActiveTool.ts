@@ -22,11 +22,35 @@ import {
   type Arc3ToolState,
 } from "../../sketch/tools/Arc3Tool.ts";
 import {
+  handleArcTangentToolPointerDown,
+  handleArcTangentToolPointerLeave,
+  handleArcTangentToolPointerMove,
+  type ArcTangentToolState,
+} from "../../sketch/tools/ArcTangentTool.ts";
+import {
   handleCircleToolPointerDown,
   handleCircleToolPointerLeave,
   handleCircleToolPointerMove,
   type CircleToolState,
 } from "../../sketch/tools/CircleTool.ts";
+import {
+  handleOffsetToolPointerDown,
+  handleOffsetToolPointerLeave,
+  handleOffsetToolPointerMove,
+  type OffsetToolState,
+} from "../../sketch/tools/OffsetTool.ts";
+import {
+  handlePolygonToolPointerDown,
+  handlePolygonToolPointerLeave,
+  handlePolygonToolPointerMove,
+  type PolygonToolState,
+} from "../../sketch/tools/PolygonTool.ts";
+import {
+  handleSlotToolPointerDown,
+  handleSlotToolPointerLeave,
+  handleSlotToolPointerMove,
+  type SlotToolState,
+} from "../../sketch/tools/SlotTool.ts";
 import {
   handleCoincidentToolPointerDown,
   handleCoincidentToolPointerLeave,
@@ -82,9 +106,13 @@ import type {
 export type CreationToolRefs = {
   readonly lineToolRef: MutableRefObject<LineToolState>;
   readonly rectangleToolRef: MutableRefObject<RectangleToolState>;
+  readonly polygonToolRef: MutableRefObject<PolygonToolState>;
+  readonly slotToolRef: MutableRefObject<SlotToolState>;
   readonly circleToolRef: MutableRefObject<CircleToolState>;
   readonly arcToolRef: MutableRefObject<ArcToolState>;
   readonly arc3ToolRef: MutableRefObject<Arc3ToolState>;
+  readonly arcTangentToolRef: MutableRefObject<ArcTangentToolState>;
+  readonly offsetToolRef: MutableRefObject<OffsetToolState>;
   readonly coincidentToolRef: MutableRefObject<CoincidentToolState>;
   readonly constraintPickToolRef: MutableRefObject<ConstraintPickToolState>;
   readonly filletChamferToolRef: MutableRefObject<FilletChamferToolState>;
@@ -111,6 +139,19 @@ export function dispatchToolPointerDown(
     refs.rectangleToolRef.current = handled.state;
     return handled.result;
   }
+  if (activeTool === "polygon") {
+    const handled = handlePolygonToolPointerDown(
+      context,
+      refs.polygonToolRef.current,
+    );
+    refs.polygonToolRef.current = handled.state;
+    return handled.result;
+  }
+  if (activeTool === "slot") {
+    const handled = handleSlotToolPointerDown(context, refs.slotToolRef.current);
+    refs.slotToolRef.current = handled.state;
+    return handled.result;
+  }
   if (activeTool === "circle") {
     const handled = handleCircleToolPointerDown(
       context,
@@ -127,6 +168,22 @@ export function dispatchToolPointerDown(
   if (activeTool === "arc3") {
     const handled = handleArc3ToolPointerDown(context, refs.arc3ToolRef.current);
     refs.arc3ToolRef.current = handled.state;
+    return handled.result;
+  }
+  if (activeTool === "arcTangent") {
+    const handled = handleArcTangentToolPointerDown(
+      context,
+      refs.arcTangentToolRef.current,
+    );
+    refs.arcTangentToolRef.current = handled.state;
+    return handled.result;
+  }
+  if (activeTool === "offset") {
+    const handled = handleOffsetToolPointerDown(
+      context,
+      refs.offsetToolRef.current,
+    );
+    refs.offsetToolRef.current = handled.state;
     return handled.result;
   }
   if (activeTool === "coincident") {
@@ -197,6 +254,12 @@ export function dispatchToolPointerMove(
       refs.rectangleToolRef.current,
     );
   }
+  if (activeTool === "polygon") {
+    return handlePolygonToolPointerMove(context, refs.polygonToolRef.current);
+  }
+  if (activeTool === "slot") {
+    return handleSlotToolPointerMove(context, refs.slotToolRef.current);
+  }
   if (activeTool === "circle") {
     return handleCircleToolPointerMove(context, refs.circleToolRef.current);
   }
@@ -205,6 +268,15 @@ export function dispatchToolPointerMove(
   }
   if (activeTool === "arc3") {
     return handleArc3ToolPointerMove(context, refs.arc3ToolRef.current);
+  }
+  if (activeTool === "arcTangent") {
+    return handleArcTangentToolPointerMove(
+      context,
+      refs.arcTangentToolRef.current,
+    );
+  }
+  if (activeTool === "offset") {
+    return handleOffsetToolPointerMove(context, refs.offsetToolRef.current);
   }
   if (activeTool === "coincident") {
     return handleCoincidentToolPointerMove(
@@ -255,6 +327,12 @@ export function dispatchToolPointerLeave(
   if (activeTool === "rectangle") {
     return handleRectangleToolPointerLeave(refs.rectangleToolRef.current);
   }
+  if (activeTool === "polygon") {
+    return handlePolygonToolPointerLeave(refs.polygonToolRef.current);
+  }
+  if (activeTool === "slot") {
+    return handleSlotToolPointerLeave(refs.slotToolRef.current);
+  }
   if (activeTool === "circle") {
     return handleCircleToolPointerLeave(refs.circleToolRef.current);
   }
@@ -263,6 +341,12 @@ export function dispatchToolPointerLeave(
   }
   if (activeTool === "arc3") {
     return handleArc3ToolPointerLeave(refs.arc3ToolRef.current);
+  }
+  if (activeTool === "arcTangent") {
+    return handleArcTangentToolPointerLeave(refs.arcTangentToolRef.current);
+  }
+  if (activeTool === "offset") {
+    return handleOffsetToolPointerLeave(refs.offsetToolRef.current);
   }
   if (activeTool === "coincident") {
     return handleCoincidentToolPointerLeave(refs.coincidentToolRef.current);

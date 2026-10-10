@@ -79,8 +79,12 @@ const DIMENSION_TOOLS: readonly ToolButton[] = [
     title:
       "Distance: line twice=length; two points; two H/V lines; point or line + X/Y axis to locate",
   },
-  { id: "dim-radius", label: "Radius", title: "Radius: pick a circle or arc" },
-  { id: "dim-diameter", label: "Diameter", title: "Diameter: pick a circle or arc" },
+  {
+    id: "dim-radial",
+    label: "Size",
+    title:
+      "Size: pick a circle (diameter; Shift = radius) or arc (radius)",
+  },
   { id: "dim-angle", label: "Angle", title: "Angle: pick two lines" },
 ];
 

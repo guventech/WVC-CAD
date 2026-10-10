@@ -37,7 +37,29 @@
 
 ## Current
 
-**Post–Chunk 27 + 2D-before-3D Tier A/B/C (2026-10-10).** Profile handoff + intersection snap + 3-pt arc + Playwright smoke shipped. Remaining U6/product gaps: polygon/slot/offset, dimension graphics, Tauri installer.
+**Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
+
+### Leftovers after 2D gap recheck (2026-10-10)
+
+| Item | Landed |
+|------|--------|
+| N-gon sides | `[` / `]` / `−`/`+` / toolbar steppers; N 3–32 remembered (ADR-057) |
+| Loop/chain offset | Closed profile loop → open degree-2 chain → segment; concentric circle |
+| Tauri 2 | `src-tauri/` + `npm run tauri:dev` / `tauri:build` (needs Rust) |
+
+### 2D gap recheck (2026-10-10)
+
+| Item | Landed |
+|------|--------|
+| Size tool | `dim-radial` + `SmartRadial` — circle → ⌀ (Shift=R); arc → R (ADR-055) |
+| DXF export | R12 ASCII geometry-only; `.sketch.json` stays SoT (ADR-056) |
+| Polygon / Slot | Regular N-gon + capsule slot create tools |
+| Tangent arc | `arcTangent` from line endpoint |
+| Offset | Parallel line / chain / closed loop / circle |
+| Dim leaders | Extension lines + arrows for length/distance/R/⌀ |
+| Mirror copy | Remaps geometric/dimensional constraints with geometry |
+
+**Post–Chunk 27 + 2D-before-3D Tier A/B/C (2026-10-10).** Profile handoff + intersection snap + 3-pt arc + Playwright smoke shipped.
 
 ### 2D-before-3D backlog (2026-10-10)
 

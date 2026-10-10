@@ -19,6 +19,7 @@ import {
 } from "../../sketch/tools/ActiveTool.ts";
 import type {
   LineMetrics,
+  OffsetSegment,
   PointDragState,
   RectMetrics,
 } from "../../sketch/tools/ToolTypes.ts";
@@ -51,6 +52,10 @@ import {
 } from "./dispatchActiveTool.ts";
 import { useCanvasViewport } from "./useCanvasViewport.ts";
 import { useCreationToolSession } from "./useCreationToolSession.ts";
+import {
+  adjustPolygonSides,
+  handlePolygonToolPointerMove,
+} from "../../sketch/tools/PolygonTool.ts";
 
 type SketchCanvasProps = {
   readonly sketch: Sketch;
@@ -90,6 +95,19 @@ type SketchCanvasProps = {
     startPoint: Point2D,
     endPoint: Point2D,
   ) => void;
+  readonly onCreatePolygon: (
+    center: Point2D,
+    radiusPoint: Point2D,
+    sides: number,
+  ) => void;
+  readonly onCreateOffsetSegments: (
+    segments: readonly OffsetSegment[],
+  ) => void;
+  readonly onCreateSlot: (
+    centerA: Point2D,
+    centerB: Point2D,
+    halfWidth: number,
+  ) => void;
   readonly onCreateCoincident: (
     first: ConstraintReference,
     second: ConstraintReference,
@@ -113,12 +131,18 @@ type SketchCanvasProps = {
   readonly onRectMetricsChange?: (metrics: RectMetrics | null) => void;
   readonly onCircleRadiusChange?: (radiusMm: number | null) => void;
   readonly onArcSweepChange?: (sweepDegrees: number | null) => void;
+  readonly onPolygonSidesChange?: (sides: number | null) => void;
   readonly onCreationSessionChange?: (active: boolean) => void;
   /** Scale only — pan must not re-render App. */
   readonly onCameraScaleChange?: (scale: number) => void;
   /** Incremented by App when Escape should cancel an in-progress creation. */
   readonly creationCancelRequest?: number;
   readonly onCreationCancelled?: () => void;
+  /**
+   * When `seq` increments while Polygon is active, adjust side count by `delta`
+   * ([ / ] / toolbar steppers).
+   */
+  readonly polygonSidesNudge?: { readonly seq: number; readonly delta: number };
 };
 
 function isCreationTool(activeTool: ActiveTool): boolean {
@@ -126,11 +150,15 @@ function isCreationTool(activeTool: ActiveTool): boolean {
     activeTool === "point" ||
     activeTool === "line" ||
     activeTool === "rectangle" ||
+    activeTool === "polygon" ||
+    activeTool === "slot" ||
     activeTool === "circle" ||
     activeTool === "arc" ||
     activeTool === "arc3" ||
+    activeTool === "arcTangent" ||
     activeTool === "trim" ||
     activeTool === "extend" ||
+    activeTool === "offset" ||
     activeTool === "mirror" ||
     activeTool === "fillet" ||
     activeTool === "chamfer" ||
@@ -148,6 +176,9 @@ export const SketchCanvas = memo(function SketchCanvas({
   onCreateLine,
   onCreateRectangle,
   onCreateCircle,
+  onCreatePolygon,
+  onCreateOffsetSegments,
+  onCreateSlot,
   onCreateArc,
   onCreateCoincident,
   onCreateConstraint,
@@ -164,12 +195,16 @@ export const SketchCanvas = memo(function SketchCanvas({
   onRectMetricsChange,
   onCircleRadiusChange,
   onArcSweepChange,
+  onPolygonSidesChange,
   onCreationSessionChange,
   onCameraScaleChange,
   creationCancelRequest = 0,
   onCreationCancelled,
+  polygonSidesNudge,
 }: SketchCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastPolygonNudgeSeqRef = useRef(0);
+  const lastCursorWorldRef = useRef<Point2D | null>(null);
   const dragRef = useRef<PointDragState | null>(null);
   const [isDraggingPoint, setIsDraggingPoint] = useState(false);
   const [dragPreview, setDragPreview] = useState<PointDragState | null>(null);
@@ -196,6 +231,8 @@ export const SketchCanvas = memo(function SketchCanvas({
     setPreviewCircle,
     previewArc,
     setPreviewArc,
+    previewPolyline,
+    setPreviewPolyline,
     activeSnap,
     setActiveSnap,
   } = useCreationToolSession(activeTool, creationCancelRequest, {
@@ -203,6 +240,7 @@ export const SketchCanvas = memo(function SketchCanvas({
     onRectMetricsChange,
     onCircleRadiusChange,
     onArcSweepChange,
+    onPolygonSidesChange,
     onCreationSessionChange,
     onCreationCancelled,
   });
@@ -213,6 +251,9 @@ export const SketchCanvas = memo(function SketchCanvas({
     onCreateLine,
     onCreateRectangle,
     onCreateCircle,
+    onCreatePolygon,
+    onCreateOffsetSegments,
+    onCreateSlot,
     onCreateArc,
     onCreateCoincident,
     onCreateConstraint,
@@ -227,6 +268,7 @@ export const SketchCanvas = memo(function SketchCanvas({
     onRectMetricsChange,
     onCircleRadiusChange,
     onArcSweepChange,
+    onPolygonSidesChange,
     onCreationSessionChange,
   };
 
@@ -237,6 +279,7 @@ export const SketchCanvas = memo(function SketchCanvas({
     setPreviewRectangle,
     setPreviewCircle,
     setPreviewArc,
+    setPreviewPolyline,
     setActiveSnap,
     setDragPreview,
     setIsDraggingPoint,
@@ -253,6 +296,93 @@ export const SketchCanvas = memo(function SketchCanvas({
     }
     onSnapChange?.(null);
   }, [activeSnap, activeTool, isDraggingPoint, onSnapChange]);
+
+  useEffect(() => {
+    if (polygonSidesNudge === undefined) {
+      return;
+    }
+    if (polygonSidesNudge.seq === lastPolygonNudgeSeqRef.current) {
+      return;
+    }
+    lastPolygonNudgeSeqRef.current = polygonSidesNudge.seq;
+    if (activeTool !== "polygon" || polygonSidesNudge.delta === 0) {
+      return;
+    }
+    toolRefs.polygonToolRef.current = adjustPolygonSides(
+      toolRefs.polygonToolRef.current,
+      polygonSidesNudge.delta,
+    );
+    onPolygonSidesChange?.(toolRefs.polygonToolRef.current.sides);
+    const cursor = lastCursorWorldRef.current;
+    if (cursor !== null && toolRefs.polygonToolRef.current.phase === "drawing") {
+      applyResult(
+        handlePolygonToolPointerMove(
+          {
+            worldPoint: cursor,
+            camera,
+            sketch,
+            selection,
+            modifiers: { shift: false, ctrl: false, meta: false },
+          },
+          toolRefs.polygonToolRef.current,
+        ),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- nudge seq drives refresh
+  }, [polygonSidesNudge, activeTool]);
+
+  useEffect(() => {
+    if (activeTool !== "polygon") {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      let delta = 0;
+      if (event.key === "[" || event.key === "-") {
+        delta = -1;
+      } else if (event.key === "]" || event.key === "+" || event.key === "=") {
+        delta = 1;
+      }
+      if (delta === 0) {
+        return;
+      }
+      event.preventDefault();
+      toolRefs.polygonToolRef.current = adjustPolygonSides(
+        toolRefs.polygonToolRef.current,
+        delta,
+      );
+      onPolygonSidesChange?.(toolRefs.polygonToolRef.current.sides);
+      const cursor = lastCursorWorldRef.current;
+      if (
+        cursor !== null &&
+        toolRefs.polygonToolRef.current.phase === "drawing"
+      ) {
+        applyResult(
+          handlePolygonToolPointerMove(
+            {
+              worldPoint: cursor,
+              camera,
+              sketch,
+              selection,
+              modifiers: { shift: false, ctrl: false, meta: false },
+            },
+            toolRefs.polygonToolRef.current,
+          ),
+        );
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tool session keys
+  }, [activeTool, camera, sketch, selection, onPolygonSidesChange]);
 
   const displaySketch =
     dragPreview === null
@@ -292,15 +422,27 @@ export const SketchCanvas = memo(function SketchCanvas({
       selection,
       previewPoint: isCreationTool(activeTool) ? previewPoint : null,
       previewLine:
-        activeTool === "line" || activeTool === "chamfer" ? previewLine : null,
+        activeTool === "line" ||
+        activeTool === "chamfer" ||
+        activeTool === "offset"
+          ? previewLine
+          : null,
       previewRectangle: activeTool === "rectangle" ? previewRectangle : null,
-      previewCircle: activeTool === "circle" ? previewCircle : null,
+      previewCircle:
+        activeTool === "circle" ||
+        activeTool === "polygon" ||
+        activeTool === "offset"
+          ? previewCircle
+          : null,
       previewArc:
         activeTool === "arc" ||
         activeTool === "arc3" ||
+        activeTool === "arcTangent" ||
+        activeTool === "slot" ||
         activeTool === "fillet"
           ? previewArc
           : null,
+      previewPolyline: activeTool === "offset" ? previewPolyline : null,
       activeSnap: showPreview ? activeSnap : null,
     });
   }, [
@@ -313,6 +455,7 @@ export const SketchCanvas = memo(function SketchCanvas({
     previewCircle,
     previewLine,
     previewPoint,
+    previewPolyline,
     previewRectangle,
     selection,
     size,
@@ -327,8 +470,10 @@ export const SketchCanvas = memo(function SketchCanvas({
       event.clientX,
       event.clientY,
     );
+    const worldPoint = screenToWorld(screenPoint, camera);
+    lastCursorWorldRef.current = worldPoint;
     return {
-      worldPoint: screenToWorld(screenPoint, camera),
+      worldPoint,
       camera,
       sketch,
       selection,

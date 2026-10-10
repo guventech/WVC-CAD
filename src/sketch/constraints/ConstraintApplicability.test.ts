@@ -76,8 +76,7 @@ describe("ConstraintApplicability", () => {
         (row) => [row.toolId, row],
       ),
     );
-    expect(byId["dim-radius"]?.canApply).toBe(true);
-    expect(byId["dim-diameter"]?.canApply).toBe(true);
+    expect(byId["dim-radial"]?.canApply).toBe(true);
     expect(byId["dim-distance"]?.state).toBe("disabled");
   });
 

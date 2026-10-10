@@ -10,7 +10,9 @@ import type {
   CirclePreview,
   LineMetrics,
   LinePreview,
+  OffsetSegment,
   PointDragState,
+  PolylinePreview,
   RectMetrics,
   RectanglePreview,
   ToolPointerResult,
@@ -24,6 +26,7 @@ export type CreationChromeCallbacks = {
   readonly onRectMetricsChange?: (metrics: RectMetrics | null) => void;
   readonly onCircleRadiusChange?: (radiusMm: number | null) => void;
   readonly onArcSweepChange?: (sweepDegrees: number | null) => void;
+  readonly onPolygonSidesChange?: (sides: number | null) => void;
   readonly onCreationSessionChange?: (active: boolean) => void;
   readonly onCreationCancelled?: () => void;
 };
@@ -63,6 +66,19 @@ export type ToolResultCallbacks = CreationChromeCallbacks & {
     startPoint: Point2D,
     endPoint: Point2D,
   ) => void;
+  readonly onCreatePolygon: (
+    center: Point2D,
+    radiusPoint: Point2D,
+    sides: number,
+  ) => void;
+  readonly onCreateSlot: (
+    centerA: Point2D,
+    centerB: Point2D,
+    halfWidth: number,
+  ) => void;
+  readonly onCreateOffsetSegments: (
+    segments: readonly OffsetSegment[],
+  ) => void;
   readonly onCreateCoincident: (
     first: ConstraintReference,
     second: ConstraintReference,
@@ -88,6 +104,7 @@ export type ToolResultLocalState = {
   readonly setPreviewRectangle: Dispatch<SetStateAction<RectanglePreview | null>>;
   readonly setPreviewCircle: Dispatch<SetStateAction<CirclePreview | null>>;
   readonly setPreviewArc: Dispatch<SetStateAction<ArcPreview | null>>;
+  readonly setPreviewPolyline: Dispatch<SetStateAction<PolylinePreview | null>>;
   readonly setActiveSnap: Dispatch<SetStateAction<SnapCandidate | null>>;
   readonly setDragPreview: Dispatch<SetStateAction<PointDragState | null>>;
   readonly setIsDraggingPoint: Dispatch<SetStateAction<boolean>>;
@@ -116,6 +133,9 @@ export function applyToolResult(
   if (result.previewArc !== undefined) {
     local.setPreviewArc(result.previewArc);
   }
+  if (result.previewPolyline !== undefined) {
+    local.setPreviewPolyline(result.previewPolyline);
+  }
   if (result.lineMetrics !== undefined) {
     callbacks.onLineMetricsChange?.(result.lineMetrics);
   }
@@ -127,6 +147,9 @@ export function applyToolResult(
   }
   if (result.arcSweepDegrees !== undefined) {
     callbacks.onArcSweepChange?.(result.arcSweepDegrees);
+  }
+  if (result.polygonSides !== undefined) {
+    callbacks.onPolygonSidesChange?.(result.polygonSides);
   }
   if (result.creationSessionActive !== undefined) {
     callbacks.onCreationSessionChange?.(result.creationSessionActive);
@@ -173,6 +196,23 @@ export function applyToolResult(
       result.createArc.center,
       result.createArc.startPoint,
       result.createArc.endPoint,
+    );
+  }
+  if (result.createPolygon !== undefined) {
+    callbacks.onCreatePolygon(
+      result.createPolygon.center,
+      result.createPolygon.radiusPoint,
+      result.createPolygon.sides,
+    );
+  }
+  if (result.createOffsetSegments !== undefined) {
+    callbacks.onCreateOffsetSegments(result.createOffsetSegments);
+  }
+  if (result.createSlot !== undefined) {
+    callbacks.onCreateSlot(
+      result.createSlot.centerA,
+      result.createSlot.centerB,
+      result.createSlot.halfWidth,
     );
   }
   if (result.createCoincident !== undefined) {

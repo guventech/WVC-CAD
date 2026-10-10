@@ -21,6 +21,11 @@ function click(
   sketch: Sketch,
   worldPoint: { x: number; y: number },
   state: ConstraintPickToolState = createConstraintPickToolState(),
+  modifiers: { shift: boolean; ctrl: boolean; meta: boolean } = {
+    shift: false,
+    ctrl: false,
+    meta: false,
+  },
 ) {
   return handleConstraintPickToolPointerDown(
     tool,
@@ -29,7 +34,7 @@ function click(
       camera: createCamera(800, 600, 2),
       sketch,
       selection: createSelectionState(),
-      modifiers: { shift: false, ctrl: false, meta: false },
+      modifiers,
     },
     state,
   );
@@ -68,14 +73,24 @@ describe("ConstraintPickTool", () => {
     });
   });
 
-  it("Radius: clicking a circle rim or center requests radius", () => {
+  it("Size: clicking a circle defaults to diameter; Shift requests radius", () => {
     const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 20)!;
-    for (const point of [{ x: 20, y: 0 }, { x: 0, y: 0 }]) {
-      expect(click("dim-radius", created.sketch, point).result.createConstraint).toEqual({
-        type: "radius",
-        references: [{ entityId: created.circle.id, role: "entity" }],
-      });
-    }
+    expect(
+      click("dim-radial", created.sketch, { x: 20, y: 0 }).result.createConstraint,
+    ).toEqual({
+      type: "diameter",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
+    expect(
+      click("dim-radial", created.sketch, { x: 20, y: 0 }, undefined, {
+        shift: true,
+        ctrl: false,
+        meta: false,
+      }).result.createConstraint,
+    ).toEqual({
+      type: "radius",
+      references: [{ entityId: created.circle.id, role: "entity" }],
+    });
   });
 
   it("Distance: same line twice creates length", () => {

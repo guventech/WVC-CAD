@@ -15,30 +15,35 @@ Goal: ship Sketcher as a **Windows installer** (`.msi` / `.exe`) that runs well 
 
 WebView2 is already on Windows 10/11 (or installed by the Tauri bundler). Users do not need a browser open.
 
-## When to add Tauri
-
-Do **not** block Chunk 5–9 on packaging. Introduce Tauri when:
-
-1. Core sketch tools (at least line/rect/circle) are usable
-2. Save/load exists (or a temporary local-file bridge is acceptable)
-3. You are ready to produce a release installer
-
-Until then: `npm run build` → static `dist/` (already ~250 KB JS gzipped ~77 KB).
-
-## Planned layout (later)
+## Scaffold status (landed)
 
 ```text
-src-tauri/          # Rust shell, window, file dialogs
+src-tauri/          # Rust shell (Tauri 2) — window, bundle metadata
 src/                # existing Vite/React sketcher (unchanged architecture)
-dist/               # frontend build consumed by Tauri
+dist/               # frontend build consumed by Tauri (`frontendDist`)
 ```
 
-Scripts (to add later):
+Scripts:
 
 ```bash
-npm run tauri dev      # desktop window + hot reload
-npm run tauri build    # Windows NSIS/MSI installer under src-tauri/target/release/bundle
+npm run tauri:dev      # desktop window + Vite hot reload (needs Rust toolchain)
+npm run tauri:build    # Windows NSIS + MSI under src-tauri/target/release/bundle
 ```
+
+### Prerequisites (developer machine)
+
+1. [Rust](https://www.rust-lang.org/tools/install) (`rustc` / `cargo` on `PATH`)
+2. Windows: WebView2 (usually preinstalled) + MSVC build tools if prompted by Rust
+3. `npm install` (includes `@tauri-apps/cli`)
+
+Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
+
+### Config notes
+
+- App id: `com.sketcher.app` (`src-tauri/tauri.conf.json`)
+- Bundle targets: `nsis` + `msi` (Windows installers)
+- Dev URL: `http://localhost:5173` (Vite `strictPort`)
+- CAD logic stays in `src/sketch/**` — the shell only hosts WebView2
 
 ## Runtime rules that keep the app light
 
@@ -64,3 +69,4 @@ These are enforced in app code today; keep them when adding tools:
 - Electron
 - Online-only / cloud runtime as the primary product
 - Shipping `node_modules` or a Node server with the app
+- Native file dialogs / OS menu bridge (optional later; browser download Save works today)

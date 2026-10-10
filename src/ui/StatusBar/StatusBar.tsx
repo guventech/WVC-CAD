@@ -27,6 +27,7 @@ type StatusBarProps = {
   readonly rectMetrics: RectMetrics | null;
   readonly circleRadiusMm: number | null;
   readonly arcSweepDegrees: number | null;
+  readonly polygonSides: number | null;
   readonly createAsConstruction: boolean;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
@@ -50,6 +51,7 @@ export function StatusBar({
   rectMetrics,
   circleRadiusMm,
   arcSweepDegrees,
+  polygonSides,
   createAsConstruction,
   canUndo,
   canRedo,
@@ -78,6 +80,7 @@ export function StatusBar({
         <span>{formatLength("H", rectMetrics?.heightMm)}</span>
         <span>{formatLength("R", circleRadiusMm ?? undefined)}</span>
         <span>{formatSweep(arcSweepDegrees ?? undefined)}</span>
+        <span>{formatPolygonSides(polygonSides)}</span>
         <span className="status-divider" aria-hidden="true" />
         <span
           className={`status-dof status-dof-${tone}`}
@@ -165,4 +168,11 @@ function formatSweep(value: number | undefined): string {
     return "Sweep: —";
   }
   return `Sweep: ${value.toFixed(1)}°`;
+}
+
+function formatPolygonSides(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) {
+    return "N: —";
+  }
+  return `N: ${Math.round(value)}`;
 }

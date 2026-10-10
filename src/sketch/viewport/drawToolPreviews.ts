@@ -3,12 +3,14 @@ import { worldToScreen } from "./Camera.ts";
 import { arcSweepRadians, distance } from "../geometry/GeometryMath.ts";
 import { pointOnCircle } from "../geometry/EntityFeatures.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
+import { regularPolygonVertices } from "../geometry/PolygonMath.ts";
 import { axisAlignedCornersFromDiagonal } from "../geometry/RectangleMath.ts";
 import type { SnapCandidate } from "../selection/SnapEngine.ts";
 import type {
   ArcPreview,
   CirclePreview,
   LinePreview,
+  PolylinePreview,
   RectanglePreview,
 } from "../tools/ToolTypes.ts";
 import { VIEWPORT_COLORS } from "./viewportColors.ts";
@@ -81,9 +83,33 @@ export function drawPreviewCircle(
   ctx.strokeStyle = VIEWPORT_COLORS.preview;
   ctx.lineWidth = 1.5;
   ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  ctx.arc(center.x, center.y, radius * camera.scale, 0, Math.PI * 2);
-  ctx.stroke();
+
+  const sides = preview.polygonSides;
+  if (sides !== undefined && sides >= 3) {
+    const verts = regularPolygonVertices(
+      preview.center,
+      preview.radiusPoint,
+      sides,
+    );
+    if (verts !== null && verts.length >= 3) {
+      ctx.beginPath();
+      for (let i = 0; i < verts.length; i += 1) {
+        const screen = worldToScreen(verts[i]!, camera);
+        if (i === 0) {
+          ctx.moveTo(screen.x, screen.y);
+        } else {
+          ctx.lineTo(screen.x, screen.y);
+        }
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+  } else {
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, radius * camera.scale, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
   ctx.beginPath();
   ctx.moveTo(center.x, center.y);
   ctx.lineTo(rim.x, rim.y);
@@ -116,6 +142,34 @@ export function drawPreviewRectangle(
   ctx.lineTo(tr.x, tr.y);
   ctx.lineTo(tl.x, tl.y);
   ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
+export function drawPreviewPolyline(
+  ctx: CanvasRenderingContext2D,
+  camera: Camera,
+  preview: PolylinePreview,
+): void {
+  if (preview.vertices.length < 2) {
+    return;
+  }
+  ctx.save();
+  ctx.strokeStyle = VIEWPORT_COLORS.preview;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  for (let i = 0; i < preview.vertices.length; i += 1) {
+    const screen = worldToScreen(preview.vertices[i]!, camera);
+    if (i === 0) {
+      ctx.moveTo(screen.x, screen.y);
+    } else {
+      ctx.lineTo(screen.x, screen.y);
+    }
+  }
+  if (preview.closed) {
+    ctx.closePath();
+  }
   ctx.stroke();
   ctx.restore();
 }

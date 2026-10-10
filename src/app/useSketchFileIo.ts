@@ -12,6 +12,10 @@ import {
 } from "../sketch/serialization/SketchAutosave.ts";
 import { settleLoadedSketch } from "../sketch/constraints/ConstraintMaintenance.ts";
 import {
+  dxfDownloadFileName,
+  exportSketchToDxf,
+} from "../sketch/serialization/DxfExporter.ts";
+import {
   parseSketchJson,
   serializeSketchToJson,
 } from "../sketch/serialization/SketchSerializer.ts";
@@ -73,6 +77,15 @@ export function useSketchFileIo({
     sketch,
   ]);
 
+  const handleExportDxf = useCallback(() => {
+    const filename = dxfDownloadFileName(
+      documentFileName?.replace(/\.sketch\.json$/i, "") ?? sketch.name,
+    );
+    downloadTextFile(filename, exportSketchToDxf(sketch));
+    setConstraintMessage(null);
+    setConstraintConflict(null);
+  }, [documentFileName, setConstraintConflict, setConstraintMessage, sketch]);
+
   const handleOpen = useCallback(() => {
     void pickSketchFileText().then((text) => {
       if (text === null) {
@@ -111,5 +124,6 @@ export function useSketchFileIo({
   return {
     handleSave,
     handleOpen,
+    handleExportDxf,
   };
 }

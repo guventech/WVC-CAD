@@ -1,6 +1,7 @@
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { layoutConstraintAnnotations } from "./annotationLayout.ts";
+import { drawDimensionLeaders } from "./drawDimensionLeaders.ts";
 import { VIEWPORT_COLORS } from "./viewportColors.ts";
 
 /**
@@ -13,6 +14,8 @@ export function drawConstraintAnnotations(
   camera: Camera,
   sketch: Sketch,
 ): void {
+  drawDimensionLeaders(ctx, camera, sketch);
+
   ctx.save();
   ctx.font = "11px system-ui, sans-serif";
   ctx.textAlign = "center";

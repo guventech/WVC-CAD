@@ -70,6 +70,8 @@ export interface CirclePreview {
   readonly centerMidpointOf?: EntityId;
   /** Origin/axis snap at center → datum coincident (ADR-050). */
   readonly centerSnap?: SnapCandidate | null;
+  /** When set, preview draws a regular N-gon instead of a full circle. */
+  readonly polygonSides?: number;
 }
 
 export interface RectanglePreview {
@@ -96,6 +98,28 @@ export interface ArcCreateRequest {
   readonly endPoint: Point2D;
 }
 
+export interface PolygonCreateRequest {
+  readonly center: Point2D;
+  readonly radiusPoint: Point2D;
+  readonly sides: number;
+}
+
+export interface PolylinePreview {
+  readonly vertices: readonly Point2D[];
+  readonly closed: boolean;
+}
+
+export interface OffsetSegment {
+  readonly start: Point2D;
+  readonly end: Point2D;
+}
+
+export interface SlotCreateRequest {
+  readonly centerA: Point2D;
+  readonly centerB: Point2D;
+  readonly halfWidth: number;
+}
+
 export interface LineMetrics {
   readonly lengthMm: number;
   readonly angleDegrees: number;
@@ -108,10 +132,13 @@ export interface ToolPointerResult {
   readonly previewRectangle?: RectanglePreview | null;
   readonly previewCircle?: CirclePreview | null;
   readonly previewArc?: ArcPreview | null;
+  readonly previewPolyline?: PolylinePreview | null;
   readonly lineMetrics?: LineMetrics | null;
   readonly rectMetrics?: RectMetrics | null;
   readonly circleRadiusMm?: number | null;
   readonly arcSweepDegrees?: number | null;
+  /** Regular polygon side count while Polygon tool is active. */
+  readonly polygonSides?: number | null;
   readonly activeSnap?: SnapCandidate | null;
   readonly cursorWorld?: Point2D | null;
   readonly createPointAt?: PointCreateRequest;
@@ -119,6 +146,10 @@ export interface ToolPointerResult {
   readonly createRectangle?: RectanglePreview;
   readonly createCircle?: CirclePreview;
   readonly createArc?: ArcCreateRequest;
+  readonly createPolygon?: PolygonCreateRequest;
+  readonly createSlot?: SlotCreateRequest;
+  /** Parallel offset of a loop/chain as multiple new lines (one undo step). */
+  readonly createOffsetSegments?: readonly OffsetSegment[];
   readonly createCoincident?: CoincidentCreateRequest;
   readonly createConstraint?: ConstraintCreateRequest;
   readonly trimRequest?: TrimExtendRequest;
@@ -202,18 +233,26 @@ export function toolHint(activeTool: ActiveTool): string {
       return "Line tool · click start · click end · continue or Esc · H/V + midpoint snaps become constraints";
     case "rectangle":
       return "Rectangle · click first corner · click opposite corner · Esc cancels · stays rectangular when corners dragged";
+    case "polygon":
+      return "Polygon · click center · click vertex · [ / ] or − / + change sides (3–32) · Esc cancels";
+    case "slot":
+      return "Slot · click first end center · second end center · click to set half-width · Esc cancels";
     case "circle":
       return "Circle · click center · click radius · Esc cancels · drag center to move · drag rim to resize";
     case "arc":
       return "Arc · center → start → end (CCW sweep) · Esc cancels · drag center to move · drag arc to resize";
     case "arc3":
       return "3-point arc · click start · through point · end · Esc cancels";
+    case "arcTangent":
+      return "Tangent arc · click near a line end · click arc end · Esc cancels";
     case "trim":
       return "Trim · click the portion of a line to remove (needs a crossing line or axis) · Esc to select";
     case "extend":
       return "Extend · click near a line end to grow to the nearest crossing line or axis · Esc to select";
+    case "offset":
+      return "Offset · click a line, chain, closed loop, or circle · click to set distance · Esc cancels";
     case "mirror":
-      return "Mirror · select geometry first · click a line or world axis to mirror across · copies geometry only";
+      return "Mirror · select geometry first · click a line or world axis · copies geometry + remappable constraints";
     case "fillet":
       return "Fillet · click two lines · click again to set radius (distance from corner) · Esc cancels";
     case "chamfer":
@@ -244,10 +283,8 @@ export function toolHint(activeTool: ActiveTool): string {
       return "Fix · click a point/endpoint/center, a line, or a circle/arc · locks geometry in place · Esc cancels";
     case "dim-distance":
       return "Distance · line×2=length · two points · two H/V lines · point/line + X/Y axis to locate · Esc cancels";
-    case "dim-radius":
-      return "Radius dimension · click a circle or arc · edit value in Constraints panel";
-    case "dim-diameter":
-      return "Diameter dimension · click a circle or arc · edit value in Constraints panel";
+    case "dim-radial":
+      return "Size · circle → diameter (Shift = radius); arc → radius · edit in Constraints panel";
     case "dim-angle":
       return "Angle dimension · click two lines · edit value (degrees) in Constraints panel · Esc cancels";
     default:

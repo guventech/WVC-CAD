@@ -5,6 +5,7 @@ export type MenuActionId =
   | "file-new"
   | "file-open"
   | "file-save"
+  | "file-export-dxf"
   | "edit-undo"
   | "edit-redo"
   | "edit-delete"
@@ -59,6 +60,11 @@ export function MenuBar({
         { kind: "action", id: "file-new", label: "New sketch", shortcut: "Ctrl+N" },
         { kind: "action", id: "file-open", label: "Open…", shortcut: "Ctrl+O" },
         { kind: "action", id: "file-save", label: "Save…", shortcut: "Ctrl+S" },
+        {
+          kind: "action",
+          id: "file-export-dxf",
+          label: "Export DXF…",
+        },
       ],
     },
     {
@@ -111,9 +117,12 @@ export function MenuBar({
         toolItem("point", "Point", activeTool),
         toolItem("line", "Line", activeTool),
         toolItem("rectangle", "Rectangle", activeTool),
+        toolItem("polygon", "Polygon", activeTool),
+        toolItem("slot", "Slot", activeTool),
         toolItem("circle", "Circle", activeTool),
         toolItem("arc", "Arc (center)", activeTool),
         toolItem("arc3", "Arc (3-point)", activeTool),
+        toolItem("arcTangent", "Arc (tangent)", activeTool),
       ],
     },
     {
@@ -134,8 +143,7 @@ export function MenuBar({
         toolItem("fix", "Fix", activeTool),
         { kind: "separator" },
         toolItem("dim-distance", "Distance", activeTool),
-        toolItem("dim-radius", "Radius", activeTool),
-        toolItem("dim-diameter", "Diameter", activeTool),
+        toolItem("dim-radial", "Size (R / ⌀)", activeTool),
         toolItem("dim-angle", "Angle", activeTool),
       ],
     },
@@ -145,6 +153,7 @@ export function MenuBar({
       items: [
         toolItem("trim", "Trim", activeTool),
         toolItem("extend", "Extend", activeTool),
+        toolItem("offset", "Offset", activeTool),
         toolItem("mirror", "Mirror", activeTool),
         toolItem("fillet", "Fillet", activeTool),
         toolItem("chamfer", "Chamfer", activeTool),

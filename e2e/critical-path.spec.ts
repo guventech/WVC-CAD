@@ -29,6 +29,7 @@ test.describe("critical path smoke", () => {
 
     await expect(page.getByTestId("app-title")).toHaveText("Sketcher");
 
+    await page.getByTestId("tool-shape-flyout").click();
     await page.getByTestId("tool-rectangle").click();
     await clickWorld(page, 0, 0);
     await clickWorld(page, 100, 50);

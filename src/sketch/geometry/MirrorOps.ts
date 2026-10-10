@@ -8,6 +8,7 @@ import {
 } from "../model/SketchFrame.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Point2D } from "./Point2D.ts";
+import { mirrorConstraintsAcrossMap } from "./MirrorConstraintCopy.ts";
 import {
   isValidMirrorAxis,
   mirrorGeometryAcrossLine,
@@ -55,8 +56,9 @@ export function resolveMirrorAxis(
 
 /**
  * Duplicate selected geometry mirrored across the axis.
- * Does not copy constraints (avoids broken / ambiguous duplicates).
- * Rectangle feature members expand to the whole feature; copies are free geometry.
+ * Also copies geometric/dimensional constraints whose refs all lie in the
+ * mirrored set (feature constraints are skipped).
+ * Rectangle feature members expand to the whole feature.
  */
 export function applyMirror(
   sketch: Sketch,
@@ -99,12 +101,22 @@ export function applyMirror(
   const mirrored = sources.map((entity) =>
     mirrorGeometryAcrossLine(entity, resolved.a0, resolved.a1),
   );
+  const idMap = new Map<EntityId, EntityId>();
+  for (let i = 0; i < sources.length; i += 1) {
+    idMap.set(sources[i]!.id, mirrored[i]!.id);
+  }
+  const copiedConstraints = mirrorConstraintsAcrossMap(
+    sketch,
+    new Set(sourceIds),
+    idMap,
+  );
 
   return {
     ok: true,
     sketch: {
       ...sketch,
       geometry: [...sketch.geometry, ...mirrored],
+      constraints: [...sketch.constraints, ...copiedConstraints],
     },
     mirroredIds: mirrored.map((entity) => entity.id),
   };

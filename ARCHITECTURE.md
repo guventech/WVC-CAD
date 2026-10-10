@@ -283,7 +283,7 @@ Keep the app usable on weak machines (and a future Tauri WebView2 shell):
 | Build | Vite `target: es2022`, minify on, no release sourcemaps. |
 | Placeholders | Do not ship unused capability stubs; add modules when the chunk lands. |
 
-Desktop packaging plan: [PACKAGING.md](./PACKAGING.md) (Tauri 2).
+Desktop packaging scaffold: [PACKAGING.md](./PACKAGING.md) (`src-tauri/`, Tauri 2).
 
 ## Related
 
