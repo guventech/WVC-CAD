@@ -39,6 +39,15 @@ export type SketchParseOutcome =
   | { readonly ok: true; readonly sketch: Sketch; readonly document: SketchDocument }
   | { readonly ok: false; readonly reason: string };
 
+/** Reject crafted / absurd inputs before they reach the solver or UI thread. */
+export const SKETCH_LOAD_LIMITS = {
+  maxFileBytes: 10 * 1024 * 1024,
+  maxGeometry: 5_000,
+  maxConstraints: 10_000,
+  /** Absolute coordinate / dimension magnitude (mm or radians as stored). */
+  maxAbsValue: 1e9,
+} as const;
+
 const CONSTRAINT_ROLES = new Set<ConstraintRole>([
   "start",
   "end",
@@ -100,6 +109,12 @@ export function serializeSketchToJson(
  * On success, syncs the entity-id counter for subsequent creates.
  */
 export function parseSketchJson(text: string): SketchParseOutcome {
+  if (text.length > SKETCH_LOAD_LIMITS.maxFileBytes) {
+    return {
+      ok: false,
+      reason: `File is too large (${text.length} bytes; max ${SKETCH_LOAD_LIMITS.maxFileBytes}).`,
+    };
+  }
   let raw: unknown;
   try {
     raw = JSON.parse(text) as unknown;
@@ -148,6 +163,18 @@ export function parseSketchDocument(raw: unknown): SketchParseOutcome {
   }
   if (!Array.isArray(raw.constraints)) {
     return { ok: false, reason: "constraints must be an array." };
+  }
+  if (raw.geometry.length > SKETCH_LOAD_LIMITS.maxGeometry) {
+    return {
+      ok: false,
+      reason: `Too many geometry entities (${raw.geometry.length}; max ${SKETCH_LOAD_LIMITS.maxGeometry}).`,
+    };
+  }
+  if (raw.constraints.length > SKETCH_LOAD_LIMITS.maxConstraints) {
+    return {
+      ok: false,
+      reason: `Too many constraints (${raw.constraints.length}; max ${SKETCH_LOAD_LIMITS.maxConstraints}).`,
+    };
   }
 
   const geometry: Geometry[] = [];
@@ -225,7 +252,7 @@ export function parseSketchDocument(raw: unknown): SketchParseOutcome {
       reason:
         first === undefined
           ? "Constraint validation failed."
-          : `${first.message} (${first.constraintId})`,
+          : `Constraint "${first.constraintId}": ${first.message}`,
     };
   }
 
@@ -369,13 +396,11 @@ function parseGeometry(
       if (!center.ok) {
         return center;
       }
-      if (typeof raw.radius !== "number" || !Number.isFinite(raw.radius)) {
-        return {
-          ok: false,
-          reason: `geometry[${index}].radius must be a finite number.`,
-        };
+      const radius = parseFiniteNumber(raw.radius, `geometry[${index}].radius`);
+      if (!radius.ok) {
+        return radius;
       }
-      if (raw.radius <= TOLERANCE.coincidence) {
+      if (radius.value <= TOLERANCE.coincidence) {
         return {
           ok: false,
           reason: `geometry[${index}].radius must be positive.`,
@@ -385,7 +410,7 @@ function parseGeometry(
         id: raw.id,
         type: "circle",
         center: center.point,
-        radius: raw.radius,
+        radius: radius.value,
         construction: raw.construction,
       };
       return { ok: true, geometry };
@@ -395,36 +420,37 @@ function parseGeometry(
       if (!center.ok) {
         return center;
       }
-      if (typeof raw.radius !== "number" || !Number.isFinite(raw.radius)) {
-        return {
-          ok: false,
-          reason: `geometry[${index}].radius must be a finite number.`,
-        };
+      const radius = parseFiniteNumber(raw.radius, `geometry[${index}].radius`);
+      if (!radius.ok) {
+        return radius;
       }
-      if (raw.radius <= TOLERANCE.coincidence) {
+      if (radius.value <= TOLERANCE.coincidence) {
         return {
           ok: false,
           reason: `geometry[${index}].radius must be positive.`,
         };
       }
-      if (
-        typeof raw.startAngle !== "number" ||
-        !Number.isFinite(raw.startAngle) ||
-        typeof raw.endAngle !== "number" ||
-        !Number.isFinite(raw.endAngle)
-      ) {
-        return {
-          ok: false,
-          reason: `geometry[${index}] arc angles must be finite numbers.`,
-        };
+      const startAngle = parseFiniteNumber(
+        raw.startAngle,
+        `geometry[${index}].startAngle`,
+      );
+      if (!startAngle.ok) {
+        return startAngle;
+      }
+      const endAngle = parseFiniteNumber(
+        raw.endAngle,
+        `geometry[${index}].endAngle`,
+      );
+      if (!endAngle.ok) {
+        return endAngle;
       }
       const geometry: ArcGeometry = {
         id: raw.id,
         type: "arc",
         center: center.point,
-        radius: raw.radius,
-        startAngle: raw.startAngle,
-        endAngle: raw.endAngle,
+        radius: radius.value,
+        startAngle: startAngle.value,
+        endAngle: endAngle.value,
         construction: raw.construction,
       };
       return { ok: true, geometry };
@@ -493,13 +519,14 @@ function parseConstraint(
 
   let value: number | undefined;
   if (raw.value !== undefined) {
-    if (typeof raw.value !== "number" || !Number.isFinite(raw.value)) {
-      return {
-        ok: false,
-        reason: `constraints[${index}].value must be a finite number when present.`,
-      };
+    const parsedValue = parseFiniteNumber(
+      raw.value,
+      `constraints[${index}].value`,
+    );
+    if (!parsedValue.ok) {
+      return parsedValue;
     }
-    value = raw.value;
+    value = parsedValue.value;
   }
 
   let driving: boolean | undefined;
@@ -521,16 +548,19 @@ function parseConstraint(
         reason: `constraints[${index}].locked must be an object when present.`,
       };
     }
-    if (
-      typeof raw.locked.x !== "number" ||
-      !Number.isFinite(raw.locked.x) ||
-      typeof raw.locked.y !== "number" ||
-      !Number.isFinite(raw.locked.y)
-    ) {
-      return {
-        ok: false,
-        reason: `constraints[${index}].locked needs finite x and y.`,
-      };
+    const lockedX = parseFiniteNumber(
+      raw.locked.x,
+      `constraints[${index}].locked.x`,
+    );
+    if (!lockedX.ok) {
+      return lockedX;
+    }
+    const lockedY = parseFiniteNumber(
+      raw.locked.y,
+      `constraints[${index}].locked.y`,
+    );
+    if (!lockedY.ok) {
+      return lockedY;
     }
     const next: {
       x: number;
@@ -538,30 +568,34 @@ function parseConstraint(
       endX?: number;
       endY?: number;
       radius?: number;
-    } = { x: raw.locked.x, y: raw.locked.y };
+    } = { x: lockedX.value, y: lockedY.value };
     if (raw.locked.endX !== undefined || raw.locked.endY !== undefined) {
-      if (
-        typeof raw.locked.endX !== "number" ||
-        !Number.isFinite(raw.locked.endX) ||
-        typeof raw.locked.endY !== "number" ||
-        !Number.isFinite(raw.locked.endY)
-      ) {
-        return {
-          ok: false,
-          reason: `constraints[${index}].locked needs finite endX and endY when present.`,
-        };
+      const endX = parseFiniteNumber(
+        raw.locked.endX,
+        `constraints[${index}].locked.endX`,
+      );
+      if (!endX.ok) {
+        return endX;
       }
-      next.endX = raw.locked.endX;
-      next.endY = raw.locked.endY;
+      const endY = parseFiniteNumber(
+        raw.locked.endY,
+        `constraints[${index}].locked.endY`,
+      );
+      if (!endY.ok) {
+        return endY;
+      }
+      next.endX = endX.value;
+      next.endY = endY.value;
     }
     if (raw.locked.radius !== undefined) {
-      if (typeof raw.locked.radius !== "number" || !Number.isFinite(raw.locked.radius)) {
-        return {
-          ok: false,
-          reason: `constraints[${index}].locked.radius must be a finite number when present.`,
-        };
+      const lockedRadius = parseFiniteNumber(
+        raw.locked.radius,
+        `constraints[${index}].locked.radius`,
+      );
+      if (!lockedRadius.ok) {
+        return lockedRadius;
       }
-      next.radius = raw.locked.radius;
+      next.radius = lockedRadius.value;
     }
     locked = next;
   }
@@ -670,6 +704,22 @@ function parseMetadata(
   };
 }
 
+function parseFiniteNumber(
+  value: unknown,
+  path: string,
+): { ok: true; value: number } | { ok: false; reason: string } {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return { ok: false, reason: `${path} must be a finite number.` };
+  }
+  if (Math.abs(value) > SKETCH_LOAD_LIMITS.maxAbsValue) {
+    return {
+      ok: false,
+      reason: `${path} magnitude ${value} exceeds ±${SKETCH_LOAD_LIMITS.maxAbsValue}.`,
+    };
+  }
+  return { ok: true, value };
+}
+
 function parsePoint2D(
   raw: unknown,
   path: string,
@@ -677,15 +727,15 @@ function parsePoint2D(
   if (!isRecord(raw)) {
     return { ok: false, reason: `${path} must be an object.` };
   }
-  if (
-    typeof raw.x !== "number" ||
-    !Number.isFinite(raw.x) ||
-    typeof raw.y !== "number" ||
-    !Number.isFinite(raw.y)
-  ) {
-    return { ok: false, reason: `${path} needs finite x and y.` };
+  const x = parseFiniteNumber(raw.x, `${path}.x`);
+  if (!x.ok) {
+    return x;
   }
-  return { ok: true, point: { x: raw.x, y: raw.y } };
+  const y = parseFiniteNumber(raw.y, `${path}.y`);
+  if (!y.ok) {
+    return y;
+  }
+  return { ok: true, point: { x: x.value, y: y.value } };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -209,4 +209,137 @@ describe("SketchSerializer", () => {
       false,
     );
   });
+
+  it("rejects NaN, Infinity, and absurd magnitudes", () => {
+    const document = sketchToDocument(createEmptySketch());
+    for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, 1e12]) {
+      const parsed = parseSketchJson(
+        JSON.stringify({
+          ...document,
+          geometry: [
+            {
+              id: "pt-bad",
+              type: "point",
+              position: { x: bad, y: 0 },
+              construction: false,
+            },
+          ],
+        }),
+      );
+      expect(parsed.ok).toBe(false);
+    }
+  });
+
+  it("rejects duplicate ids and missing constraint references with clear errors", () => {
+    const document = sketchToDocument(createEmptySketch());
+    const dup = parseSketchJson(
+      JSON.stringify({
+        ...document,
+        geometry: [
+          {
+            id: "line-1",
+            type: "line",
+            start: { x: 0, y: 0 },
+            end: { x: 10, y: 0 },
+            construction: false,
+          },
+          {
+            id: "line-1",
+            type: "line",
+            start: { x: 0, y: 1 },
+            end: { x: 10, y: 1 },
+            construction: false,
+          },
+        ],
+      }),
+    );
+    expect(dup.ok).toBe(false);
+    if (!dup.ok) {
+      expect(dup.reason).toMatch(/Duplicate geometry id/i);
+    }
+
+    const missing = parseSketchJson(
+      JSON.stringify({
+        ...document,
+        geometry: [
+          {
+            id: "line-1",
+            type: "line",
+            start: { x: 0, y: 0 },
+            end: { x: 10, y: 0 },
+            construction: false,
+          },
+        ],
+        constraints: [
+          {
+            id: "c-missing",
+            type: "horizontal",
+            references: [{ entityId: "line-missing", role: "entity" }],
+          },
+        ],
+      }),
+    );
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) {
+      expect(missing.reason).toMatch(/Constraint "c-missing"/);
+      expect(missing.reason).toMatch(/line-missing/);
+    }
+  });
+
+  it("rejects unknown constraint types and oversized files", () => {
+    const document = sketchToDocument(createEmptySketch());
+    const unknown = parseSketchJson(
+      JSON.stringify({
+        ...document,
+        constraints: [
+          {
+            id: "c1",
+            type: "teleport",
+            references: [],
+          },
+        ],
+      }),
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok) {
+      expect(unknown.reason).toMatch(/unknown type "teleport"/i);
+    }
+
+    const huge = "x".repeat(10 * 1024 * 1024 + 1);
+    const tooBig = parseSketchJson(huge);
+    expect(tooBig.ok).toBe(false);
+    if (!tooBig.ok) {
+      expect(tooBig.reason).toMatch(/too large/i);
+    }
+  });
+
+  it("fuzz: random mutations of a valid sketch never throw", () => {
+    resetEntityIdCounter();
+    const sketch = createAddLineCommand({ x: 0, y: 0 }, { x: 40, y: 0 })!.apply(
+      createEmptySketch(),
+    );
+    const base = serializeSketchToJson(sketch);
+    let seed = 0x1234abcd;
+    const next = (): number => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed;
+    };
+
+    for (let i = 0; i < 40; i += 1) {
+      const chars = [...base];
+      const edits = 1 + (next() % 4);
+      for (let e = 0; e < edits; e += 1) {
+        const at = next() % chars.length;
+        const mode = next() % 3;
+        if (mode === 0) {
+          chars[at] = String.fromCharCode(32 + (next() % 95));
+        } else if (mode === 1) {
+          chars.splice(at, 1);
+        } else {
+          chars.splice(at, 0, String.fromCharCode(32 + (next() % 95)));
+        }
+      }
+      expect(() => parseSketchJson(chars.join(""))).not.toThrow();
+    }
+  });
 });

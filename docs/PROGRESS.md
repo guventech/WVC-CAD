@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P1 (2026-10-11).** P0 T1–T4 done. T5 FileStorage (ADR-058) and T6 autosave hardening (quota, instance id, Tauri close) landed. Next: T7 harden `.sketch.json` loader.
+**Review brief P1 (2026-10-11).** P0 done; T5–T7 landed (FileStorage, autosave hardening, loader limits + fuzz). Next: T8 Tauri CSP/icons/metadata.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -296,7 +296,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Sample sketches + File → Open sample…
 - Quick-start / first-run onboarding polish
 - Reliability fixes from alpha feedback; expand Playwright coverage
-- Review-brief P1 T7 (loader harden); then T8–T9 packaging/release
+- Review-brief P1 T8–T9 (Tauri CSP/icons; samples + alpha tag)
 - Installer polish (custom icons, unsigned→signed plan) — [PACKAGING.md](./PACKAGING.md)
 - Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 
