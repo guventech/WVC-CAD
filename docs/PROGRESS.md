@@ -37,6 +37,8 @@
 
 ## Current
 
+**Phase 1 mutation audit (2026-10-11).** Fixed `MirrorCommand` dropping copied constraints; move undo restores constraints; selection prune after trim/extend/mirror/fillet/chamfer; architecture-boundary Vitest gate.
+
 **CI timing (2026-10-11).** `SolverScale` / `SolverPerformance` gate correctness + generous sanity ceilings; wall times logged (GHA was red on 15s/5s local-style thresholds).
 
 **Alpha UX + deferred items (2026-10-11).** Status bar resize fix; hardened samples + tests; icon concept A. **ADR-052 row scaling landed** (`ResidualScaling.ts`; column scaling not used). Fillet rebuild retries opposite wedge on large moves. `v0.1.0-alpha.2` published.

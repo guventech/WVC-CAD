@@ -129,11 +129,24 @@ describe("Mirror", () => {
     expect(outcome.sketch.geometry).toHaveLength(2);
   });
 
-  it("undo restores pre-mirror geometry", () => {
+  it("command path copies remappable constraints and undo restores both arrays", () => {
     let sketch = createEmptySketch();
     sketch = addLineToSketch(sketch, { x: 10, y: 5 }, { x: 30, y: 5 })!.sketch;
-    const before = sketch;
-    const cmd = createMirrorCommand(sketch, [sketch.geometry[0]!.id], {
+    const lineId = sketch.geometry[0]!.id;
+    sketch = {
+      ...sketch,
+      constraints: [
+        {
+          id: "c-h",
+          type: "horizontal",
+          references: [{ entityId: lineId, role: "entity" }],
+        },
+      ],
+    };
+    const beforeGeometry = sketch.geometry;
+    const beforeConstraints = sketch.constraints;
+
+    const cmd = createMirrorCommand(sketch, [lineId], {
       kind: "frame-axis",
       entityId: DATUM_AXIS_X_ID,
     });
@@ -141,10 +154,17 @@ describe("Mirror", () => {
     if (!cmd.ok) {
       return;
     }
-    let history = createCommandHistory();
+
+    const history = createCommandHistory();
     const result = executeCommand(history, sketch, cmd.command);
     expect(result.sketch.geometry).toHaveLength(2);
+    expect(result.sketch.constraints).toHaveLength(2);
+    expect(result.sketch.constraints.filter((c) => c.type === "horizontal")).toHaveLength(
+      2,
+    );
+
     const undone = undoCommand(result.history, result.sketch);
-    expect(undone.sketch.geometry).toEqual(before.geometry);
+    expect(undone.sketch.geometry).toEqual(beforeGeometry);
+    expect(undone.sketch.constraints).toEqual(beforeConstraints);
   });
 });

@@ -3,6 +3,7 @@ import {
   applyClickSelection,
   clearSelection,
   createSelectionState,
+  pruneSelectionToExisting,
   selectOnly,
   setHovered,
   toggleInSelection,
@@ -51,5 +52,14 @@ describe("SelectionManager", () => {
     state = toggleInSelection(state, "y");
     state = toggleInSelection(state, "x");
     expect(state.selectedIds).toEqual(["y"]);
+  });
+
+  it("prunes selected and hovered ids missing from the sketch", () => {
+    let state = selectOnly(createSelectionState(), "a");
+    state = applyClickSelection(state, "b", { additive: true });
+    state = setHovered(state, "gone");
+    state = pruneSelectionToExisting(state, new Set(["a"]));
+    expect(state.selectedIds).toEqual(["a"]);
+    expect(state.hoveredId).toBeNull();
   });
 });

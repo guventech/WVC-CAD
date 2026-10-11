@@ -225,14 +225,25 @@ export function createMoveGeometryCommand(
     return null;
   }
   const previousGeometry = sketch.geometry;
+  const previousConstraints = sketch.constraints;
+  const nextGeometry = applied.geometry;
+  const nextConstraints = applied.constraints;
 
   return {
     label: `Move ${target.entityId}`,
     apply(current) {
-      return applyGeometryDragWithConstraints(current, target, to);
+      return {
+        ...current,
+        geometry: nextGeometry,
+        constraints: nextConstraints,
+      };
     },
     undo(current) {
-      return { ...current, geometry: previousGeometry };
+      return {
+        ...current,
+        geometry: previousGeometry,
+        constraints: previousConstraints,
+      };
     },
   };
 }

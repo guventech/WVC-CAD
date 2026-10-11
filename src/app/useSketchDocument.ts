@@ -59,6 +59,7 @@ import type { MirrorRequest } from "../sketch/tools/MirrorTool.ts";
 import type { FilletChamferRequest } from "../sketch/tools/FilletChamferTool.ts";
 import {
   clearSelection,
+  pruneSelectionToExisting,
   type SelectionState,
 } from "../sketch/selection/SelectionManager.ts";
 
@@ -401,54 +402,79 @@ export function useSketchDocument({
     [runConstraintCommand],
   );
 
-  const handleTrim = useCallback((request: TrimExtendRequest) => {
-    setDocumentState((current) => {
-      const outcome = createTrimCommand(
-        current.sketch,
-        request.entityId,
-        request.clickWorld,
-      );
-      if (!outcome.ok) {
-        setConstraintMessage(outcome.reason);
-        setConstraintConflict(null);
-        return current;
-      }
-      setConstraintMessage(null);
-      setConstraintConflict(null);
-      const result = executeCommand(
-        current.history,
-        current.sketch,
-        outcome.command,
-      );
-      return { sketch: result.sketch, history: result.history };
-    });
-  }, []);
+  const pruneSelectionAfterSketch = useCallback(
+    (sketch: Sketch) => {
+      const existing = new Set(sketch.geometry.map((entity) => entity.id));
+      setSelection((current) => pruneSelectionToExisting(current, existing));
+    },
+    [setSelection],
+  );
 
-  const handleExtend = useCallback((request: TrimExtendRequest) => {
-    setDocumentState((current) => {
-      const outcome = createExtendCommand(
-        current.sketch,
-        request.entityId,
-        request.clickWorld,
-      );
-      if (!outcome.ok) {
-        setConstraintMessage(outcome.reason);
+  const handleTrim = useCallback(
+    (request: TrimExtendRequest) => {
+      let nextSketch: Sketch | null = null;
+      setDocumentState((current) => {
+        const outcome = createTrimCommand(
+          current.sketch,
+          request.entityId,
+          request.clickWorld,
+        );
+        if (!outcome.ok) {
+          setConstraintMessage(outcome.reason);
+          setConstraintConflict(null);
+          return current;
+        }
+        setConstraintMessage(null);
         setConstraintConflict(null);
-        return current;
+        const result = executeCommand(
+          current.history,
+          current.sketch,
+          outcome.command,
+        );
+        nextSketch = result.sketch;
+        return { sketch: result.sketch, history: result.history };
+      });
+      if (nextSketch !== null) {
+        pruneSelectionAfterSketch(nextSketch);
       }
-      setConstraintMessage(null);
-      setConstraintConflict(null);
-      const result = executeCommand(
-        current.history,
-        current.sketch,
-        outcome.command,
-      );
-      return { sketch: result.sketch, history: result.history };
-    });
-  }, []);
+    },
+    [pruneSelectionAfterSketch],
+  );
+
+  const handleExtend = useCallback(
+    (request: TrimExtendRequest) => {
+      let nextSketch: Sketch | null = null;
+      setDocumentState((current) => {
+        const outcome = createExtendCommand(
+          current.sketch,
+          request.entityId,
+          request.clickWorld,
+        );
+        if (!outcome.ok) {
+          setConstraintMessage(outcome.reason);
+          setConstraintConflict(null);
+          return current;
+        }
+        setConstraintMessage(null);
+        setConstraintConflict(null);
+        const result = executeCommand(
+          current.history,
+          current.sketch,
+          outcome.command,
+        );
+        nextSketch = result.sketch;
+        return { sketch: result.sketch, history: result.history };
+      });
+      if (nextSketch !== null) {
+        pruneSelectionAfterSketch(nextSketch);
+      }
+    },
+    [pruneSelectionAfterSketch],
+  );
 
   const handleMirror = useCallback(
     (request: MirrorRequest) => {
+      let nextSketch: Sketch | null = null;
       setDocumentState((current) => {
         const outcome = createMirrorCommand(
           current.sketch,
@@ -467,49 +493,69 @@ export function useSketchDocument({
           current.sketch,
           outcome.command,
         );
+        nextSketch = result.sketch;
         return { sketch: result.sketch, history: result.history };
       });
+      if (nextSketch !== null) {
+        pruneSelectionAfterSketch(nextSketch);
+      }
     },
-    [selectedIds],
+    [pruneSelectionAfterSketch, selectedIds],
   );
 
-  const handleFillet = useCallback((request: FilletChamferRequest) => {
-    setDocumentState((current) => {
-      const outcome = createFilletCommand(current.sketch, request);
-      if (!outcome.ok) {
-        setConstraintMessage(outcome.reason);
+  const handleFillet = useCallback(
+    (request: FilletChamferRequest) => {
+      let nextSketch: Sketch | null = null;
+      setDocumentState((current) => {
+        const outcome = createFilletCommand(current.sketch, request);
+        if (!outcome.ok) {
+          setConstraintMessage(outcome.reason);
+          setConstraintConflict(null);
+          return current;
+        }
+        setConstraintMessage(null);
         setConstraintConflict(null);
-        return current;
+        const result = executeCommand(
+          current.history,
+          current.sketch,
+          outcome.command,
+        );
+        nextSketch = result.sketch;
+        return { sketch: result.sketch, history: result.history };
+      });
+      if (nextSketch !== null) {
+        pruneSelectionAfterSketch(nextSketch);
       }
-      setConstraintMessage(null);
-      setConstraintConflict(null);
-      const result = executeCommand(
-        current.history,
-        current.sketch,
-        outcome.command,
-      );
-      return { sketch: result.sketch, history: result.history };
-    });
-  }, []);
+    },
+    [pruneSelectionAfterSketch],
+  );
 
-  const handleChamfer = useCallback((request: FilletChamferRequest) => {
-    setDocumentState((current) => {
-      const outcome = createChamferCommand(current.sketch, request);
-      if (!outcome.ok) {
-        setConstraintMessage(outcome.reason);
+  const handleChamfer = useCallback(
+    (request: FilletChamferRequest) => {
+      let nextSketch: Sketch | null = null;
+      setDocumentState((current) => {
+        const outcome = createChamferCommand(current.sketch, request);
+        if (!outcome.ok) {
+          setConstraintMessage(outcome.reason);
+          setConstraintConflict(null);
+          return current;
+        }
+        setConstraintMessage(null);
         setConstraintConflict(null);
-        return current;
+        const result = executeCommand(
+          current.history,
+          current.sketch,
+          outcome.command,
+        );
+        nextSketch = result.sketch;
+        return { sketch: result.sketch, history: result.history };
+      });
+      if (nextSketch !== null) {
+        pruneSelectionAfterSketch(nextSketch);
       }
-      setConstraintMessage(null);
-      setConstraintConflict(null);
-      const result = executeCommand(
-        current.history,
-        current.sketch,
-        outcome.command,
-      );
-      return { sketch: result.sketch, history: result.history };
-    });
-  }, []);
+    },
+    [pruneSelectionAfterSketch],
+  );
 
   const handleEditDimension = useCallback(
     (constraintId: string, edit: DimensionEdit) => {

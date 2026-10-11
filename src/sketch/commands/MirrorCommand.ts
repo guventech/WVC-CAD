@@ -22,7 +22,9 @@ export function createMirrorCommand(
   }
 
   const previousGeometry = sketch.geometry;
+  const previousConstraints = sketch.constraints;
   const nextGeometry = outcome.sketch.geometry;
+  const nextConstraints = outcome.sketch.constraints;
 
   return {
     ok: true,
@@ -33,12 +35,14 @@ export function createMirrorCommand(
         return {
           ...current,
           geometry: nextGeometry,
+          constraints: nextConstraints,
         };
       },
       undo(current) {
         return {
           ...current,
           geometry: previousGeometry,
+          constraints: previousConstraints,
         };
       },
     },

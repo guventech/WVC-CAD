@@ -40,6 +40,28 @@ export function clearSelection(state: SelectionState): SelectionState {
 }
 
 /**
+ * Drop selected/hovered ids that are no longer present in the sketch
+ * (e.g. after trim, fillet, or load that replaces entities).
+ */
+export function pruneSelectionToExisting(
+  state: SelectionState,
+  existingIds: ReadonlySet<EntityId>,
+): SelectionState {
+  const selectedIds = state.selectedIds.filter((id) => existingIds.has(id));
+  const hoveredId =
+    state.hoveredId !== null && existingIds.has(state.hoveredId)
+      ? state.hoveredId
+      : null;
+  if (
+    selectedIds.length === state.selectedIds.length &&
+    hoveredId === state.hoveredId
+  ) {
+    return state;
+  }
+  return { ...state, selectedIds, hoveredId };
+}
+
+/**
  * Replace selection with one entity, or clear when `entityId` is null.
  */
 export function selectOnly(
