@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Filleted plate with hole",
+  "geometry": [
+    {
+      "id": "point-2",
+      "type": "point",
+      "position": {
+        "x": 120,
+        "y": 0
+      },
+      "construction": false
+    },
+    {
+      "id": "point-3",
+      "type": "point",
+      "position": {
+        "x": 120,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "point-4",
+      "type": "point",
+      "position": {
+        "x": 0,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-5",
+      "type": "line",
+      "start": {
+        "x": 16.970562748477146,
+        "y": 0
+      },
+      "end": {
+        "x": 120,
+        "y": 0
+      },
+      "construction": false
+    },
+    {
+      "id": "line-6",
+      "type": "line",
+      "start": {
+        "x": 120,
+        "y": 0
+      },
+      "end": {
+        "x": 120,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-7",
+      "type": "line",
+      "start": {
+        "x": 120,
+        "y": 80
+      },
+      "end": {
+        "x": 0,
+        "y": 80
+      },
+      "construction": false
+    },
+    {
+      "id": "line-8",
+      "type": "line",
+      "start": {
+        "x": 0,
+        "y": 80
+      },
+      "end": {
+        "x": 0,
+        "y": 16.970562748477146
+      },
+      "construction": false
+    },
+    {
+      "id": "arc-18",
+      "type": "arc",
+      "center": {
+        "x": 16.970562748477143,
+        "y": 16.970562748477143
+      },
+      "radius": 16.970562748477143,
+      "startAngle": 3.141592653589793,
+      "endAngle": -1.5707963267948963,
+      "construction": false
+    },
+    {
+      "id": "circle-21",
+      "type": "circle",
+      "center": {
+        "x": 60,
+        "y": 40
+      },
+      "radius": 15,
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-9",
+      "type": "rectangle",
+      "references": [
+        {
+          "entityId": "point-2",
+          "role": "corner-br"
+        },
+        {
+          "entityId": "point-3",
+          "role": "corner-tr"
+        },
+        {
+          "entityId": "point-4",
+          "role": "corner-tl"
+        },
+        {
+          "entityId": "line-5",
+          "role": "edge-bottom"
+        },
+        {
+          "entityId": "line-6",
+          "role": "edge-right"
+        },
+        {
+          "entityId": "line-7",
+          "role": "edge-top"
+        },
+        {
+          "entityId": "line-8",
+          "role": "edge-left"
+        }
+      ]
+    },
+    {
+      "id": "constraint-10",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-11",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-7",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-12",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-8",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-13",
+      "type": "vertical",
+      "references": [
+        {
+          "entityId": "line-6",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-14",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "end"
+        },
+        {
+          "entityId": "line-6",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-15",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-6",
+          "role": "end"
+        },
+        {
+          "entityId": "line-7",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-16",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "line-7",
+          "role": "end"
+        },
+        {
+          "entityId": "line-8",
+          "role": "start"
+        }
+      ]
+    },
+    {
+      "id": "constraint-19",
+      "type": "fillet",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "first"
+        },
+        {
+          "entityId": "line-8",
+          "role": "second"
+        },
+        {
+          "entityId": "arc-18",
+          "role": "entity"
+        }
+      ],
+      "value": 16.970562748477143
+    },
+    {
+      "id": "constraint-20",
+      "type": "radius",
+      "references": [
+        {
+          "entityId": "arc-18",
+          "role": "entity"
+        }
+      ],
+      "value": 16.970562748477143,
+      "driving": true
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-11T07:28:27.807Z",
+    "app": "wvc-cad"
+  }
+}

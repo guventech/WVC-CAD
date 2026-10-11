@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Capsule slot",
+  "geometry": [
+    {
+      "id": "line-1",
+      "type": "line",
+      "start": {
+        "x": 0,
+        "y": 20
+      },
+      "end": {
+        "x": 80,
+        "y": 20
+      },
+      "construction": false
+    },
+    {
+      "id": "line-2",
+      "type": "line",
+      "start": {
+        "x": 80,
+        "y": -20
+      },
+      "end": {
+        "x": 0,
+        "y": -20
+      },
+      "construction": false
+    },
+    {
+      "id": "arc-3",
+      "type": "arc",
+      "center": {
+        "x": 0,
+        "y": 0
+      },
+      "radius": 20,
+      "startAngle": 1.5707963267948966,
+      "endAngle": 4.71238898038469,
+      "construction": false
+    },
+    {
+      "id": "arc-4",
+      "type": "arc",
+      "center": {
+        "x": 80,
+        "y": 0
+      },
+      "radius": 20,
+      "startAngle": -1.5707963267948966,
+      "endAngle": 1.5707963267948966,
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-5",
+      "type": "parallel",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        },
+        {
+          "entityId": "line-2",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-6",
+      "type": "equal",
+      "references": [
+        {
+          "entityId": "arc-3",
+          "role": "entity"
+        },
+        {
+          "entityId": "arc-4",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-7",
+      "type": "tangent",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        },
+        {
+          "entityId": "arc-3",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-8",
+      "type": "tangent",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        },
+        {
+          "entityId": "arc-4",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-9",
+      "type": "tangent",
+      "references": [
+        {
+          "entityId": "line-2",
+          "role": "entity"
+        },
+        {
+          "entityId": "arc-3",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-10",
+      "type": "tangent",
+      "references": [
+        {
+          "entityId": "line-2",
+          "role": "entity"
+        },
+        {
+          "entityId": "arc-4",
+          "role": "entity"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-11T07:28:27.804Z",
+    "app": "wvc-cad"
+  }
+}

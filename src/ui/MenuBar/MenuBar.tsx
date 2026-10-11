@@ -13,9 +13,15 @@ export type MenuActionId =
   | "edit-toggle-construction"
   | "edit-construction-mode"
   | `file-recent:${string}`
+  | `file-sample:${string}`
   | `tool:${ActiveTool}`;
 
 export type RecentMenuItem = {
+  readonly id: string;
+  readonly label: string;
+};
+
+export type SampleMenuItem = {
   readonly id: string;
   readonly label: string;
 };
@@ -44,6 +50,7 @@ type MenuBarProps = {
   readonly createAsConstruction: boolean;
   readonly activeTool: ActiveTool;
   readonly recentFiles?: readonly RecentMenuItem[];
+  readonly sampleFiles?: readonly SampleMenuItem[];
   readonly onAction: (action: MenuActionId) => void;
 };
 
@@ -55,6 +62,7 @@ export function MenuBar({
   createAsConstruction,
   activeTool,
   recentFiles = [],
+  sampleFiles = [],
   onAction,
 }: MenuBarProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -77,6 +85,18 @@ export function MenuBar({
           label: entry.label,
         }));
 
+  const sampleItems: MenuItem[] =
+    sampleFiles.length === 0
+      ? []
+      : [
+          { kind: "separator" as const },
+          ...sampleFiles.map((entry) => ({
+            kind: "action" as const,
+            id: `file-sample:${entry.id}` as MenuActionId,
+            label: `Sample: ${entry.label}`,
+          })),
+        ];
+
   const menus: readonly MenuDefinition[] = [
     {
       id: "file",
@@ -85,6 +105,7 @@ export function MenuBar({
         { kind: "action", id: "file-new", label: "New sketch", shortcut: "Ctrl+N" },
         { kind: "action", id: "file-open", label: "Open…", shortcut: "Ctrl+O" },
         ...recentItems,
+        ...sampleItems,
         { kind: "separator" },
         { kind: "action", id: "file-save", label: "Save", shortcut: "Ctrl+S" },
         {

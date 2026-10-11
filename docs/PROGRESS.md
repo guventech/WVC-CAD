@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P1 (2026-10-11).** P0 done; T5–T8 landed (FileStorage, autosave, loader, Tauri CSP/icons/metadata). Next: T9 samples + alpha onboarding/tag.
+**Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed (FileStorage through samples/onboarding/alpha docs). Solver P2 (T10+) remains deferred.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -296,7 +296,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Sample sketches + File → Open sample…
 - Quick-start / first-run onboarding polish
 - Reliability fixes from alpha feedback; expand Playwright coverage
-- Review-brief P1 T9 (samples, first-run hint, alpha tag/release notes)
+- Review-brief P2 solver robustness (T10 scaling) when a concrete failure appears; else expand E2E (T18)
 - Code signing for Windows installers when certificate is ready — [PACKAGING.md](./PACKAGING.md)
 - Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 

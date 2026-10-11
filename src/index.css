@@ -423,6 +423,15 @@ button.is-active {
   gap: 8px;
 }
 
+.canvas-host {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -734,4 +743,32 @@ button.is-active {
 .diagnostic-error::marker {
   content: "✗ ";
   color: var(--error);
+}
+
+.first-run-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(36rem, calc(100% - 2rem));
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.first-run-hint p {
+  margin: 0;
+}
+
+.first-run-hint button {
+  flex: 0 0 auto;
 }

@@ -30,9 +30,15 @@ import { MenuBar, type MenuActionId } from "../ui/MenuBar/MenuBar.tsx";
 import { PropertiesPanel } from "../ui/PropertiesPanel/PropertiesPanel.tsx";
 import { StatusBar } from "../ui/StatusBar/StatusBar.tsx";
 import { RecoveryDialog } from "../ui/Dialogs/RecoveryDialog.tsx";
+import {
+  dismissFirstRunHint,
+  FirstRunHint,
+  shouldShowFirstRunHint,
+} from "../ui/Dialogs/FirstRunHint.tsx";
 import { useSketchAutosave } from "./useSketchAutosave.ts";
 import { useSketchDocument } from "./useSketchDocument.ts";
 import { useSketchFileIo } from "./useSketchFileIo.ts";
+import { SAMPLE_SKETCHES } from "./sampleSketches.ts";
 
 function clearCreationChrome(
   setActiveSnap: (snap: SnapCandidate | null) => void,
@@ -73,6 +79,9 @@ export default function App() {
   const [creationSessionActive, setCreationSessionActive] = useState(false);
   const [createAsConstruction, setCreateAsConstruction] = useState(false);
   const [documentFileName, setDocumentFileName] = useState<string | null>(null);
+  const [showFirstRunHint, setShowFirstRunHint] = useState(() =>
+    shouldShowFirstRunHint(),
+  );
 
   const {
     sketch,
@@ -144,6 +153,7 @@ export default function App() {
     handleSaveAs,
     handleOpen,
     handleOpenRecent,
+    handleOpenSample,
     handleExportDxf,
     recentFiles,
     clearDocumentFile,
@@ -247,6 +257,10 @@ export default function App() {
         }
         return;
       }
+      if (action.startsWith("file-sample:")) {
+        handleOpenSample(action.slice("file-sample:".length));
+        return;
+      }
       if (action === "file-export-dxf") {
         handleExportDxf();
         return;
@@ -288,6 +302,7 @@ export default function App() {
       handleNew,
       handleOpen,
       handleOpenRecent,
+      handleOpenSample,
       handleRedo,
       handleSave,
       handleSaveAs,
@@ -469,6 +484,10 @@ export default function App() {
           id: entry.id,
           label: entry.displayName,
         }))}
+        sampleFiles={SAMPLE_SKETCHES.map((entry) => ({
+          id: entry.id,
+          label: entry.label,
+        }))}
         onAction={handleMenuAction}
       />
       <DocumentBar
@@ -528,6 +547,15 @@ export default function App() {
           />
           <DiagnosticsPanel sketch={sketch} />
         </aside>
+        <div className="canvas-host">
+        {showFirstRunHint && sketch.geometry.length === 0 ? (
+          <FirstRunHint
+            onDismiss={() => {
+              dismissFirstRunHint();
+              setShowFirstRunHint(false);
+            }}
+          />
+        ) : null}
         <SketchCanvas
           sketch={sketch}
           selection={selection}
@@ -563,6 +591,7 @@ export default function App() {
           onCreationCancelled={handleCreationCancelled}
           polygonSidesNudge={polygonSidesNudge}
         />
+        </div>
       </div>
       <StatusBar
         sketch={sketch}

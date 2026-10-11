@@ -39,6 +39,7 @@ import {
 import type { ActiveTool } from "../sketch/tools/ActiveTool.ts";
 import type { ConstraintConflict } from "../sketch/constraints/OverConstraint.ts";
 import type { DocumentState } from "./useSketchDocument.ts";
+import { SAMPLE_SKETCHES } from "./sampleSketches.ts";
 
 export type UseSketchFileIoOptions = {
   readonly sketch: Sketch;
@@ -234,6 +235,36 @@ export function useSketchFileIo({
     });
   }, [applyOpenedSketch, storage]);
 
+  const handleOpenSample = useCallback(
+    (sampleId: string) => {
+      const sample = SAMPLE_SKETCHES.find((item) => item.id === sampleId);
+      if (sample === undefined) {
+        setConstraintMessage("Sample sketch not found.");
+        return;
+      }
+      void fetch(sample.path)
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.text();
+        })
+        .then((text) => {
+          // Not a durable file handle — do not add to Open recent.
+          applyOpenedSketch(text, {
+            id: `sample:${sample.id}`,
+            displayName: `${sample.label}.sketch.json`,
+            kind: "fsa",
+            resource: null,
+          });
+        })
+        .catch(() => {
+          setConstraintMessage(`Could not open sample “${sample.label}”.`);
+        });
+    },
+    [applyOpenedSketch, setConstraintMessage],
+  );
+
   const handleOpenRecent = useCallback(
     (entryId: string) => {
       if (storage === null) {
@@ -273,6 +304,7 @@ export function useSketchFileIo({
     handleSaveAs,
     handleOpen,
     handleOpenRecent,
+    handleOpenSample,
     handleExportDxf,
     recentFiles,
     clearDocumentFile,

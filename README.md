@@ -21,11 +21,25 @@ npm run tauri:build  # Windows NSIS/MSI installer
 
 ## Quick start
 
-1. `npm run dev` and open the app.
-2. Choose **Rectangle** from the shape flyout (▾), click two opposite corners.
-3. Add **Distance** / **Size** dimensions from the Constraints toolbar as needed.
-4. Check **Sketch Analysis** for a closed profile (“Ready for pad”).
-5. **File → Save** for `.sketch.json`, or **Export DXF…** for geometry interchange.
+1. `npm run dev` and open the app (under 5 minutes to first closed profile).
+2. Dismiss the first-run tip, or choose **File → Sample: …** for a ready sketch.
+3. Or draw: **Rectangle** from the shape flyout (▾), click two opposite corners.
+4. Add **Distance** / **Size** dimensions; check **Sketch Analysis** (“Ready for pad”).
+5. **File → Save** (overwrite when a file handle exists) or **Export DXF…**.
+
+![WVC-CAD canvas](./docs/images/app-canvas.png)
+
+### Feature status
+
+| Area | Status |
+|------|--------|
+| Points, lines, circles, arcs, rectangle, polygon, slot | Supported |
+| Fillet / chamfer / trim / extend / offset / mirror | Supported (offset: line/chain/loop/circle) |
+| Geometric + dimensional constraints + LM solver | Supported |
+| DOF / over-constraint honesty | Supported (no fake “fully constrained”) |
+| Save / Save As / recent / samples / autosave | Supported |
+| DXF | Export only |
+| 3D Pad/Pocket / STEP / cloud / AI | Not yet |
 
 See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities.
 
@@ -52,7 +66,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **Horizontal / Vertical** — click a line, or two points/endpoints/centers; stays H/V while dragging; conflicting constraints are rejected
 - **Parallel / Perpendicular / Tangent / Concentric / Midpoint / Equal / Symmetric / Point on object / Fix** — constraint tools (Constraints menu / toolbar)
 - **Dimensions** — Distance (smart), Size (circle ⌀ / Shift=R; arc R), Angle. Edit in the Constraints panel or double-click a canvas label
-- **File** — New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S) `*.sketch.json`; **Export DXF…** (geometry-only DXF R12 ASCII)
+- **File** — New (Ctrl+N), Open (Ctrl+O), Save / Save As, Open recent, **Sample: …**, Export DXF…
 - **Autosave** — dirty sketches autosave to a local recovery slot; restore prompt after crash/reload
 - **Undo / Redo** — Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z)
 - Snaps: grid, origin, endpoints/points, midpoints, centers, intersections, on-entity; temporary H/V (+ grid compose)

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "units": "mm",
+  "id": "sketch-1",
+  "name": "Over-constrained line",
+  "geometry": [
+    {
+      "id": "line-1",
+      "type": "line",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 50,
+        "y": 0
+      },
+      "construction": false
+    }
+  ],
+  "constraints": [
+    {
+      "id": "constraint-2",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "length-4",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        }
+      ],
+      "value": 50,
+      "driving": true
+    },
+    {
+      "id": "c-conflict-length",
+      "type": "length",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        }
+      ],
+      "value": 75,
+      "driving": true
+    }
+  ],
+  "settings": {
+    "gridVisible": true
+  },
+  "frame": {
+    "id": "frame-world",
+    "originId": "datum:origin",
+    "axes": [
+      {
+        "id": "datum:axis:x",
+        "tag": "x",
+        "direction": {
+          "x": 1,
+          "y": 0
+        }
+      },
+      {
+        "id": "datum:axis:y",
+        "tag": "y",
+        "direction": {
+          "x": 0,
+          "y": 1
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "savedAt": "2026-10-11T07:28:27.805Z",
+    "app": "wvc-cad"
+  }
+}
