@@ -34,7 +34,7 @@ Never use `===` for geometric float equality; use `isApproximatelyEqual`.
 
 Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), independent of zoom.
 
-## Current unit coverage (as of Chunk 14)
+## Current unit coverage (as of 2026-10-11; Chunks 0–27 + post-chunk tooling)
 
 | Area | Location | Focus |
 |------|----------|--------|
@@ -80,10 +80,10 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 ## Geometry tests (expand with each entity)
 
 - Vector / distance / angle / projection
-- Intersections (when implemented)
-- Bounding boxes (when implemented)
+- Intersections (`Intersections.ts` + snap/trim coverage)
 - Hit testing at extreme zoom
-- Serialization round-trip (when implemented)
+- Serialization round-trip (`SketchSerializer.test.ts`)
+- Polygon / slot / offset / DXF exporter unit tests under `src/sketch/**`
 
 ## Solver tests (Chunks 14–15)
 
@@ -114,7 +114,11 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 
 Keep selection/demo fixtures out of production App startup.
 
-## E2E plan (future Playwright)
+## E2E (Playwright)
+
+Landed smoke: `e2e/critical-path.spec.ts` — rectangle → closed profile → fillet → ready-for-pad → save download (`npm run test:e2e`).
+
+Further coverage candidates:
 
 - Create sketch → place points → select → delete
 - Create line → length/angle display → Escape finish

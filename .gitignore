@@ -46,5 +46,11 @@ Desktop.ini
 *.sln
 *.sw?
 
-# Tauri / packaging (when added later)
+# Tauri / packaging
 src-tauri/target
+
+# Local test / scratch artifacts (may contain machine paths)
+test-results/
+playwright-report/
+tmp*.txt
+tmp*.log

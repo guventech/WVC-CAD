@@ -137,7 +137,7 @@ constraints/
   DimensionInput.ts        unit parsing for dimension edit fields
 ```
 
-- Supported equations: coincident (stored handles), horizontal/vertical, parallel/perpendicular (unit-direction sin/cos), tangent (line–curve / curve–curve on supporting circles), concentric (shared centers), midpoint (point at line mid), equal, symmetric, point-on-object, length, H/V distance, radius/diameter, angle, coordinate-x/y, Fix; `rectangle` / `fillet` feature topology residuals. Generic Euclidean `distance` is **not** in the catalog until residuals exist (honesty).
+- Supported equations: coincident (stored handles), horizontal/vertical, parallel/perpendicular (unit-direction sin/cos), tangent (line–curve / curve–curve on supporting circles), concentric (shared centers), midpoint (point at line mid), equal, symmetric, point-on-object, length, Euclidean `distance`, H/V distance, radius/diameter, angle, coordinate-x/y, Fix; `rectangle` / `fillet` feature topology residuals. Smart Distance UX maps picks onto length / H/V / `distance` (ADR-048).
 - **Chamfer** features are rebuild-only (no solver residual); length/angle dimensions + geometry rebuild keep the blend. Documented intentional asymmetry vs fillet (ADR-045).
 - **Anchors** (drag) remove those parameters from X so the grabbed handle stays put. Parallel/perpendicular between two *user* lines anchors the first-picked line so the second follows.
 - **Rejection rule:** add, edit, and drag accept residual-OK `solved` or `under-constrained` results; over-constrained / inconsistent / failed keep the previous sketch.
@@ -191,11 +191,11 @@ Canvas preview calls the same apply function with ephemeral state; the model upd
 - React (`SketchCanvas`) binds pointer events and renders previews; it does not own engineering state machines.
 - Canvas UI is split for size: `canvasPointer` / `applyToolResult` / `dispatchActiveTool` + `useCanvasViewport` / `useCreationToolSession`.
 - Viewport draw is split: `renderViewport` orchestrates; `drawViewportChrome` (grid/axes) and `drawToolPreviews` own stroke details.
-- Active tools: `select`, `point`, `line`, `rectangle`, `circle`, `arc`, `trim`, `extend`, `mirror`, `fillet`, `chamfer`, `coincident`, `horizontal`, `vertical`, `dim-*` (see `ActiveTool.ts`).
+- Active tools: `select`, `point`, `line`, `rectangle`, `polygon`, `slot`, `circle`, `arc`, `arc3`, `arcTangent`, `trim`, `extend`, `offset`, `mirror`, `fillet`, `chamfer`, `coincident`, `horizontal`, `vertical`, `dim-*` (see `ActiveTool.ts`). Shape create tools share a Rectangle ▾ flyout in the geometry toolbar.
 - Line tool: click start → move with preview (X/Y/L/∠ + snap markers) → click end → continue from end; Escape cancels unfinished segment, second Escape (or Escape when idle) returns to Select.
 - Rectangle tool: click opposite corners → 4 points + 4 lines + H/V/coincident + `rectangle` feature constraint (ADR-011). Feature-local corner/edge edit keeps axis-alignment (not the numerical solver).
 - Circle tool: click center → radius preview (R) → click rim; zero radius rejected.
-- Arc tool (center-point): center → start (radius) → end; CCW sweep; three-point / tangent arcs later.
+- Arc tools: center-point Arc; three-point Arc3; tangent Arc from a line endpoint.
 
 ## World Datum Frame (Pre–Chunk 16 / ADR-022)
 
@@ -205,7 +205,7 @@ Typical absolute lock: coincident a corner/center to `datum:origin`, **or** driv
 
 ## Under-constrained visualization (Chunk 17 / ADR-023)
 
-Free solver variables (non-pivot Jacobian columns) map to geometry handles. Amber diamond markers show where motion remains; single-axis freedom adds a short H or V tick. Constraints panel + status tooltip explain the remaining DOF in plain language (not color alone). Dimension labels stay text-only for now (arrowed technical dimensions are polish, not this chunk).
+Free solver variables (non-pivot Jacobian columns) map to geometry handles. Amber diamond markers show where motion remains; single-axis freedom adds a short H or V tick. Constraints panel + status tooltip explain the remaining DOF in plain language (not color alone). Dimension annotations include extension lines / arrows for length, distance, radius, and diameter (`drawDimensionLeaders.ts`).
 
 **Fully-constrained entity coloring (ADR-049):** `fullyConstrainedEntityIds` marks entities whose body cannot leave its supporting place (free columns expanded through coincident clusters + rectangle corner topology; H/V edges may stay green under length-only freedom). Construction / hover / selected colors override. Driving `radius` / `diameter` hard-lock rim drag (size via dimension edit; center drag remains).
 
@@ -221,11 +221,11 @@ Driving dimension values edit from the Constraints panel or by double-clicking a
 
 ## Trim and extend (Chunk 19 / ADR-026)
 
-`Intersections.ts` provides line–line math. **Trim** removes the clicked interval of a line between cutters (other lines or world axes): end intervals keep the entity id; middle intervals split into two new lines and drop constraints that referenced the original. **Extend** grows the nearer endpoint to the nearest valid cutter along the ray. Rectangle feature edges are blocked. Ops run through undoable commands and `maintainConstraints` (reject on failure). Circles/arcs and break/fillet remain later chunks.
+`Intersections.ts` provides line–line math. **Trim** removes the clicked interval of a line between cutters (other lines or world axes): end intervals keep the entity id; middle intervals split into two new lines and drop constraints that referenced the original. **Extend** grows the nearer endpoint to the nearest valid cutter along the ray. Rectangle feature edges are blocked. Ops run through undoable commands and `maintainConstraints` (reject on failure). Circles/arcs as trim/extend targets and break/split remain later work. Fillet/chamfer are Chunk 21.
 
 ## Mirror (Chunk 20 / ADR-027)
 
-**Mirror** tool: select geometry, then click a sketch line or world X/Y axis. `MirrorMath` reflects points/lines/circles/arcs (arc start/end swapped to keep CCW). Copies are new entities; constraints are not duplicated. Rectangle feature selection expands to all members. Undo restores prior geometry.
+**Mirror** tool: select geometry, then click a sketch line or world X/Y axis. `MirrorMath` reflects points/lines/circles/arcs (arc start/end swapped to keep CCW). Copies are new entities; remappable geometric/dimensional constraints are copied with geometry (`MirrorConstraintCopy.ts`). Rectangle feature selection expands to all members. Undo restores prior geometry.
 
 ## Fillet and chamfer (Chunk 21 / ADR-028)
 

@@ -2,7 +2,12 @@
   "name": "sketcher",
   "private": true,
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guventech/WVC-CAD.git"
+  },
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc -b",

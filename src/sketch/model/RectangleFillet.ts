@@ -240,7 +240,7 @@ export function dissolveRectangleAtCorner(
  * Move origin/axis coincidents off a deleted rectangle corner point onto the
  * surviving edges as driving coordinate locate (0 mm).
  *
- * CAD practice (Fusion/SolidWorks): locate with offset-to-axis / dimensions to
+ * Common parametric CAD practice: locate with offset-to-axis / dimensions to
  * the straight edges — not only endpoint↔axis coincidents — so fillets that
  * consume corners do not drop the axis lock (sketch-12: Y stayed via
  * coordinate-x, X floated when coordinate-y was missing).

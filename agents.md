@@ -1,5 +1,7 @@
 # AGENTS.md — Parametric 2D Mechanical Sketcher
 
+> **Agent / contributor roadmap.** Chunk plan below is historical + forward guidance. **Live status** is always [PROGRESS.md](./PROGRESS.md) and [README.md](./README.md). Packaging scaffold (`src-tauri/`) already exists — see [PACKAGING.md](./PACKAGING.md).
+
 ## Living project docs (read these first for current status)
 
 | File | Role |
@@ -12,7 +14,7 @@
 
 **Agent rule:** Before coding, read PROGRESS.md and ARCHITECTURE.md. Do not invent status from this file alone — the chunk plan below is the roadmap; PROGRESS.md is the live checklist.
 
-**Current gate:** Chunks 0–27 and Pre–Chunk 16 (World Datum Frame) are complete — see PROGRESS.md. Prefer Tauri 2 (not Electron) for the eventual Windows installer; do not scaffold packaging mid-chunk unless asked.
+**Current gate:** Chunks 0–27 and Pre–Chunk 16 (World Datum Frame) are complete — see PROGRESS.md. Prefer Tauri 2 (not Electron) for the Windows installer; `src-tauri/` is scaffolded — extend packaging only when asked.
 
 # Architecture Preservation Rules
 

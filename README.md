@@ -1,10 +1,10 @@
-# WVC-CAD
+# Sketcher (working title)
 
-**Weekend Vibe-Coded CAD** — a parametric 2D mechanical sketcher (Chunks **0–27** complete).
+Experimental **parametric 2D mechanical sketcher**. Internal units are millimetres. The sketch model is the source of truth; React is a view only.
 
-Internal units: millimetres. The sketch model is the source of truth; React is a view only.
+The desktop window title is **Sketcher**. The GitHub repository name may change before a public launch.
 
-> Private WIP — engineering-oriented sketcher, not a production CAD product.
+> Not a production CAD product. No affiliation with Autodesk, Dassault Systèmes, Siemens, PTC, or other commercial CAD vendors. Icons and chrome are original — not copied from proprietary products.
 
 ## Scripts
 
@@ -21,7 +21,6 @@ npm run tauri:dev    # desktop window (needs Rust + WebView2)
 npm run tauri:build  # Windows NSIS/MSI installer
 ```
 
-
 ## Controls
 
 Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geometry/constraint toolbars.
@@ -29,7 +28,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **Select** — click to select; drag points, line ends/body, rect corners/edges, circle/arc centers or rims; Delete/Backspace to remove
 - **Point** — click to place; Escape → Select
 - **Line** — click start → end (L/∠); continues from the end; Escape cancels unfinished segment; perfect H/V lines get Horizontal/Vertical constraints
-- **Rectangle / Polygon / Slot** — click the shape flyout (▾ under Rectangle) to pick rectangle, N-gon, or capsule slot
+- **Rectangle / Polygon / Slot** — click the shape flyout (▾) to pick rectangle, N-gon, or capsule slot
 - **Circle** — click center → click radius (R); drag center to move; drag rim to resize
 - **Arc** — center → start → end (CCW sweep; R + Sweep); drag center to move; drag arc to resize
 - **3-pt Arc** — start → through → end (circle through three points)
@@ -45,7 +44,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **Horizontal / Vertical** — click a line, or two points/endpoints/centers; stays H/V while dragging; conflicting constraints are rejected
 - **Parallel / Perpendicular / Tangent / Concentric / Midpoint / Equal / Symmetric / Point on object / Fix** — constraint tools (Constraints menu / toolbar)
 - **Dimensions** — Distance (smart), Size (circle ⌀ / Shift=R; arc R), Angle. Edit in the Constraints panel or double-click a canvas label
-- **File** — New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S) `*.sketch.json`; **Export DXF…** (geometry-only R12)
+- **File** — New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S) `*.sketch.json`; **Export DXF…** (geometry-only DXF R12 ASCII)
 - **Autosave** — dirty sketches autosave to a local recovery slot; restore prompt after crash/reload
 - **Undo / Redo** — Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z)
 - Snaps: grid, origin, endpoints/points, midpoints, centers, intersections, on-entity; temporary H/V (+ grid compose)
@@ -60,9 +59,13 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 - Offset of mixed line+arc closed profiles falls back to single-segment / is skipped for polyline rebuild
 - DXF is export-only (no import; constraints not in DXF)
-- Dense solver is comfortable for tens–low hundreds of constraints (see ARCHITECTURE.md)
+- Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./ARCHITECTURE.md))
 - Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./PROGRESS.md) and [assessments.md](./assessments.md)
+- Tauri installer requires a local Rust toolchain; app icons are still scaffold defaults
 
+## License
+
+MIT — see [LICENSE](./LICENSE).
 
 ## Docs
 
@@ -72,6 +75,8 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Layers and edit pipeline |
 | [DECISIONS.md](./DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./TEST_PLAN.md) | Test coverage |
-| [AGENTS.md](./AGENTS.md) | Mission and chunk plan |
-| [assessments.md](./assessments.md) | Architecture assessment |
-| [PACKAGING.md](./PACKAGING.md) | Tauri 2 installer plan |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute |
+| [SECURITY.md](./SECURITY.md) | Vulnerability reporting |
+| [AGENTS.md](./AGENTS.md) | Agent/contributor roadmap |
+| [assessments.md](./assessments.md) | Historical architecture snapshot |
+| [PACKAGING.md](./PACKAGING.md) | Tauri 2 installer notes |

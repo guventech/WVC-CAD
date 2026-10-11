@@ -5,7 +5,7 @@ import type { Sketch } from "../model/Sketch.ts";
 const DXF_EXTENSION = ".dxf";
 
 /**
- * Export sketch geometry as AutoCAD R12 ASCII DXF.
+ * Export sketch geometry as DXF R12 ASCII.
  * Constraints, dimensions, and features are not represented — parametric
  * truth remains `.sketch.json`. Construction geometry goes on layer CONSTRUCTION.
  */

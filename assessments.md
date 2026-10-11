@@ -1,7 +1,9 @@
 # Architecture Assessment
 
+> **Historical snapshot (2026-10-06).** Not the live project status. For current state use [PROGRESS.md](./PROGRESS.md), [README.md](./README.md), and [ARCHITECTURE.md](./ARCHITECTURE.md). Chunk 27 and later 2D gap-recheck work landed after this review.
+
 **Date:** 2026-10-06  
-**Scope:** Post–Chunk 26 sketcher (Chunks 0–26 + Pre–Chunk 16 World Datum Frame; Tier 1–3 geometric constraints + Fix + dimensions). Next gated work: Chunk 27 (CAD-like UI refinement).  
+**Scope (at time of review):** Post–Chunk 26 sketcher (Chunks 0–26 + Pre–Chunk 16 World Datum Frame; Tier 1–3 geometric constraints + Fix + dimensions). Next gated work then: Chunk 27 (CAD-like UI refinement).  
 **Method:** Read-only code review against living docs (`PROGRESS.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `AGENTS.md`). Findings verified in source, not docs alone. Review models: Claude Opus 4.8 (thinking high) for architecture/design/constraint assessment, plus a second deep dive on geometry math and solver implementation.
 
 **Remediation status (2026-10-06):** Prep pass implemented (ADR-045). See [PROGRESS.md](./PROGRESS.md) “Assessment remediation”. Items marked **DONE** below were addressed in code/docs; **DEFERRED** remain honest limitations.

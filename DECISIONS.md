@@ -733,7 +733,7 @@ Reason:
 Align interaction with commercial sketchers (icons + selection-driven constraints) without moving CAD logic into UI.
 
 Status:
-**Implemented (UX U1–U5).** U6 backlog remains deferred.
+**Implemented (UX U1–U5).** U6 partially landed (green fully-constrained + rim lock + datum create snaps); later 2D gap work covered remaining listed backlog items.
 
 ---
 
@@ -782,7 +782,7 @@ When Rectangle or Circle creation commits with an active **origin** or **axis** 
 1. Origin → coincident (point/center ↔ `datum:origin`).
 2. Axis → coincident point-on-line (point/center ↔ world X or Y axis).
 3. If a new rectangle edge lies on a world axis, both corners of that edge are pinned the same way (origin preferred when the corner is at 0,0).
-4. Do **not** auto-add Parallel to axes — rectangle edges already have H/V; locate uses coincident / point-on-axis (FreeCAD-style Auto constraints).
+4. Do **not** auto-add Parallel to axes — rectangle edges already have H/V; locate uses coincident / point-on-axis (common parametric “auto locate” practice).
 
 Reason:
 Commercial sketchers turn datum snaps into permanent constraints on create; parallel-to-axis is redundant with horizontal/vertical.
@@ -798,7 +798,7 @@ Date: 2026-10-09
 
 Decision:
 When filleting/chamfering a rectangle corner:
-1. Datum coincidents on the deleted corner point migrate to driving **coordinate locate on the surviving edges** (`coordinate-x=0` / `coordinate-y=0`), matching Fusion/SolidWorks practice of dimensioning to axes/edges rather than consumed corner points.
+1. Datum coincidents on the deleted corner point migrate to driving **coordinate locate on the surviving edges** (`coordinate-x=0` / `coordinate-y=0`), matching common parametric CAD practice of dimensioning to axes/edges rather than consumed corner points.
 2. Rectangle create with datum snap also emits those edge coordinates (in addition to corner coincidents).
 3. Rectangle topology residuals remain for every non-null corner (not disabled when any corner opens).
 4. Driving `length` on filleted rectangle edges is **promoted** to opposite-edge outer spans (`horizontal-distance` / `vertical-distance`) before LM and before length-restore. Segment-length restore must not shove rectangle edges (sketch-13 drift).
@@ -884,7 +884,7 @@ Date: 2026-10-10
 
 Decision:
 1. Native parametric format remains versioned `.sketch.json`.
-2. **File → Export DXF…** writes AutoCAD R12 ASCII (LINE/CIRCLE/ARC/POINT; construction on layer CONSTRUCTION).
+2. **File → Export DXF…** writes DXF R12 ASCII (LINE/CIRCLE/ARC/POINT; construction on layer CONSTRUCTION).
 3. Constraints / dimensions / features are not represented in DXF. Import deferred.
 
 Status:

@@ -83,7 +83,7 @@
 | U4 | `ConstraintContextBar` on Select; greyed boxes; apply or continue-pick; coincident failures surfaced |
 | U5 | Constraint panel Related/All filter; feature rows de-emphasized; status Session disclosure |
 
-**U6 (partial):** fully-constrained entity green stroke + hard-lock rim drag when driving radius/diameter exists; origin/axis create auto-coincidents for rectangle/circle (2026-10-09). Remaining U6 backlog: polygon/slot/offset; dimension extension lines; Tauri packaging; mirror constraint copy.
+**U6 (partial):** fully-constrained entity green stroke + hard-lock rim drag when driving radius/diameter exists; origin/axis create auto-coincidents for rectangle/circle (2026-10-09). Later landings covered polygon/slot/offset, dim leaders, Tauri scaffold, and mirror constraint copy — see Current section above.
 
 ### Fully-constrained green + radius rim lock (2026-10-09)
 
@@ -378,21 +378,19 @@ Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicu
 
 ## Known limitations (product)
 
-- Dimension canvas graphics are labels only (no technical-drawing arrows yet)
-- Three-point / tangent arcs not implemented
-- Advanced snaps (intersection, parallel, perp, tangent) not yet
 - Fillet/chamfer: line–line corners and rectangle corners (opens corner on `rectangle` feature; Offset locate vs size)
 - Chamfer topology is rebuild-only (no solver residual, unlike fillet)
 - Tangent uses supporting circle (contact may lie off a drawn arc sweep)
 - Frozen sign/side/mode captures can trap LM on large branch-crossing moves
 - Dense solver: interactive comfort is tens–low hundreds of constraints (not yet 1,000)
-- Mixed mm/radian residuals are unscaled (column scaling deferred)
+- Mixed mm/radian residuals are unscaled (column scaling deferred; ADR-052)
 - Whole-rectangle body drag translate still limited (Offset X/Y: locate rigid-translates; opposing same-axis Offsets size one edge + rebuild blends)
 - Profile analyzer: line + arc wire loops + circles; area uses arc mid-samples
 - Perfect H/V lines get orientation constraints on create
-- Mirror copies geometry only (constraints not duplicated)
-- No Playwright E2E yet
-- No Windows installer yet (Tauri planned)
+- Offset of mixed line+arc closed profiles is not rebuilt as a polyline loop
+- DXF export is geometry-only (no import; constraints omitted)
+- Tauri 2 scaffold exists (`npm run tauri:dev` / `tauri:build`); needs Rust; icons still defaults; no signed store release yet
+- Parallel / perpendicular / tangent inference snaps during create remain a subset (intersection + H/V + on-entity are present)
 
 ## Living docs
 
