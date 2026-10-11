@@ -185,6 +185,11 @@ export function useSketchAutosave({
   ]);
 
   useEffect(() => {
+    // Tauri/WebView2 close is handled by useTauriCloseGuard; beforeunload
+    // confirmations are unreliable there and can interfere with window close.
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      return;
+    }
     const onBeforeUnload = (event: BeforeUnloadEvent): void => {
       if (!hasUnsavedChanges) {
         return;

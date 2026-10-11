@@ -19,8 +19,8 @@ The sketcher is in **genuinely good engineering health** for its stage. The doma
 ## Strengths
 
 - **Clean domain / React boundary.** `src/sketch/**` does not import React or `src/ui/**` — the hard rule in `ARCHITECTURE.md` holds in practice.
-- **Honest solver surface.** [`Solver.ts`](src/sketch/solver/Solver.ts) diagnoses from residuals + [`DegreesOfFreedom.ts`](src/sketch/constraints/DegreesOfFreedom.ts) (Jacobian rank); status labels are text-backed, not cosmetic.
-- **Signed, factored residual catalog.** [`Residuals.ts`](src/sketch/solver/Residuals.ts) captures sign/mode once per solve (`createResidualContext`); constraint families live in dedicated modules.
+- **Honest solver surface.** [`Solver.ts`](../src/sketch/solver/Solver.ts) diagnoses from residuals + [`DegreesOfFreedom.ts`](../src/sketch/constraints/DegreesOfFreedom.ts) (Jacobian rank); status labels are text-backed, not cosmetic.
+- **Signed, factored residual catalog.** [`Residuals.ts`](../src/sketch/solver/Residuals.ts) captures sign/mode once per solve (`createResidualContext`); constraint families live in dedicated modules.
 - **Degenerate-geometry rejection.** `geometryIsValid` in LM + loader geometric sanity on parse.
 - **Reject-on-conflict contract.** Failed edits return the original sketch.
 - **Defensive serialization.** Versioned `.sketch.json` with structural + geometric sanity checks.
