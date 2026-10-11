@@ -69,4 +69,4 @@ These are enforced in app code today; keep them when adding tools:
 - Electron
 - Online-only / cloud runtime as the primary product
 - Shipping `node_modules` or a Node server with the app
-- Native file dialogs / OS menu bridge (optional later; browser download Save works today)
+- Native Save/Open via Tauri dialog + fs plugins (ADR-058); web uses File System Access API or download fallback

@@ -99,7 +99,7 @@ export function StatusBar({
           data-testid="unsaved-indicator"
           title={
             hasUnsavedChanges
-              ? "Local autosave is active; Save to download a file copy"
+              ? "Local autosave is active; Save to write the sketch file"
               : "No unsaved changes vs last Save/Open"
           }
         >

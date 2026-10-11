@@ -1,10 +1,22 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { clearCommandHistory } from "../sketch/commands/Command.ts";
 import {
   downloadTextFile,
-  pickSketchFileText,
   sketchDownloadFileName,
 } from "./sketchFileIo.ts";
+import {
+  createFileStorage,
+  isTauriRuntime,
+} from "./fileStorage/createFileStorage.ts";
+import { createWebFileStorage } from "./fileStorage/webFileStorage.ts";
+import {
+  createLocalStorageRecentStore,
+  loadRecentFiles,
+  recentEntryToFileRef,
+  rememberRecentFile,
+} from "./fileStorage/recentFiles.ts";
+import type { RecentFileEntry, SketchFileRef } from "./fileStorage/types.ts";
+import type { FileStorage } from "./fileStorage/types.ts";
 import {
   clearAutosaveStore,
   sketchContentFingerprint,
@@ -45,6 +57,26 @@ export type UseSketchFileIoOptions = {
   readonly setConstraintConflict: (conflict: ConstraintConflict | null) => void;
 };
 
+function isFileSystemFileHandle(value: unknown): value is FileSystemFileHandle {
+  return (
+    typeof FileSystemFileHandle !== "undefined" &&
+    value instanceof FileSystemFileHandle
+  );
+}
+
+function isReopenableRef(ref: SketchFileRef): boolean {
+  if (ref.kind === "tauri-path" || ref.kind === "memory") {
+    return true;
+  }
+  if (ref.kind === "fsa") {
+    return (
+      isFileSystemFileHandle(ref.resource) ||
+      (typeof ref.resource === "string" && ref.resource.length > 0)
+    );
+  }
+  return false;
+}
+
 export function useSketchFileIo({
   sketch,
   documentFileName,
@@ -57,25 +89,129 @@ export function useSketchFileIo({
   setConstraintMessage,
   setConstraintConflict,
 }: UseSketchFileIoOptions) {
+  const [storage, setStorage] = useState<FileStorage | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    if (window.__WVC_FILE_STORAGE__ !== undefined) {
+      return window.__WVC_FILE_STORAGE__;
+    }
+    // Web storage is synchronous; Tauri plugins load async.
+    if (!isTauriRuntime()) {
+      return createWebFileStorage();
+    }
+    return null;
+  });
+  const [fileRef, setFileRef] = useState<SketchFileRef | null>(null);
+  const [recentFiles, setRecentFiles] = useState<RecentFileEntry[]>(() =>
+    loadRecentFiles(),
+  );
+
+  useEffect(() => {
+    if (storage !== null) {
+      return;
+    }
+    let cancelled = false;
+    void createFileStorage().then((resolved) => {
+      if (!cancelled) {
+        setStorage(resolved);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [storage]);
+
+  const applyOpenedSketch = useCallback(
+    (text: string, ref: SketchFileRef | null) => {
+      const parsed = parseSketchJson(text);
+      if (!parsed.ok) {
+        setConstraintMessage(`Could not open sketch. ${parsed.reason}`);
+        setConstraintConflict(null);
+        return false;
+      }
+      const loaded = settleLoadedSketch(parsed.sketch);
+      setDocumentState({
+        sketch: loaded,
+        history: clearCommandHistory(),
+      });
+      const name = ref?.displayName ?? sketchDownloadFileName(loaded.name);
+      setDocumentFileName(name);
+      setFileRef(ref);
+      setLastCleanFingerprint(sketchContentFingerprint(loaded));
+      clearAutosaveStore(autosaveStore);
+      setSelection((current) => clearSelection(current));
+      setConstraintMessage(null);
+      setConstraintConflict(null);
+      setActiveTool("select");
+      if (ref !== null && isReopenableRef(ref)) {
+        setRecentFiles(rememberRecentFile(ref));
+      }
+      return true;
+    },
+    [
+      autosaveStore,
+      setActiveTool,
+      setConstraintConflict,
+      setConstraintMessage,
+      setDocumentFileName,
+      setDocumentState,
+      setLastCleanFingerprint,
+      setSelection,
+    ],
+  );
+
+  const markSaved = useCallback(
+    (ref: SketchFileRef) => {
+      setFileRef(ref);
+      setDocumentFileName(ref.displayName);
+      setLastCleanFingerprint(sketchContentFingerprint(sketch));
+      clearAutosaveStore(autosaveStore);
+      setConstraintMessage(null);
+      setConstraintConflict(null);
+      if (isReopenableRef(ref)) {
+        setRecentFiles(rememberRecentFile(ref));
+      }
+    },
+    [
+      autosaveStore,
+      setConstraintConflict,
+      setConstraintMessage,
+      setDocumentFileName,
+      setLastCleanFingerprint,
+      sketch,
+    ],
+  );
+
   const handleSave = useCallback(() => {
-    const filename =
+    if (storage === null) {
+      return;
+    }
+    const suggested =
       documentFileName ?? sketchDownloadFileName(sketch.name);
     const json = serializeSketchToJson(sketch);
-    downloadTextFile(filename, json);
-    setDocumentFileName(filename);
-    setLastCleanFingerprint(sketchContentFingerprint(sketch));
-    clearAutosaveStore(autosaveStore);
-    setConstraintMessage(null);
-    setConstraintConflict(null);
-  }, [
-    autosaveStore,
-    documentFileName,
-    setConstraintConflict,
-    setConstraintMessage,
-    setDocumentFileName,
-    setLastCleanFingerprint,
-    sketch,
-  ]);
+    void storage.save(json, fileRef, suggested).then((ref) => {
+      if (ref === null) {
+        return;
+      }
+      markSaved(ref);
+    });
+  }, [documentFileName, fileRef, markSaved, sketch, storage]);
+
+  const handleSaveAs = useCallback(() => {
+    if (storage === null) {
+      return;
+    }
+    const suggested =
+      documentFileName ?? sketchDownloadFileName(sketch.name);
+    const json = serializeSketchToJson(sketch);
+    void storage.saveAs(json, suggested).then((ref) => {
+      if (ref === null) {
+        return;
+      }
+      markSaved(ref);
+    });
+  }, [documentFileName, markSaved, sketch, storage]);
 
   const handleExportDxf = useCallback(() => {
     const filename = dxfDownloadFileName(
@@ -87,43 +223,58 @@ export function useSketchFileIo({
   }, [documentFileName, setConstraintConflict, setConstraintMessage, sketch]);
 
   const handleOpen = useCallback(() => {
-    void pickSketchFileText().then((text) => {
-      if (text === null) {
+    if (storage === null) {
+      return;
+    }
+    void storage.open().then((opened) => {
+      if (opened === null) {
         return;
       }
-      const parsed = parseSketchJson(text);
-      if (!parsed.ok) {
-        setConstraintMessage(`Could not open sketch. ${parsed.reason}`);
-        setConstraintConflict(null);
-        return;
-      }
-      const sketch = settleLoadedSketch(parsed.sketch);
-      setDocumentState({
-        sketch,
-        history: clearCommandHistory(),
-      });
-      setDocumentFileName(sketchDownloadFileName(sketch.name));
-      setLastCleanFingerprint(sketchContentFingerprint(sketch));
-      clearAutosaveStore(autosaveStore);
-      setSelection((current) => clearSelection(current));
-      setConstraintMessage(null);
-      setConstraintConflict(null);
-      setActiveTool("select");
+      applyOpenedSketch(opened.text, opened.ref);
     });
-  }, [
-    autosaveStore,
-    setActiveTool,
-    setConstraintConflict,
-    setConstraintMessage,
-    setDocumentFileName,
-    setDocumentState,
-    setLastCleanFingerprint,
-    setSelection,
-  ]);
+  }, [applyOpenedSketch, storage]);
+
+  const handleOpenRecent = useCallback(
+    (entryId: string) => {
+      if (storage === null) {
+        return;
+      }
+      const entry = loadRecentFiles(createLocalStorageRecentStore()).find(
+        (item) => item.id === entryId,
+      );
+      if (entry === undefined) {
+        setConstraintMessage("Recent file is no longer available.");
+        return;
+      }
+      const ref = recentEntryToFileRef(entry);
+      if (ref === null) {
+        setConstraintMessage("Recent file is no longer available.");
+        return;
+      }
+      void storage.openRef(ref).then((opened) => {
+        if (opened === null) {
+          setConstraintMessage(
+            "Could not reopen recent file. Use File → Open…",
+          );
+          return;
+        }
+        applyOpenedSketch(opened.text, opened.ref);
+      });
+    },
+    [applyOpenedSketch, setConstraintMessage, storage],
+  );
+
+  const clearDocumentFile = useCallback(() => {
+    setFileRef(null);
+  }, []);
 
   return {
     handleSave,
+    handleSaveAs,
     handleOpen,
+    handleOpenRecent,
     handleExportDxf,
+    recentFiles,
+    clearDocumentFile,
   };
 }

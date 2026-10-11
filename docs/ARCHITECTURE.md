@@ -88,11 +88,16 @@ Pan and zoom never change geometry coordinates.
 - UI: History **Undo** / **Redo** in the top toolbar; Constraints panel can delete a constraint.
 - App also binds Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z).
 
-## Save / load (Chunk 25 / ADR-034)
+## Save / load (Chunk 25 / ADR-034 / ADR-058)
 
 - Interchange: `SketchDocument` JSON (`*.sketch.json`) via `sketchToDocument` / `parseSketchJson`.
 - Includes `schemaVersion`, `units` (mm only), geometry, constraints, settings, frame, metadata.
-- Browser File **Open** / **Save** (Ctrl+O / Ctrl+S); load clears undo history and syncs entity ids.
+- `FileStorage` in `src/app/fileStorage/` owns Open / Save / Save As (not the sketch domain).
+- Web: File System Access API when available (overwrite-on-save + IDB handles); else download fallback.
+- Tauri: `@tauri-apps/plugin-dialog` + `@tauri-apps/plugin-fs` (dynamic import; scoped fs).
+- **Save** (Ctrl+S) overwrites the current handle/path; **Save As** (Ctrl+Shift+S) picks a new file.
+- Recent files in the File menu (`localStorage` + FSA IDB / Tauri paths).
+- Load clears undo history and syncs entity ids.
 - Unsupported schema versions or non-`mm` units are rejected (no silent unit conversion).
 
 ## Autosave / recovery (Chunk 26 / ADR-035)

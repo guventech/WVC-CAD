@@ -24,6 +24,13 @@ test.describe("critical path smoke", () => {
   test("rectangle → closed profile → fillet → ready for pad → save download", async ({
     page,
   }) => {
+    // Force download fallback so the smoke test can assert a download event
+    // (Chromium's File System Access picker has no Playwright download hook).
+    await page.addInitScript(() => {
+      Reflect.deleteProperty(window, "showSaveFilePicker");
+      Reflect.deleteProperty(window, "showOpenFilePicker");
+    });
+
     await page.goto("/");
     await dismissRecoveryIfPresent(page);
 

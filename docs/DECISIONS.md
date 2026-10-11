@@ -905,3 +905,22 @@ Fixed hexagon and single-line offset were known leftovers after the 2D gap reche
 
 Status:
 **Implemented.**
+
+---
+
+## ADR-058 — FileStorage for overwrite Save / Save As / recent files
+
+Date: 2026-10-11
+
+Decision:
+1. Introduce `FileStorage` (`open` / `save` / `saveAs` / `openRef`) under `src/app/fileStorage/` — never inside `src/sketch/**`.
+2. Web uses the File System Access API when present (durable handle + IndexedDB for reloads); otherwise keep the download fallback (no durable overwrite).
+3. Tauri uses `@tauri-apps/plugin-dialog` + `@tauri-apps/plugin-fs`, loaded only via dynamic import when `__TAURI_INTERNALS__` is present. These are the only non-React production npm deps and must stay out of the sketch domain.
+4. **Save** overwrites the current ref; **Save As** always prompts. File menu lists recent reopenable files (metadata in `localStorage`).
+5. Tests/Playwright may inject `window.__WVC_FILE_STORAGE__` (memory backend) to prove overwrite without native pickers.
+
+Reason:
+Browser download-on-every-Save created `sketch (1).sketch.json` duplicates and is a data-loss trap for the desktop installer. Real overwrite semantics are required for alpha readiness (review brief T5).
+
+Status:
+**Implemented.**

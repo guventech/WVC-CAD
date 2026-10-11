@@ -5,13 +5,20 @@ export type MenuActionId =
   | "file-new"
   | "file-open"
   | "file-save"
+  | "file-save-as"
   | "file-export-dxf"
   | "edit-undo"
   | "edit-redo"
   | "edit-delete"
   | "edit-toggle-construction"
   | "edit-construction-mode"
+  | `file-recent:${string}`
   | `tool:${ActiveTool}`;
+
+export type RecentMenuItem = {
+  readonly id: string;
+  readonly label: string;
+};
 
 type MenuItem =
   | {
@@ -36,6 +43,7 @@ type MenuBarProps = {
   readonly canToggleConstruction: boolean;
   readonly createAsConstruction: boolean;
   readonly activeTool: ActiveTool;
+  readonly recentFiles?: readonly RecentMenuItem[];
   readonly onAction: (action: MenuActionId) => void;
 };
 
@@ -46,11 +54,28 @@ export function MenuBar({
   canToggleConstruction,
   createAsConstruction,
   activeTool,
+  recentFiles = [],
   onAction,
 }: MenuBarProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement | null>(null);
   const baseId = useId();
+
+  const recentItems: MenuItem[] =
+    recentFiles.length === 0
+      ? [
+          {
+            kind: "action",
+            id: "file-recent:__none__",
+            label: "Open recent",
+            disabled: true,
+          },
+        ]
+      : recentFiles.map((entry) => ({
+          kind: "action" as const,
+          id: `file-recent:${entry.id}` as MenuActionId,
+          label: entry.label,
+        }));
 
   const menus: readonly MenuDefinition[] = [
     {
@@ -59,7 +84,15 @@ export function MenuBar({
       items: [
         { kind: "action", id: "file-new", label: "New sketch", shortcut: "Ctrl+N" },
         { kind: "action", id: "file-open", label: "Open…", shortcut: "Ctrl+O" },
-        { kind: "action", id: "file-save", label: "Save…", shortcut: "Ctrl+S" },
+        ...recentItems,
+        { kind: "separator" },
+        { kind: "action", id: "file-save", label: "Save", shortcut: "Ctrl+S" },
+        {
+          kind: "action",
+          id: "file-save-as",
+          label: "Save As…",
+          shortcut: "Ctrl+Shift+S",
+        },
         {
           kind: "action",
           id: "file-export-dxf",

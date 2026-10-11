@@ -137,7 +137,15 @@ export default function App() {
     handleDiscardRecovery,
   } = autosave;
 
-  const { handleSave, handleOpen, handleExportDxf } = useSketchFileIo({
+  const {
+    handleSave,
+    handleSaveAs,
+    handleOpen,
+    handleOpenRecent,
+    handleExportDxf,
+    recentFiles,
+    clearDocumentFile,
+  } = useSketchFileIo({
     sketch,
     documentFileName,
     setDocumentFileName,
@@ -184,6 +192,7 @@ export default function App() {
       history: createCommandHistory(),
     });
     setDocumentFileName(null);
+    clearDocumentFile();
     setLastCleanFingerprint(emptySketchCleanFingerprint());
     clearAutosaveStore(autosaveStore);
     setSelection(() => createSelectionState());
@@ -201,6 +210,7 @@ export default function App() {
     );
   }, [
     autosaveStore,
+    clearDocumentFile,
     hasUnsavedChanges,
     setConstraintConflict,
     setConstraintMessage,
@@ -222,6 +232,17 @@ export default function App() {
       }
       if (action === "file-save") {
         handleSave();
+        return;
+      }
+      if (action === "file-save-as") {
+        handleSaveAs();
+        return;
+      }
+      if (action.startsWith("file-recent:")) {
+        const recentId = action.slice("file-recent:".length);
+        if (recentId !== "__none__") {
+          handleOpenRecent(recentId);
+        }
         return;
       }
       if (action === "file-export-dxf") {
@@ -264,8 +285,10 @@ export default function App() {
       handleExportDxf,
       handleNew,
       handleOpen,
+      handleOpenRecent,
       handleRedo,
       handleSave,
+      handleSaveAs,
       handleToolChange,
       handleUndo,
       selection.selectedIds,
@@ -297,7 +320,11 @@ export default function App() {
 
       if (mod && event.key.toLowerCase() === "s") {
         event.preventDefault();
-        handleSave();
+        if (event.shiftKey) {
+          handleSaveAs();
+        } else {
+          handleSave();
+        }
         return;
       }
 
@@ -376,6 +403,7 @@ export default function App() {
     handleOpen,
     handleRedo,
     handleSave,
+    handleSaveAs,
     handleUndo,
     selection.selectedIds,
     setConstraintMessage,
@@ -434,6 +462,10 @@ export default function App() {
         canToggleConstruction={selection.selectedIds.length > 0}
         createAsConstruction={createAsConstruction}
         activeTool={activeTool}
+        recentFiles={recentFiles.map((entry) => ({
+          id: entry.id,
+          label: entry.displayName,
+        }))}
         onAction={handleMenuAction}
       />
       <DocumentBar
