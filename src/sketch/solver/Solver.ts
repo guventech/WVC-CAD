@@ -1,3 +1,22 @@
+/**
+ * TODO (ADR-052): Implement residual and column scaling for Jacobian
+ *
+ * Current state: Unscaled JᵀJ + per-variable rebuilds; residuals mix mm and
+ * radians in one vector. Practical interactive limit is tens–low hundreds of
+ * constraints (see SolverPerformance.test.ts / SolverScale.test.ts).
+ *
+ * Future work (when a concrete rank/large-edit failure arises or a dedicated
+ * milestone lands):
+ * 1. Normalize residuals per variable type (mm, radians)
+ * 2. Scale Jacobian columns by |∂F/∂X| magnitude
+ * 3. Re-baseline on the 1,000-constraint fixture (SolverScale.test.ts)
+ * 4. Validate mixed length+angle DOF fixtures still match honesty rules
+ *
+ * Deferred because scaling changes DOF fixtures and can hide real
+ * under-constraint. Alpha focuses on <~200-constraint sketches.
+ *
+ * See docs/PROGRESS.md, docs/DECISIONS.md (ADR-052).
+ */
 import {
   analyzeDegreesOfFreedom,
   classifySketchStatus,

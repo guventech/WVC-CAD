@@ -22,7 +22,12 @@ npm run tauri:build  # Windows NSIS/MSI installer
 ## Quick start
 
 1. `npm run dev` and open the app (under 5 minutes to first closed profile).
-2. Dismiss the first-run tip, or choose **File → Sample: …** for a ready sketch.
+2. Dismiss the first-run tip, or choose **File → Sample: …** for a ready sketch from `public/samples/`:
+   - Anchored rectangle — fully constrained 100×50 mm
+   - Filleted plate with hole — outer profile + inner circle
+   - Capsule slot — slot create tool result
+   - Mirrored bracket — L-bracket mirrored about Y
+   - Over-constrained line — conflicting lengths (solver status honesty)
 3. Or draw: **Rectangle** from the shape flyout (▾), click two opposite corners.
 4. Add **Distance** / **Size** dimensions; check **Sketch Analysis** (“Ready for pad”).
 5. **File → Save** (overwrite when a file handle exists) or **Export DXF…**.

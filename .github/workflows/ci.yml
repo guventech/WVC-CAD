@@ -21,6 +21,11 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
+      - name: Log Node / TypeScript versions
+        run: |
+          node -v
+          npm -v
+          npx tsc -v
       - run: npm run check
       - name: npm audit (non-blocking)
         continue-on-error: true
@@ -36,6 +41,11 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
+      - name: Log Node / TypeScript versions
+        run: |
+          node -v
+          npm -v
+          npx tsc -v
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - if: failure()
