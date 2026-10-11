@@ -89,6 +89,43 @@ describe("fillet follows line drag", () => {
     expect(arc.center.x).toBeCloseTo(30, 1);
   });
 
+  it("survives a large parent move via fillet wedge branch retry", () => {
+    let sketch = createEmptySketch();
+    sketch = addLineToSketch(sketch, { x: 0, y: 0 }, { x: 100, y: 0 })!.sketch;
+    sketch = addLineToSketch(sketch, { x: 0, y: 0 }, { x: 0, y: 80 })!.sketch;
+    const hId = sketch.geometry[0]!.id;
+    const vId = sketch.geometry[1]!.id;
+
+    const filleted = applyFilletLines(sketch, hId, vId, { x: 8, y: 8 }, 10);
+    expect(filleted.ok).toBe(true);
+    if (!filleted.ok) {
+      return;
+    }
+    sketch = filleted.sketch;
+
+    sketch = applyGeometryDragWithConstraints(
+      sketch,
+      {
+        kind: "line-body",
+        entityId: vId,
+        grabOffset: { x: 0, y: 0 },
+        span: { x: 0, y: 80 },
+      },
+      { x: 55, y: 40 },
+    );
+
+    const arc = sketch.geometry.find((e) => e.type === "arc");
+    const vLine = sketch.geometry.find((e) => e.id === vId);
+    expect(arc?.type).toBe("arc");
+    expect(vLine?.type).toBe("line");
+    if (arc?.type !== "arc" || vLine?.type !== "line") {
+      return;
+    }
+    expect(listUnsatisfiedConstraints(sketch)).toHaveLength(0);
+    expect(arc.radius).toBeCloseTo(10, 4);
+    expect(vLine.start.x).toBeCloseTo(55, 1);
+  });
+
   it("rebuilds both fillets on a shared rectangle edge when that edge moves", () => {
     const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 100, y: 50 })!;
     let sketch = add.apply(createEmptySketch());

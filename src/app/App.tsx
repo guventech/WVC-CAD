@@ -463,7 +463,7 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell">
+    <>
       {pendingRecovery !== null && (
         <RecoveryDialog
           savedAt={pendingRecovery.savedAt}
@@ -473,6 +473,7 @@ export default function App() {
           onDiscard={handleDiscardRecovery}
         />
       )}
+      <div className="app-shell">
       <MenuBar
         canUndo={documentCanUndo}
         canRedo={documentCanRedo}
@@ -613,6 +614,7 @@ export default function App() {
         hasUnsavedChanges={hasUnsavedChanges}
         autosaveWarning={autosaveWarning}
       />
-    </div>
+      </div>
+    </>
   );
 }

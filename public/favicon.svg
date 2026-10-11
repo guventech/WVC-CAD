@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="4" fill="#1e1e1e"/>
-  <path d="M6 16h20M16 6v20" stroke="#4fc1ff" stroke-width="1.5"/>
-  <circle cx="16" cy="16" r="2" fill="#d4d4d4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="WVC-CAD">
+  <rect width="32" height="32" rx="6" fill="#1a1f28"/>
+  <path d="M6 16.5h20" stroke="#4db8ff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16.5 26V6" stroke="#4db8ff" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16.5" cy="16.5" r="2" fill="#e8eef5"/>
+  <path d="M21 16.5v2.5" stroke="#8aa0b5" stroke-width="1.2" stroke-linecap="round"/>
 </svg>

@@ -5,6 +5,11 @@ import { syncFilletArcAngles } from "../geometry/FilletTopology.ts";
 import { buildJacobian } from "./Jacobian.ts";
 import { solveNormalEquations, vecAdd, vecNormInf } from "./LinearAlgebra.ts";
 import {
+  residualRowWeights,
+  scaleJacobianRows,
+  scaleResidualRows,
+} from "./ResidualScaling.ts";
+import {
   buildResidualVector,
   createResidualContext,
   listUnsatisfiedConstraints,
@@ -97,11 +102,22 @@ export function solveLevenbergMarquardt(
       context,
       residual,
     );
+    // ADR-052: row-weight mixed mm/radian residuals for the normal equations.
+    // Column scaling is omitted — anisotropic λ damping broke H/V settles.
+    // Engineering residual norms stay unscaled.
+    const rowWeights = residualRowWeights(equations, currentSketch);
+    const scaledResidual = scaleResidualRows(residual, rowWeights);
+    const scaledJacobian = scaleJacobianRows(
+      jacobian,
+      residual.length,
+      values.length,
+      rowWeights,
+    );
     const step = solveNormalEquations(
       residual.length,
       values.length,
-      jacobian,
-      residual,
+      scaledJacobian,
+      scaledResidual,
       lambda,
     );
 

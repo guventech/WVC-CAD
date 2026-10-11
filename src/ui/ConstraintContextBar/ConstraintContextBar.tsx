@@ -31,8 +31,15 @@ export function ConstraintContextBar({
   visible,
   onAction,
 }: ConstraintContextBarProps) {
+  // Always mount a row so shell layout does not reflow when leaving Select.
   if (!visible) {
-    return null;
+    return (
+      <div
+        className="constraint-context-bar constraint-context-bar--hidden"
+        aria-hidden="true"
+        data-testid="constraint-context-bar-spacer"
+      />
+    );
   }
 
   const rows = evaluateConstraintApplicability(sketch, selectedIds);

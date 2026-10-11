@@ -1,8 +1,7 @@
 /**
- * TODO (ADR-052): Jacobian rank uses the same unscaled residual/Jacobian as LM.
- * Do not invent DOF from dimension counts or closed-profile status. When residual
- * / column scaling lands, re-check DOF fixtures and SolverScale.test.ts.
- * See docs/DECISIONS.md (ADR-052).
+ * ADR-052: rank uses row-scaled Jacobian from `assembleSystem` (positive
+ * weights ⇒ same nullspace dimension). Do not invent DOF from dimension
+ * counts or closed-profile status. See ResidualScaling.ts / DECISIONS.md.
  */
 import { TOLERANCE } from "../geometry/GeometryMath.ts";
 import type { Sketch } from "../model/Sketch.ts";

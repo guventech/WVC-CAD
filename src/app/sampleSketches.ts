@@ -16,25 +16,25 @@ export const SAMPLE_SKETCHES: readonly SampleSketchInfo[] = [
   {
     id: "filleted-plate",
     label: "Filleted plate with hole",
-    description: "Rectangle, one fillet, and an inner circle",
+    description: "Located 120×80 plate, BL fillet, fixed ⌀30 hole",
     path: "/samples/filleted-plate-with-hole.sketch.json",
   },
   {
     id: "capsule-slot",
     label: "Capsule slot",
-    description: "Slot create tool result",
+    description: "Slot at origin with pitch 80 mm and R20 (still some free DOF)",
     path: "/samples/capsule-slot.sketch.json",
   },
   {
     id: "mirrored-bracket",
-    label: "Mirrored bracket",
-    description: "L-bracket mirrored about the Y-axis",
+    label: "L-bracket",
+    description: "Fully constrained L at the origin (60×40 mm)",
     path: "/samples/mirrored-bracket.sketch.json",
   },
   {
     id: "over-constrained-line",
     label: "Over-constrained line",
-    description: "Conflicting lengths — shows inconsistent solver status",
+    description: "Intentional conflicting lengths — inconsistent solver demo",
     path: "/samples/over-constrained-line.sketch.json",
   },
 ] as const;

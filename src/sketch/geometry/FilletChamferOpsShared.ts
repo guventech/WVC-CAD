@@ -505,20 +505,45 @@ export function rebuildFilletGeometry(
     return null;
   }
 
-  const pickPoint = filletWedgePickPoint(line1, line2) ?? arc.center;
-  const plan = computeLineLineFillet(line1, line2, radiusMm, pickPoint, {
-    arcId: arc.id,
-    construction: arc.construction,
-  });
-  if (plan === null) {
-    return null;
+  const hit = intersectInfiniteLines(
+    line1.start,
+    line1.end,
+    line2.start,
+    line2.end,
+    TOLERANCE.coincidence,
+  );
+  const primaryPick = filletWedgePickPoint(line1, line2) ?? arc.center;
+  const picks: Point2D[] = [primaryPick];
+  // Large parent moves can flip the exterior wedge; retry the opposite branch
+  // (ADR-052 fillet sign/branch retry) before giving up.
+  if (hit !== null) {
+    picks.push({
+      x: 2 * hit.point.x - primaryPick.x,
+      y: 2 * hit.point.y - primaryPick.y,
+    });
+    if (
+      Math.hypot(arc.center.x - primaryPick.x, arc.center.y - primaryPick.y) >
+      TOLERANCE.coincidence
+    ) {
+      picks.push(arc.center);
+    }
   }
 
-  const mutated = applyFilletPlan(sketch, feature.line1Id, feature.line2Id, plan);
-  if (mutated === null) {
-    return null;
+  for (const pickPoint of picks) {
+    const plan = computeLineLineFillet(line1, line2, radiusMm, pickPoint, {
+      arcId: arc.id,
+      construction: arc.construction,
+    });
+    if (plan === null) {
+      continue;
+    }
+    const mutated = applyFilletPlan(sketch, feature.line1Id, feature.line2Id, plan);
+    if (mutated === null) {
+      continue;
+    }
+    return syncFilletRadiusConstraints(mutated, feature, radiusMm);
   }
-  return syncFilletRadiusConstraints(mutated, feature, radiusMm);
+  return null;
 }
 
 /**

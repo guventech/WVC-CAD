@@ -28,7 +28,7 @@ npm run tauri:build  # Windows NSIS/MSI installer
 5. Open **Sketch Analysis** — look for “Ready for pad” when the outer profile is closed.
 6. **File → Save** (or **Export DXF…** for geometry-only interchange).
 
-Other samples: filleted plate with hole, capsule slot, mirrored bracket, over-constrained line.
+Other samples: filleted plate with hole, capsule slot, L-bracket, over-constrained line.
 
 ![WVC-CAD canvas](./docs/images/app-canvas.png)
 

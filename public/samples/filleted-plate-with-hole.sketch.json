@@ -84,7 +84,7 @@
       "construction": false
     },
     {
-      "id": "arc-18",
+      "id": "arc-27",
       "type": "arc",
       "center": {
         "x": 16.970562748477143,
@@ -96,7 +96,7 @@
       "construction": false
     },
     {
-      "id": "circle-21",
+      "id": "circle-30",
       "type": "circle",
       "center": {
         "x": 60,
@@ -224,7 +224,91 @@
       ]
     },
     {
-      "id": "constraint-19",
+      "id": "constraint-20",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "point-2",
+          "role": "position"
+        },
+        {
+          "entityId": "datum:axis:x",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-21",
+      "type": "coordinate-y",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "constraint-23",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "point-4",
+          "role": "position"
+        },
+        {
+          "entityId": "datum:axis:y",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-24",
+      "type": "coordinate-x",
+      "references": [
+        {
+          "entityId": "line-8",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "length-25",
+      "type": "horizontal-distance",
+      "references": [
+        {
+          "entityId": "line-8",
+          "role": "start"
+        },
+        {
+          "entityId": "line-6",
+          "role": "start"
+        }
+      ],
+      "value": 120,
+      "driving": true
+    },
+    {
+      "id": "length-26",
+      "type": "vertical-distance",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "start"
+        },
+        {
+          "entityId": "line-7",
+          "role": "start"
+        }
+      ],
+      "value": 80,
+      "driving": true
+    },
+    {
+      "id": "constraint-28",
       "type": "fillet",
       "references": [
         {
@@ -236,22 +320,66 @@
           "role": "second"
         },
         {
-          "entityId": "arc-18",
+          "entityId": "arc-27",
           "role": "entity"
         }
       ],
       "value": 16.970562748477143
     },
     {
-      "id": "constraint-20",
+      "id": "constraint-29",
       "type": "radius",
       "references": [
         {
-          "entityId": "arc-18",
+          "entityId": "arc-27",
           "role": "entity"
         }
       ],
       "value": 16.970562748477143,
+      "driving": true
+    },
+    {
+      "id": "horizontal-distance-31",
+      "type": "horizontal-distance",
+      "references": [
+        {
+          "entityId": "datum:origin",
+          "role": "position"
+        },
+        {
+          "entityId": "circle-30",
+          "role": "center"
+        }
+      ],
+      "value": 60,
+      "driving": true
+    },
+    {
+      "id": "vertical-distance-32",
+      "type": "vertical-distance",
+      "references": [
+        {
+          "entityId": "datum:origin",
+          "role": "position"
+        },
+        {
+          "entityId": "circle-30",
+          "role": "center"
+        }
+      ],
+      "value": 40,
+      "driving": true
+    },
+    {
+      "id": "diameter-33",
+      "type": "diameter",
+      "references": [
+        {
+          "entityId": "circle-30",
+          "role": "entity"
+        }
+      ],
+      "value": 30,
       "driving": true
     }
   ],
@@ -281,7 +409,7 @@
     ]
   },
   "metadata": {
-    "savedAt": "2026-10-11T07:28:27.807Z",
+    "savedAt": "2026-10-11T15:10:04.982Z",
     "app": "wvc-cad"
   }
 }

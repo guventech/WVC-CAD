@@ -149,7 +149,7 @@ constraints/
 - **Rejection rule:** add, edit, and drag accept residual-OK `solved` or `under-constrained` results; over-constrained / inconsistent / failed keep the previous sketch.
 - Degenerate “solutions” (zero-length line, zero radius) are rejected even if F≈0 (blocks H+V collapse-to-point).
 - `solve(sketch)` does **not** mutate and does **not** run LM — it diagnoses **stored** geometry (residual gates + Jacobian rank). Interactive edits use `solveSketch` / `maintainConstraints`. After load, status reflects stored geometry until the next settling edit (or an explicit `solveSketch`).
-- **Jacobian / DOF:** central finite differences; residuals mix mm and radians in one unscaled vector — mixed length+angle DOF fixtures lock current behavior. **Residual/column scaling is deferred** (ADR-052) until a concrete rank or large-edit failure requires it; DOF is never faked from dimension counts or closed-profile status.
+- **Jacobian / DOF:** central finite differences; engineering gates use unscaled mm/radian residuals. LM + rank apply ADR-052 **row weights** (length ÷ characteristic length); DOF is never faked from dimension counts or closed-profile status.
 - **Practical scale:** dense `JᵀJ` + per-variable residual rebuilds. Interactive solving is comfortable for tens–low hundreds of constraints; AGENTS §10’s 1,000-constraint target needs sparse/analytic Jacobians. Baseline: `SolverPerformance.test.ts` (~100 constraints).
 - **Fillet geometry re-seating:** after LM, `reconcileCornerFeaturesAfterSolve` rebuilds derived blend arcs / restores driving lengths, then re-runs LM. It is not a second solver — residual satisfaction remains the acceptance gate (ADR-045).
 

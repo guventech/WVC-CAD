@@ -67,10 +67,18 @@ button.is-active {
 }
 
 .app-shell {
-  display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  overflow: hidden;
   background: var(--bg-app);
+}
+
+.app-shell > .menu-bar,
+.app-shell > .document-bar,
+.app-shell > .tool-row,
+.app-shell > .constraint-context-bar {
+  flex-shrink: 0;
 }
 
 /* —— Menu bar (File | Edit | Sketch | Constraints | Tools) —— */
@@ -314,6 +322,14 @@ button.is-active {
   border-bottom: 1px solid var(--border);
 }
 
+.constraint-context-bar--hidden {
+  min-height: 0;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+  border-bottom: 0;
+}
+
 .constraint-context-bar .toolbar-label {
   margin-right: 4px;
 }
@@ -435,7 +451,9 @@ button.is-active {
 .workspace {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
+  flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 .side-panels {
@@ -628,6 +646,7 @@ button.is-active {
 }
 
 .status-bar {
+  flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;

@@ -1,6 +1,10 @@
 import type { PositionAnchor } from "../constraints/Coincident.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import {
+  residualRowWeights,
+  scaleJacobianRows,
+} from "./ResidualScaling.ts";
+import {
   buildResidualVector,
   createResidualContext,
   residualValues,
@@ -17,8 +21,9 @@ import {
  * Absolute floor avoids zero-scale stalls. Central differences give O(step²)
  * truncation error, better matched to solverResidual (1e-8) than one-sided FD.
  *
- * Residuals mix mm and radians unscaled (ADR-052). Do not add ad-hoc column
- * scaling here without updating DOF fixtures and documenting the change.
+ * `assembleSystem` applies ADR-052 row weights to the returned Jacobian so
+ * mixed mm/radian systems are better conditioned for rank/DOF. Raw FD stays
+ * unscaled; callers that need engineering residual norms use `residual`.
  */
 const FD_RELATIVE = 1e-7;
 const FD_ABSOLUTE = 1e-8;
@@ -75,11 +80,18 @@ export function assembleSystem(
   const equations = buildResidualVector(sketch, context);
   const residual = residualValues(equations);
   const jacobian = buildJacobian(sketch, system, system.values, context, residual);
+  const weights = residualRowWeights(equations, sketch);
+  const scaledJacobian = scaleJacobianRows(
+    jacobian,
+    residual.length,
+    system.values.length,
+    weights,
+  );
   return {
     system,
     context,
     residual,
-    jacobian,
+    jacobian: scaledJacobian,
     constraintIds: equations.map((equation) => equation.constraintId),
   };
 }

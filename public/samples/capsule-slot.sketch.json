@@ -139,6 +139,74 @@
           "role": "entity"
         }
       ]
+    },
+    {
+      "id": "coincident-11",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "arc-3",
+          "role": "center"
+        },
+        {
+          "entityId": "datum:origin",
+          "role": "position"
+        }
+      ]
+    },
+    {
+      "id": "horizontal-12",
+      "type": "horizontal",
+      "references": [
+        {
+          "entityId": "line-1",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "distance-13",
+      "type": "distance",
+      "references": [
+        {
+          "entityId": "arc-3",
+          "role": "center"
+        },
+        {
+          "entityId": "arc-4",
+          "role": "center"
+        }
+      ],
+      "value": 80,
+      "driving": true
+    },
+    {
+      "id": "radius-14",
+      "type": "radius",
+      "references": [
+        {
+          "entityId": "arc-3",
+          "role": "entity"
+        }
+      ],
+      "value": 20,
+      "driving": true
+    },
+    {
+      "id": "vertical-distance-15",
+      "type": "vertical-distance",
+      "references": [
+        {
+          "entityId": "datum:origin",
+          "role": "position"
+        },
+        {
+          "entityId": "arc-4",
+          "role": "center"
+        }
+      ],
+      "value": 0,
+      "driving": true
     }
   ],
   "settings": {
@@ -167,7 +235,7 @@
     ]
   },
   "metadata": {
-    "savedAt": "2026-10-11T07:28:27.804Z",
+    "savedAt": "2026-10-11T15:10:04.976Z",
     "app": "wvc-cad"
   }
 }

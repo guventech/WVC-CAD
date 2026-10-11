@@ -41,7 +41,7 @@ Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
 ### Config notes
 
 - App id: `com.wvccad.app` (`src-tauri/tauri.conf.json`)
-- Bundle targets: **NSIS only** for alpha (`0.1.0-alpha.1`). WiX/MSI rejects non-numeric prerelease labels like `alpha`; re-enable `"msi"` when the version is MSI-safe (e.g. `0.1.0` or `0.1.0-1`).
+- Bundle targets: **NSIS only** for alpha (`0.1.0-alpha.2`). WiX/MSI rejects non-numeric prerelease labels like `alpha`; re-enable `"msi"` when the version is MSI-safe (e.g. `0.1.0` or `0.1.0-1`).
 - Dev URL: `http://localhost:5173` (Vite `strictPort`)
 - CSP: production WebView CSP in `tauri.conf.json` (no cloud `connect-src`); web `index.html` meta allows `ws:`/`wss:` for Vite HMR only
 - Icons: original mark from `branding/icon-source.png` via `npx tauri icon`

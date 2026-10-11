@@ -812,21 +812,22 @@ Status:
 
 ---
 
-## ADR-052 — Solver residual scaling deferred; honesty unchanged
+## ADR-052 — Solver residual/column scaling; honesty unchanged
 
-Date: 2026-10-10
+Date: 2026-10-10  
+Updated: 2026-10-11
 
 Decision:
-1. Keep mixed mm and radian residuals in one unscaled vector for LM and Jacobian rank. Do **not** invent column/residual scaling until a concrete rank or large-edit failure forces it.
-2. Do **not** add fake “fully constrained” shortcuts (dimension counts, green-only heuristics, or profile-closed ⇒ DOF 0).
-3. Fillet large-move sign/branch retry remains deferred; recreate-from-scratch + promote/migrate (ADR-051) is the acceptance path for axis locate after fillets.
-4. `isReadyForPad` is a **topology** gate only (outer loop, no open solid wire, no self-intersection, no non-manifold). It does not claim solver DOF is zero.
+1. Engineering residual gates (`listUnsatisfiedConstraints`, displayed ‖F‖) stay on **unscaled** mm / radian residuals.
+2. LM normal equations and Jacobian-rank DOF use **positive row weights** (length residuals ÷ characteristic sketch length; angle/unitless weight 1) via `ResidualScaling.ts`. Positive row weights do not change nullspace dimension — DOF is never invented from dimension counts. Variable column scaling is **not** used in LM (anisotropic λ damping regressed H/V settles).
+3. Fillet rebuild retries the **opposite wedge pick** (and current arc center) when the primary wedge fails after large parent moves.
+4. `isReadyForPad` remains a **topology** gate only.
 
 Reason:
-Premature residual scaling changes DOF fixtures and can hide real under-constraint. Pad handoff needs honest profiles + honest DOF, not scaled cosmetics.
+Mixed units in one F(X) hurt LM conditioning on larger sketches; row/column equilibration improves solve stability without fake fully-constrained shortcuts.
 
 Status:
-**Accepted (scaling deferred; honesty documented).**
+**Accepted (scaling implemented; honesty preserved).**
 
 ---
 

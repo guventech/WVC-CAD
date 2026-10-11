@@ -229,7 +229,73 @@
       ]
     },
     {
-      "id": "length-19",
+      "id": "constraint-18",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "point-1",
+          "role": "position"
+        },
+        {
+          "entityId": "datum:origin",
+          "role": "position"
+        }
+      ]
+    },
+    {
+      "id": "constraint-20",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "point-2",
+          "role": "position"
+        },
+        {
+          "entityId": "datum:axis:x",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-21",
+      "type": "coordinate-y",
+      "references": [
+        {
+          "entityId": "line-5",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "constraint-23",
+      "type": "coincident",
+      "references": [
+        {
+          "entityId": "point-4",
+          "role": "position"
+        },
+        {
+          "entityId": "datum:axis:y",
+          "role": "entity"
+        }
+      ]
+    },
+    {
+      "id": "constraint-24",
+      "type": "coordinate-x",
+      "references": [
+        {
+          "entityId": "line-8",
+          "role": "start"
+        }
+      ],
+      "value": 0,
+      "driving": true
+    },
+    {
+      "id": "length-25",
       "type": "length",
       "references": [
         {
@@ -241,7 +307,7 @@
       "driving": true
     },
     {
-      "id": "length-20",
+      "id": "length-26",
       "type": "length",
       "references": [
         {
@@ -279,7 +345,7 @@
     ]
   },
   "metadata": {
-    "savedAt": "2026-10-11T07:28:27.800Z",
+    "savedAt": "2026-10-11T15:10:04.970Z",
     "app": "wvc-cad"
   }
 }

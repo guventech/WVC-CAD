@@ -4,10 +4,20 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] — 2026-10-11
+
 ### Added
 
-- Playwright E2E for dimension edit (panel) and first-run tip dismiss persistence
+- ADR-052 residual row scaling for LM + Jacobian rank (`ResidualScaling.ts`)
+- Fillet rebuild opposite-wedge retry after large parent moves
+- Playwright E2E for dimension edit, first-run tip dismiss, status-bar resize, and anchored-rectangle sample edit
+- Hardened teaching samples (origin locate + driving dims); L-bracket replaces free mirrored pair
+- Refined axes app icon (concept A) + updated favicon
 - Clearer first-run / README quick-start tutorial path
+
+### Fixed
+
+- Bottom status bar disappearing on window resize / tool switch (shell layout)
 
 ## [0.1.0-alpha.1] — 2026-10-11
 

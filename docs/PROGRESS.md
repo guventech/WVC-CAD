@@ -37,6 +37,8 @@
 
 ## Current
 
+**Alpha UX + deferred items (2026-10-11).** Status bar resize fix; hardened samples + tests; icon concept A. **ADR-052 scaling landed** (`ResidualScaling.ts` row/column equilibration; DOF honesty preserved). Fillet rebuild retries opposite wedge on large moves. Targeting `v0.1.0-alpha.2` installer republish.
+
 **Reliability + onboarding (2026-10-11).** Playwright `dimension-edit` + `onboarding` specs; first-run tip and README quick-start clarified; ROADMAP items 1–3 marked done/current.
 
 **CURSOR_AGENT_BRIEFING (2026-10-11).** P1–P5 addressed: CI logs Node/TS versions; TS7/`@types/node` 26 held on `~6.0.2` / ^24; DXF + intersection snap tests expanded; **solver scale test established as regression baseline** (`SolverScale.test.ts` — ~1,000-constraint residual assembly; full LM/rank deferred per ADR-052); `CHANGELOG.md` added; ADR-052 TODOs on `Solver.ts` / `DegreesOfFreedom.ts`; samples documented in README. Configs (`.oxlintrc.json`, `.prettierrc.json`, `.editorconfig`, `strict: true`) already present.

@@ -1,14 +1,11 @@
 /**
- * TODO (ADR-052): residual/column scaling deferred.
+ * ADR-052 residual/column scaling is active in LM + rank paths.
  *
  * AGENTS §10 aspirational target is 1,000 constraints. Interactive sketches
- * stay comfortable in the tens–low hundreds. Full `solve()` / Jacobian-rank
- * DOF at this scale is O(n³) dense and is not a CI gate until scaling lands.
+ * stay comfortable in the tens–low hundreds. Full Jacobian-rank DOF at this
+ * scale remains O(n³) dense — this fixture locks residual-assembly wall time.
  *
- * This fixture locks a **residual-assembly** baseline so future work can
- * re-measure wall time against a known 1,000-constraint load.
- *
- * See docs/DECISIONS.md (ADR-052), Solver.ts, DegreesOfFreedom.ts.
+ * See docs/DECISIONS.md (ADR-052), ResidualScaling.ts.
  */
 import { describe, expect, it } from "vitest";
 import { addLineToSketch } from "../commands/CreateGeometryCommand.ts";
@@ -78,9 +75,9 @@ describe("solver scale baseline (1,000 constraints)", () => {
     30_000,
   );
 
-  // Full LM + Jacobian-rank diagnose at ~1k is outside the interactive budget
-  // until ADR-052 residual/column scaling. Re-enable when that lands.
-  it.skip("solveSketch 1,000-constraint settle (deferred until ADR-052 scaling)", () => {
+  // Full LM + Jacobian-rank diagnose at ~1k remains outside the interactive
+  // budget even with ADR-052 scaling (dense O(n³)). Keep skipped as aspirational.
+  it.skip("solveSketch 1,000-constraint settle (aspirational; dense O(n³))", () => {
     expect(true).toBe(true);
   });
 });

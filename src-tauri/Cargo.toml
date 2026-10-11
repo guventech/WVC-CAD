@@ -1,6 +1,6 @@
 [package]
 name = "wvc-cad"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 description = "WVC-CAD — parametric 2D mechanical sketcher (Tauri shell)"
 authors = ["WVC-CAD"]
 license = "MIT"
