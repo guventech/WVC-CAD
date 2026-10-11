@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P0 (2026-10-11).** Working through [WVC-CAD_review_and_fix_brief](https://github.com/guventech/WVC-CAD) external findings: CI/templates landed; docs tidy + solver cleanup in progress.
+**Review brief P0 (2026-10-11).** External review findings: CI/templates landed (T1); docs/link fixes in progress (T2+).
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -194,7 +194,7 @@ Deferred: residual scaling, sign-retry, feature residual polymorphism, exact pro
 
 | Area | What landed |
 |------|-------------|
-| Domain | `Tangent.ts` — line↔circle/arc (`|d|−R`) and circle↔circle (external/internal) |
+| Domain | `Tangent.ts` — line↔circle/arc (abs(d)−R) and circle↔circle (external/internal) |
 | Solver | Side / mode captured at solve start (no flip mid-iteration) |
 | Tools | **Tangent** — line+curve or two curves; world axes allowed as lines |
 | UI | Canvas glyph `T`; Constraints toolbar |
@@ -291,10 +291,14 @@ Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicu
 
 ## Next
 
-- Tier 3 geometric catalog complete (Angle dim tool already shipped in Chunk 13)
-- Chunk 27 — CAD-like UI refinement
-- …
-- Later: Tauri 2 Windows installer — see [PACKAGING.md](./PACKAGING.md)
+Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
+
+- Sample sketches + File → Open sample…
+- Quick-start / first-run onboarding polish
+- Reliability fixes from alpha feedback; expand Playwright coverage
+- Review-brief P0/P1 (CI done; docs tidy; real Save/Save As; loader harden)
+- Installer polish (custom icons, unsigned→signed plan) — [PACKAGING.md](./PACKAGING.md)
+- Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 
 ## Chunk 23 results (2026-10-05)
 
@@ -304,7 +308,7 @@ Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicu
 | Wire | Solid line + arc loops + circle loops; nesting (concentric circles, circle-in-polygon) |
 | Open | `openEntityIds` for wire not in a closed loop |
 | UI / diagnostics | Sketch Analysis shows outer/hole counts; profile findings use analyzer |
-| Limits | Solid arcs not wired into loops yet; no 3D extrusion |
+| Limits | Solid arcs not wired into loops yet; no 3D extrusion *(superseded — line+arc wire loops are supported; see Known limitations / ProfileAnalyzer)* |
 
 ## Chunk 22 results (2026-10-05)
 
@@ -332,7 +336,7 @@ Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicu
 |------|-------------|
 | Math | `MirrorMath.ts` — reflect point/line/circle/arc across an axis |
 | Ops | `MirrorOps.ts` — duplicate selection across world axis or any line |
-| Tool | **Mirror** — select geometry, click line or world axis; copies geometry only (no constraint clones) |
+| Tool | **Mirror** — select geometry, click line or world axis; copies geometry only (no constraint clones) *(superseded — remappable constraints are copied; see Mirror copy / MirrorConstraintCopy)* |
 | Undo | `createMirrorCommand` snapshots geometry |
 
 ## Chunk 19 results (2026-10-05)
@@ -398,11 +402,15 @@ Filleted rectangle + driving length + large/stepwise Select-drag of a perpendicu
 
 | File | Role |
 |------|------|
+| [README.md](./README.md) | How to run |
 | [AGENTS.md](./AGENTS.md) | Mission, chunk plan, agent rules |
+| [ROADMAP.md](./ROADMAP.md) | Near-term public priorities |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Layer boundaries, performance rules |
 | [DECISIONS.md](./DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./TEST_PLAN.md) | Tests, tolerances |
 | [PACKAGING.md](./PACKAGING.md) | Windows Tauri installer plan |
 | [PROGRESS.md](./PROGRESS.md) | This file |
-| [assessments.md](./assessments.md) | Architecture assessment snapshot |
-| [README.md](./README.md) | How to run |
+| [assessments.md](./assessments.md) | Historical architecture assessment |
+| [THIRD_PARTY.md](./THIRD_PARTY.md) | Dependency licenses |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guide |
+| [SECURITY.md](./SECURITY.md) | Vulnerability reporting |

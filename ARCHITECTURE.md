@@ -49,7 +49,7 @@ src/
     viewport/          Camera, grid spacing, canvas rendering (view)
     selection/         SelectionManager, HitTesting, SnapEngine (pure)
     commands/          Model mutations as undoable SketchCommand + CommandHistory
-    tools/             Plain-TS tool controllers (Select, Point, Line, Rectangle, Circle, Arc)
+    tools/             Plain-TS tool controllers (Select, Point, Line, Rectangle, Polygon, Slot, Circle, Arc/Arc3/ArcTangent, Trim, Extend, Offset, Mirror, Fillet, Chamfer, constraints, dims)
     solver/            Variables, residuals, Jacobian, LM, Solver API
     constraints/       Catalog, factories, graph, maintenance façade → solveSketch
     serialization/     Versioned `.sketch.json` schema + serializer (Chunk 25)
@@ -201,7 +201,7 @@ Canvas preview calls the same apply function with ephemeral state; the model upd
 
 Every sketch has `frame: SketchFrame` — origin + in-plane X/Y axes with stable datum ids. Datums are **not** in `geometry[]`. They participate in hit-test, selection, snap, and coincident residuals, but contribute **0** solver variables and cannot be deleted or dragged. Viewport axes/origin are drawn from `sketch.frame`. `FrameAxisTag` includes `"z"` for a future 3D Frame3D / sketch-plane binding.
 
-Typical absolute lock: coincident a corner/center to `datum:origin`, **or** driving `coordinate-x` / `coordinate-y` (Offset Y / Offset X tools) plus sizes → `FULLY CONSTRAINED`.
+Typical absolute lock: coincident a corner/center to `datum:origin`, **or** driving `coordinate-x` / `coordinate-y` via the unified **Distance** tool (axis locate picks; formerly Offset X/Y — ADR-048) plus sizes → `FULLY CONSTRAINED`.
 
 ## Under-constrained visualization (Chunk 17 / ADR-023)
 
