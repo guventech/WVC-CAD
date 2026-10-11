@@ -1,15 +1,15 @@
 # AGENTS.md — Parametric 2D Mechanical Sketcher
 
-> **Agent / contributor roadmap.** Chunk plan below is historical + forward guidance. **Live status** is always [PROGRESS.md](./PROGRESS.md) and [README.md](./README.md). Packaging scaffold (`src-tauri/`) already exists — see [PACKAGING.md](./PACKAGING.md).
+> **Agent / contributor roadmap.** Chunk plan below is historical + forward guidance. **Live status** is always [PROGRESS.md](./docs/PROGRESS.md) and [README.md](./README.md). Packaging scaffold (`src-tauri/`) already exists — see [PACKAGING.md](./docs/PACKAGING.md).
 
 ## Living project docs (read these first for current status)
 
 | File | Role |
 |------|------|
-| [PROGRESS.md](./PROGRESS.md) | Completed chunks, current work, architecture-review issues |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Layer boundaries, folders, coordinates, solver honesty |
-| [DECISIONS.md](./DECISIONS.md) | ADRs (model ownership, units, commands, tools, queries) |
-| [TEST_PLAN.md](./TEST_PLAN.md) | Tolerances, unit coverage, fixtures, E2E plan |
+| [PROGRESS.md](./docs/PROGRESS.md) | Completed chunks, current work, architecture-review issues |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Layer boundaries, folders, coordinates, solver honesty |
+| [DECISIONS.md](./docs/DECISIONS.md) | ADRs (model ownership, units, commands, tools, queries) |
+| [TEST_PLAN.md](./docs/TEST_PLAN.md) | Tolerances, unit coverage, fixtures, E2E plan |
 | [README.md](./README.md) | How to run and use the app |
 
 **Agent rule:** Before coding, read PROGRESS.md and ARCHITECTURE.md. Do not invent status from this file alone — the chunk plan below is the roadmap; PROGRESS.md is the live checklist.

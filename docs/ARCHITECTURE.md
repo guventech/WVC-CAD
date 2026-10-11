@@ -287,7 +287,7 @@ Desktop packaging scaffold: [PACKAGING.md](./PACKAGING.md) (`src-tauri/`, Tauri 
 
 ## Related
 
-- Product and chunk plan: [AGENTS.md](./AGENTS.md)
+- Product and chunk plan: [AGENTS.md](../AGENTS.md)
 - ADRs: [DECISIONS.md](./DECISIONS.md)
 - Status: [PROGRESS.md](./PROGRESS.md)
 - Tests: [TEST_PLAN.md](./TEST_PLAN.md)

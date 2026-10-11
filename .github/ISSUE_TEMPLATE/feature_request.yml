@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please check [ROADMAP.md](../../ROADMAP.md). Payments, cloud, AI, and 3D solids are out of scope for now.
+        Please check [ROADMAP.md](../../docs/ROADMAP.md). Payments, cloud, AI, and 3D solids are out of scope for now.
   - type: textarea
     id: problem
     attributes:

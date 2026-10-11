@@ -143,7 +143,8 @@ describe("App rectangle tool", () => {
   it("creates a rectangle with two corner clicks", () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Rectangle" }));
+    fireEvent.click(screen.getByTestId("tool-shape-flyout"));
+    fireEvent.click(screen.getByTestId("tool-rectangle"));
     openSessionStatus();
     expect(screen.getByRole("status")).toHaveTextContent("Tool: rectangle");
 

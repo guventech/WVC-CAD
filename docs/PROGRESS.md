@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P0 (2026-10-11).** External review findings: CI/templates landed (T1); docs/link fixes in progress (T2+).
+**Review brief P0 (2026-10-11).** T1 CI, T2 docs fixes, and T3 (`docs/` move, `0.1.0-alpha.1`, Prettier, `npm run check`) landed. Next: T4 drop ignored `solve()` options.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -296,7 +296,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Sample sketches + File → Open sample…
 - Quick-start / first-run onboarding polish
 - Reliability fixes from alpha feedback; expand Playwright coverage
-- Review-brief P0/P1 (CI done; docs tidy; real Save/Save As; loader harden)
+- Review-brief P0 T4 (drop ignored `solve()` options); then P1 (real Save/Save As; loader harden)
 - Installer polish (custom icons, unsigned→signed plan) — [PACKAGING.md](./PACKAGING.md)
 - Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 
@@ -402,8 +402,8 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 
 | File | Role |
 |------|------|
-| [README.md](./README.md) | How to run |
-| [AGENTS.md](./AGENTS.md) | Mission, chunk plan, agent rules |
+| [README.md](../README.md) | How to run |
+| [AGENTS.md](../AGENTS.md) | Mission, chunk plan, agent rules |
 | [ROADMAP.md](./ROADMAP.md) | Near-term public priorities |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Layer boundaries, performance rules |
 | [DECISIONS.md](./DECISIONS.md) | ADRs |
@@ -411,6 +411,6 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 | [PACKAGING.md](./PACKAGING.md) | Windows Tauri installer plan |
 | [PROGRESS.md](./PROGRESS.md) | This file |
 | [assessments.md](./assessments.md) | Historical architecture assessment |
-| [THIRD_PARTY.md](./THIRD_PARTY.md) | Dependency licenses |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution guide |
-| [SECURITY.md](./SECURITY.md) | Vulnerability reporting |
+| [THIRD_PARTY.md](../THIRD_PARTY.md) | Dependency licenses |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guide |
+| [SECURITY.md](../SECURITY.md) | Vulnerability reporting |

@@ -1,0 +1,8 @@
+dist
+node_modules
+coverage
+src-tauri/target
+package-lock.json
+*.sketch.json
+playwright-report
+test-results

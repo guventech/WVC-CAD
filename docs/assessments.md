@@ -1,6 +1,6 @@
 # Architecture Assessment
 
-> **Historical snapshot (2026-10-06).** Not the live project status. For current state use [PROGRESS.md](./PROGRESS.md), [README.md](./README.md), and [ARCHITECTURE.md](./ARCHITECTURE.md). Chunk 27 and later 2D gap-recheck work landed after this review.
+> **Historical snapshot (2026-10-06).** Not the live project status. For current state use [PROGRESS.md](./PROGRESS.md), [README.md](../README.md), and [ARCHITECTURE.md](./ARCHITECTURE.md). Chunk 27 and later 2D gap-recheck work landed after this review.
 
 **Date:** 2026-10-06  
 **Scope (at time of review):** Post–Chunk 26 sketcher (Chunks 0–26 + Pre–Chunk 16 World Datum Frame; Tier 1–3 geometric constraints + Fix + dimensions). Next gated work then: Chunk 27 (CAD-like UI refinement).  

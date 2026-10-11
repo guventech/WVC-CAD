@@ -27,7 +27,7 @@ npm run tauri:build  # Windows NSIS/MSI installer
 4. Check **Sketch Analysis** for a closed profile (“Ready for pad”).
 5. **File → Save** for `.sketch.json`, or **Export DXF…** for geometry interchange.
 
-See [ROADMAP.md](./ROADMAP.md) for near-term priorities.
+See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities.
 
 ## Controls
 
@@ -61,14 +61,14 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 ## Windows installer
 
-**Tauri 2** scaffold in `src-tauri/` (not Electron). Needs Rust for `tauri:dev` / `tauri:build`. Details: [PACKAGING.md](./PACKAGING.md).
+**Tauri 2** scaffold in `src-tauri/` (not Electron). Needs Rust for `tauri:dev` / `tauri:build`. Details: [PACKAGING.md](./docs/PACKAGING.md).
 
 ## Current limitations
 
 - Offset of mixed line+arc closed profiles falls back to single-segment / is skipped for polyline rebuild
 - DXF is export-only (no import; constraints not in DXF)
-- Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./ARCHITECTURE.md))
-- Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./PROGRESS.md) and [assessments.md](./assessments.md)
+- Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./docs/ARCHITECTURE.md))
+- Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./docs/PROGRESS.md) and [assessments.md](./docs/assessments.md)
 - Tauri installer requires a local Rust toolchain; app icons are still scaffold defaults
 
 ## License
@@ -79,14 +79,14 @@ MIT — see [LICENSE](./LICENSE). Third-party notices: [THIRD_PARTY.md](./THIRD_
 
 | File | Role |
 |------|------|
-| [PROGRESS.md](./PROGRESS.md) | Live checklist |
-| [ROADMAP.md](./ROADMAP.md) | Near-term public priorities |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Layers and edit pipeline |
-| [DECISIONS.md](./DECISIONS.md) | ADRs |
-| [TEST_PLAN.md](./TEST_PLAN.md) | Test coverage |
+| [PROGRESS.md](./docs/PROGRESS.md) | Live checklist |
+| [ROADMAP.md](./docs/ROADMAP.md) | Near-term public priorities |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Layers and edit pipeline |
+| [DECISIONS.md](./docs/DECISIONS.md) | ADRs |
+| [TEST_PLAN.md](./docs/TEST_PLAN.md) | Test coverage |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute |
 | [SECURITY.md](./SECURITY.md) | Vulnerability reporting |
 | [AGENTS.md](./AGENTS.md) | Agent/contributor roadmap |
-| [assessments.md](./assessments.md) | Historical architecture snapshot |
-| [PACKAGING.md](./PACKAGING.md) | Tauri 2 installer notes |
+| [assessments.md](./docs/assessments.md) | Historical architecture snapshot |
+| [PACKAGING.md](./docs/PACKAGING.md) | Tauri 2 installer notes |
 | [THIRD_PARTY.md](./THIRD_PARTY.md) | Dependency licenses |

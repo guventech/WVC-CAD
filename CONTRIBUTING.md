@@ -7,7 +7,7 @@ Thanks for interest in WVC-CAD, an experimental 2D parametric sketcher.
 - **In scope:** 2D sketch geometry, constraints, solver honesty, diagnostics, serialization.
 - **Out of scope (for now):** 3D solids, STEP/STL, assemblies, CAM, cloud sync.
 
-Read [README.md](./README.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) before large changes. Living status is in [PROGRESS.md](./PROGRESS.md). Agent/contributor roadmap details live in [AGENTS.md](./AGENTS.md).
+Read [README.md](./README.md) and [ARCHITECTURE.md](./docs/ARCHITECTURE.md) before large changes. Living status is in [PROGRESS.md](./docs/PROGRESS.md). Agent/contributor roadmap details live in [AGENTS.md](./AGENTS.md).
 
 ## Dev setup
 
