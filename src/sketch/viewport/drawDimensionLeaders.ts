@@ -10,6 +10,7 @@ import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { worldToScreen } from "./Camera.ts";
+import { radialDimensionAngle } from "./radialDimensionAngle.ts";
 import { VIEWPORT_COLORS } from "./viewportColors.ts";
 
 /**
@@ -103,9 +104,8 @@ function drawRadialLeader(
   if (entity?.type !== "circle" && entity?.type !== "arc") {
     return;
   }
-  const angle = 0.7;
+  const angle = radialDimensionAngle(entity, constraint.id);
   const rim = pointOnCircle(entity.center, entity.radius, angle);
-  const center = worldToScreen(entity.center, camera);
   const rimScreen = worldToScreen(rim, camera);
   ctx.beginPath();
   if (constraint.type === "diameter") {
@@ -116,12 +116,30 @@ function drawRadialLeader(
     ctx.stroke();
     drawArrowHead(ctx, oppScreen, rimScreen);
     drawArrowHead(ctx, rimScreen, oppScreen);
-  } else {
-    ctx.moveTo(center.x, center.y);
+    return;
+  }
+
+  if (entity.type === "arc") {
+    // Fillet/arc radius: short leader outside the arc, arrow tip on the curve
+    // pointing at that corner (not a shared fixed up-right direction).
+    const outside = pointOnCircle(
+      entity.center,
+      entity.radius + 14 / camera.scale,
+      angle,
+    );
+    const outScreen = worldToScreen(outside, camera);
+    ctx.moveTo(outScreen.x, outScreen.y);
     ctx.lineTo(rimScreen.x, rimScreen.y);
     ctx.stroke();
-    drawArrowHead(ctx, center, rimScreen);
+    drawArrowHead(ctx, outScreen, rimScreen);
+    return;
   }
+
+  const center = worldToScreen(entity.center, camera);
+  ctx.moveTo(center.x, center.y);
+  ctx.lineTo(rimScreen.x, rimScreen.y);
+  ctx.stroke();
+  drawArrowHead(ctx, center, rimScreen);
 }
 
 function drawArrowHead(
@@ -137,7 +155,7 @@ function drawArrowHead(
   }
   const ux = dx / len;
   const uy = dy / len;
-  const size = 5;
+  const size = 7;
   ctx.beginPath();
   ctx.moveTo(to.x, to.y);
   ctx.lineTo(to.x - ux * size - uy * size * 0.45, to.y - uy * size + ux * size * 0.45);

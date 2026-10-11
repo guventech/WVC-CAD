@@ -22,6 +22,7 @@ import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { worldToScreen } from "./Camera.ts";
+import { radialDimensionAngle } from "./radialDimensionAngle.ts";
 
 /** Screen-pixel offset of labels from the geometry they annotate. */
 export const LABEL_OFFSET_PX = 12;
@@ -348,23 +349,39 @@ function preferredAnnotation(
     constraintId: constraint.id,
     text: isDrivingConstraint(constraint) ? text : `(${text})`,
     anchor,
-    offset: dimensionLabelOffset(constraint.type),
+    offset: dimensionLabelOffset(sketch, constraint),
     dimension: true,
   };
 }
 
-function dimensionLabelOffset(type: Constraint["type"]): Point2D {
-  if (type === "coordinate-x") {
+function dimensionLabelOffset(
+  sketch: Sketch,
+  constraint: Constraint,
+): Point2D {
+  if (constraint.type === "coordinate-x") {
     return { x: -1.2, y: 0 };
   }
-  if (type === "coordinate-y") {
+  if (constraint.type === "coordinate-y") {
     return { x: 0, y: -1.2 };
   }
-  if (type === "horizontal-distance") {
+  if (constraint.type === "horizontal-distance") {
     return { x: 0, y: -1.2 };
   }
-  if (type === "vertical-distance") {
+  if (constraint.type === "vertical-distance") {
     return { x: 1.2, y: 0 };
+  }
+  if (constraint.type === "radius" || constraint.type === "diameter") {
+    const entity = sketch.geometry.find(
+      (item) => item.id === constraint.references[0]?.entityId,
+    );
+    if (entity?.type === "circle" || entity?.type === "arc") {
+      const angle = radialDimensionAngle(entity, constraint.id);
+      // Offset is screen-space (Y down); world Y-up radial → flip sin.
+      return {
+        x: Math.cos(angle) * 1.6,
+        y: -Math.sin(angle) * 1.6,
+      };
+    }
   }
   return { x: 0, y: -1.2 };
 }
@@ -404,7 +421,7 @@ function dimensionAnchor(sketch: Sketch, constraint: Constraint): Point2D | null
       return pointOnCircle(
         entity.center,
         entity.radius,
-        radiusLabelAngle(constraint.id),
+        radialDimensionAngle(entity, constraint.id),
       );
     }
     case "angle": {
@@ -418,15 +435,6 @@ function dimensionAnchor(sketch: Sketch, constraint: Constraint): Point2D | null
     default:
       return null;
   }
-}
-
-/** Spread radius/diameter labels around the circle by constraint id. */
-function radiusLabelAngle(constraintId: string): number {
-  let hash = 0;
-  for (let i = 0; i < constraintId.length; i += 1) {
-    hash = (hash * 31 + constraintId.charCodeAt(i)) | 0;
-  }
-  return (((hash >>> 0) % 360) * Math.PI) / 180;
 }
 
 function formatDimension(constraint: Constraint, measured: number): string {

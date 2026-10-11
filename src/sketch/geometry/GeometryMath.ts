@@ -137,3 +137,8 @@ export function arcSweepRadians(startAngle: number, endAngle: number): number {
   }
   return end > start ? end - start : Math.PI * 2 - (start - end);
 }
+
+/** Angle at the midpoint of a CCW arc sweep (for labels / radial leaders). */
+export function arcMidAngle(startAngle: number, endAngle: number): number {
+  return normalizeAngle(startAngle) + arcSweepRadians(startAngle, endAngle) / 2;
+}
