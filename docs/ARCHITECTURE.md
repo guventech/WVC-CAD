@@ -52,7 +52,7 @@ src/
     tools/             Plain-TS tool controllers (Select, Point, Line, Rectangle, Polygon, Slot, Circle, Arc/Arc3/ArcTangent, Trim, Extend, Offset, Mirror, Fillet, Chamfer, constraints, dims)
     solver/            Variables, residuals, Jacobian, LM, Solver API
     constraints/       Catalog, factories, graph, maintenance façade → solveSketch
-    serialization/     Versioned `.sketch.json` schema + serializer (Chunk 25)
+    serialization/     Versioned `.sketch.json` SoT + DXF R12 geometry export (ADR-056; no import)
     analysis/          ProfileAnalyzer, SketchDiagnostics, ProfileGeometry
     fixtures/          Temporary or test sketches
   tests/               App / shared tests (some tests are colocated under sketch/)
@@ -99,6 +99,7 @@ Pan and zoom never change geometry coordinates.
 - Recent files in the File menu (`localStorage` + FSA IDB / Tauri paths).
 - Load clears undo history and syncs entity ids.
 - Unsupported schema versions or non-`mm` units are rejected (no silent unit conversion).
+- **DXF** (ADR-056): File → Export DXF… writes R12 ASCII geometry only (POINT/LINE/CIRCLE/ARC; construction → `CONSTRUCTION` layer). Non-finite coordinates fail the export (no download). Import is not supported; constraints stay in `.sketch.json`.
 
 ## Autosave / recovery (Chunk 26 / ADR-035 / review T6)
 

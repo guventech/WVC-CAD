@@ -37,6 +37,8 @@
 
 ## Current
 
+**Phase 4 DXF (2026-10-11).** Export fails closed on non-finite geometry; parser-independent coverage for POINT/CIRCLE/ARC (incl. 0°-crossing); UI notes geometry-only / no import after export.
+
 **Phase 3 file safety (2026-10-11).** Open / Sample / Recent confirm before discarding dirty work; save I/O errors surface a message; recovery Discard + truncated-JSON load covered.
 
 **H/V dimension leaders (2026-10-11).** Horizontal/vertical distance (and coordinate) leaders stay axis-aligned with extension lines — no more diagonal “X” across filleted corners.

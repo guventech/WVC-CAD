@@ -83,9 +83,9 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 ## Current limitations
 
 - Offset of mixed line+arc closed profiles falls back to single-segment / is skipped for polyline rebuild
-- DXF is export-only (no import; constraints not in DXF)
+- DXF is **export-only** geometry interchange (R12 ASCII; no import; constraints stay in `.sketch.json`)
 - Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./docs/ARCHITECTURE.md))
-- Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./docs/PROGRESS.md) and [assessments.md](./docs/assessments.md)
+- ADR-052 residual **row** scaling is in; column scaling unused (see [PROGRESS.md](./docs/PROGRESS.md))
 - Tauri installer requires a local Rust toolchain; Windows builds are unsigned until code signing is configured (see [PACKAGING.md](./docs/PACKAGING.md))
 
 ## License

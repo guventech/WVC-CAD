@@ -12,7 +12,11 @@ import {
   addPointToSketch,
 } from "../commands/CreateGeometryCommand.ts";
 import { createEmptySketch } from "../model/Sketch.ts";
-import { dxfDownloadFileName, exportSketchToDxf } from "./DxfExporter.ts";
+import {
+  dxfDownloadFileName,
+  exportSketchToDxf,
+  tryExportSketchToDxf,
+} from "./DxfExporter.ts";
 
 describe("DxfExporter", () => {
   it("exports an empty sketch as a valid R12 shell ending in EOF", () => {
@@ -61,6 +65,20 @@ describe("DxfExporter", () => {
     expect(dxf).toMatch(/\n51\n90\n/);
   });
 
+  it("exports arcs that cross 0° with normalized CCW degree bounds", () => {
+    const created = addArcToSketch(
+      createEmptySketch(),
+      { x: 0, y: 0 },
+      10,
+      (3 * Math.PI) / 2,
+      Math.PI / 4,
+    )!;
+    const pairs = parseGroupPairs(exportSketchToDxf(created.sketch));
+    const arc = entityPairs(pairs, "ARC");
+    expect(groupValue(arc, 50)).toBe("270");
+    expect(groupValue(arc, 51)).toBe("45");
+  });
+
   it("exports line, circle, arc, and point entities together", () => {
     let sketch = createEmptySketch();
     sketch = addPointToSketch(sketch, { x: 1, y: 2 }).sketch;
@@ -88,6 +106,13 @@ describe("DxfExporter", () => {
     const lineIdx = dxf.indexOf("\n0\nLINE\n");
     expect(lineIdx).toBeGreaterThanOrEqual(0);
     expect(dxf.slice(lineIdx, lineIdx + 80)).toContain("CONSTRUCTION");
+  });
+
+  it("puts solid geometry on layer 0", () => {
+    const created = addCircleToSketch(createEmptySketch(), { x: 0, y: 0 }, 2)!;
+    const pairs = parseGroupPairs(exportSketchToDxf(created.sketch));
+    const circle = entityPairs(pairs, "CIRCLE");
+    expect(groupValue(circle, 8)).toBe("0");
   });
 
   it("does not encode constraints or dimensions in DXF", () => {
@@ -125,6 +150,50 @@ describe("DxfExporter", () => {
     expect(groupValue(line, 20)).toBe("34");
     expect(groupValue(line, 11)).toBe("56");
     expect(groupValue(line, 21)).toBe("78");
+  });
+
+  it("round-trips point, circle, and arc group codes", () => {
+    let sketch = createEmptySketch();
+    sketch = addPointToSketch(sketch, { x: 3, y: 4 }).sketch;
+    sketch = addCircleToSketch(sketch, { x: 1, y: 2 }, 5)!.sketch;
+    sketch = addArcToSketch(sketch, { x: 0, y: 0 }, 8, -Math.PI / 2, 0)!.sketch;
+
+    const pairs = parseGroupPairs(exportSketchToDxf(sketch));
+    const point = entityPairs(pairs, "POINT");
+    expect(groupValue(point, 10)).toBe("3");
+    expect(groupValue(point, 20)).toBe("4");
+
+    const circle = entityPairs(pairs, "CIRCLE");
+    expect(groupValue(circle, 10)).toBe("1");
+    expect(groupValue(circle, 20)).toBe("2");
+    expect(groupValue(circle, 40)).toBe("5");
+
+    const arc = entityPairs(pairs, "ARC");
+    expect(groupValue(arc, 40)).toBe("8");
+    expect(groupValue(arc, 50)).toBe("270");
+    expect(groupValue(arc, 51)).toBe("0");
+  });
+
+  it("fails export for non-finite geometry instead of writing a silent zero file", () => {
+    const sketch = {
+      ...createEmptySketch(),
+      geometry: [
+        {
+          id: "line-bad",
+          type: "line" as const,
+          start: { x: Number.NaN, y: 0 },
+          end: { x: 1, y: 0 },
+          construction: false,
+        },
+      ],
+    };
+    const outcome = tryExportSketchToDxf(sketch);
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) {
+      return;
+    }
+    expect(outcome.reason).toMatch(/non-finite/i);
+    expect(() => exportSketchToDxf(sketch)).toThrow(/non-finite/i);
   });
 
   it("builds a sanitized .dxf download name", () => {

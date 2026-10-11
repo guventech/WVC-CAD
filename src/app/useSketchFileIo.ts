@@ -25,7 +25,7 @@ import {
 import { settleLoadedSketch } from "../sketch/constraints/ConstraintMaintenance.ts";
 import {
   dxfDownloadFileName,
-  exportSketchToDxf,
+  tryExportSketchToDxf,
 } from "../sketch/serialization/DxfExporter.ts";
 import {
   parseSketchJson,
@@ -254,11 +254,19 @@ export function useSketchFileIo({
   ]);
 
   const handleExportDxf = useCallback(() => {
+    const outcome = tryExportSketchToDxf(sketch);
+    if (!outcome.ok) {
+      setConstraintMessage(`Could not export DXF. ${outcome.reason}`);
+      setConstraintConflict(null);
+      return;
+    }
     const filename = dxfDownloadFileName(
       documentFileName?.replace(/\.sketch\.json$/i, "") ?? sketch.name,
     );
-    downloadTextFile(filename, exportSketchToDxf(sketch));
-    setConstraintMessage(null);
+    downloadTextFile(filename, outcome.dxf);
+    setConstraintMessage(
+      "Exported geometry-only DXF. Constraints remain in .sketch.json (import not supported).",
+    );
     setConstraintConflict(null);
   }, [documentFileName, setConstraintConflict, setConstraintMessage, sketch]);
 

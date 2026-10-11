@@ -4,39 +4,59 @@ import type { Sketch } from "../model/Sketch.ts";
 
 const DXF_EXTENSION = ".dxf";
 
+export type DxfExportOutcome =
+  | { readonly ok: true; readonly dxf: string }
+  | { readonly ok: false; readonly reason: string };
+
 /**
  * Export sketch geometry as DXF R12 ASCII.
  * Constraints, dimensions, and features are not represented — parametric
  * truth remains `.sketch.json`. Construction geometry goes on layer CONSTRUCTION.
+ * Non-finite coordinates fail the export (no silent zero substitution).
  */
 export function exportSketchToDxf(sketch: Sketch): string {
-  const lines: string[] = [];
-  pushPair(lines, 0, "SECTION");
-  pushPair(lines, 2, "HEADER");
-  pushPair(lines, 9, "$ACADVER");
-  pushPair(lines, 1, "AC1009");
-  pushPair(lines, 9, "$INSUNITS");
-  pushPair(lines, 70, "4"); // millimeters
-  pushPair(lines, 0, "ENDSEC");
-
-  pushPair(lines, 0, "SECTION");
-  pushPair(lines, 2, "TABLES");
-  pushPair(lines, 0, "TABLE");
-  pushPair(lines, 2, "LAYER");
-  pushPair(lines, 70, "2");
-  writeLayer(lines, "0", 7);
-  writeLayer(lines, "CONSTRUCTION", 8);
-  pushPair(lines, 0, "ENDTAB");
-  pushPair(lines, 0, "ENDSEC");
-
-  pushPair(lines, 0, "SECTION");
-  pushPair(lines, 2, "ENTITIES");
-  for (const entity of sketch.geometry) {
-    writeEntity(lines, entity);
+  const outcome = tryExportSketchToDxf(sketch);
+  if (!outcome.ok) {
+    throw new Error(outcome.reason);
   }
-  pushPair(lines, 0, "ENDSEC");
-  pushPair(lines, 0, "EOF");
-  return lines.join("\n") + "\n";
+  return outcome.dxf;
+}
+
+/** Same as {@link exportSketchToDxf} but never throws. */
+export function tryExportSketchToDxf(sketch: Sketch): DxfExportOutcome {
+  try {
+    const lines: string[] = [];
+    pushPair(lines, 0, "SECTION");
+    pushPair(lines, 2, "HEADER");
+    pushPair(lines, 9, "$ACADVER");
+    pushPair(lines, 1, "AC1009");
+    pushPair(lines, 9, "$INSUNITS");
+    pushPair(lines, 70, "4"); // millimeters
+    pushPair(lines, 0, "ENDSEC");
+
+    pushPair(lines, 0, "SECTION");
+    pushPair(lines, 2, "TABLES");
+    pushPair(lines, 0, "TABLE");
+    pushPair(lines, 2, "LAYER");
+    pushPair(lines, 70, "2");
+    writeLayer(lines, "0", 7);
+    writeLayer(lines, "CONSTRUCTION", 8);
+    pushPair(lines, 0, "ENDTAB");
+    pushPair(lines, 0, "ENDSEC");
+
+    pushPair(lines, 0, "SECTION");
+    pushPair(lines, 2, "ENTITIES");
+    for (const entity of sketch.geometry) {
+      writeEntity(lines, entity);
+    }
+    pushPair(lines, 0, "ENDSEC");
+    pushPair(lines, 0, "EOF");
+    return { ok: true, dxf: lines.join("\n") + "\n" };
+  } catch (error) {
+    const reason =
+      error instanceof Error ? error.message : "DXF export failed.";
+    return { ok: false, reason };
+  }
 }
 
 export function dxfDownloadFileName(sketchName: string): string {
@@ -79,6 +99,7 @@ function writeEntity(lines: string[], entity: Geometry): void {
       pushPair(lines, 40, fmt(entity.radius));
       break;
     case "arc": {
+      // Model arcs are CCW; DXF R12 ARC is also CCW from group 50 → 51.
       const startDeg = (normalizeAngle(entity.startAngle) * 180) / Math.PI;
       const endDeg = (normalizeAngle(entity.endAngle) * 180) / Math.PI;
       pushPair(lines, 0, "ARC");
@@ -108,7 +129,7 @@ function pushPair(lines: string[], code: number, value: string): void {
 
 function fmt(value: number): string {
   if (!Number.isFinite(value)) {
-    return "0.0";
+    throw new Error("Non-finite coordinate or radius cannot be exported to DXF.");
   }
   return Number(value.toFixed(8)).toString();
 }
