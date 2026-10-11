@@ -37,6 +37,8 @@
 
 ## Current
 
+**Phase 2 solver honesty (2026-10-11).** Unsatisfied underdetermined sketches report `failed` (not `inconsistent`); ADR-052/ROADMAP/PROGRESS docs synced to row scaling + angle `1/L`; diagnostics cover zero-length lines and invalid arcs.
+
 **Fillet radius leaders (2026-10-11).** Radial arrows/labels for arcs aim at the fillet sweep midpoint (no more shared up-right 0.7 rad leader for every corner).
 
 **Canvas fill gap (2026-10-11).** `.canvas-pane` now flex-fills `.canvas-host` so the 2D sketch area no longer leaves an empty band below/right after resize (canvas intrinsic height was pinning the pane).
@@ -150,7 +152,7 @@ Addressed items from [assessments.md](./assessments.md) (ADR-045):
 | App | `useSketchDocument` / `useSketchAutosave` / `useSketchFileIo` (App shell ~358 lines) |
 | Docs | Chamfer rebuild-only; `solve()` = stored-geometry diagnose; geometry folder reality |
 
-Deferred: residual scaling, sign-retry, feature residual polymorphism, exact profile areas, hard tangent arc-sweep residual.
+Deferred: sign-retry (beyond fillet wedge), feature residual polymorphism, exact profile areas, hard tangent arc-sweep residual. (ADR-052 row scaling landed.)
 
 ### Point-on-object constraint (2026-10-06) — Tier 3 geometric catalog complete
 

@@ -94,7 +94,10 @@ export function classifySketchStatus(
     ) {
       return "over-constrained";
     }
-    return "inconsistent";
+    // Underdetermined but residuals unmet: LM did not settle. That is not a
+    // proven inconsistency (conflicting eqs); reserve "inconsistent" for
+    // conflict diagnostics that identify opposing constraints.
+    return "failed";
   }
 
   if (sketch.geometry.length === 0) {

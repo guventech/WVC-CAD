@@ -16,4 +16,4 @@ Public priorities only. This is **not** a promise of dates or a full business pl
 - 3D solids / extrusion (Pad/Pocket) until the 2D core stays solid under real use
 - Renaming away from WVC-CAD (codename stays unless a cleared product name is chosen later)
 
-Solver residual/column scaling is **implemented** (ADR-052); engineering gates stay unscaled.
+Solver residual **row** scaling is **implemented** (ADR-052); column scaling is intentionally unused; engineering gates stay unscaled.

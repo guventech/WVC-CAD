@@ -85,6 +85,44 @@ describe("SketchDiagnostics (Chunk 22)", () => {
     );
   });
 
+  it("flags zero-length lines", () => {
+    const sketch = {
+      ...createEmptySketch(),
+      geometry: [
+        {
+          id: "line-bad",
+          type: "line" as const,
+          start: { x: 5, y: 5 },
+          end: { x: 5, y: 5 },
+          construction: false,
+        },
+      ],
+    };
+    const report = analyzeSketchDiagnostics(sketch);
+    expect(report.findings.some((f) => f.code === "zero-length-line")).toBe(
+      true,
+    );
+  });
+
+  it("flags invalid arcs (zero radius)", () => {
+    const sketch = {
+      ...createEmptySketch(),
+      geometry: [
+        {
+          id: "arc-bad",
+          type: "arc" as const,
+          center: { x: 0, y: 0 },
+          radius: 0,
+          startAngle: 0,
+          endAngle: Math.PI / 2,
+          construction: false,
+        },
+      ],
+    };
+    const report = analyzeSketchDiagnostics(sketch);
+    expect(report.findings.some((f) => f.code === "invalid-arc")).toBe(true);
+  });
+
   it("formats a readable analysis report", () => {
     let sketch = createEmptySketch();
     sketch = addLineToSketch(sketch, { x: 0, y: 0 }, { x: 20, y: 0 })!.sketch;

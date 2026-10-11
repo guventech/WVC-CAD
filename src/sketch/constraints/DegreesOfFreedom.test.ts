@@ -15,6 +15,7 @@ import { createEmptySketch, type Sketch } from "../model/Sketch.ts";
 import { solve } from "../solver/Solver.ts";
 import {
   analyzeDegreesOfFreedom,
+  classifySketchStatus,
   formatConstraintStatus,
 } from "./DegreesOfFreedom.ts";
 
@@ -177,6 +178,35 @@ describe("degrees of freedom (Chunk 15)", () => {
     const result = solve(sketch);
     expect(result.status).toBe("under-constrained");
     expect(result.degreesOfFreedom).toBe(analysis.degreesOfFreedom);
+  });
+
+  it("unsatisfied underdetermined sketches are failed, not inconsistent", () => {
+    // Slanted line + horizontal: residuals unmet, but vars still exceed eqs.
+    const created = addLineToSketch(
+      createEmptySketch(),
+      { x: 0, y: 0 },
+      { x: 40, y: 10 },
+    )!;
+    const sketch = {
+      ...created.sketch,
+      constraints: [
+        {
+          id: "h-unsettled",
+          type: "horizontal" as const,
+          references: [{ entityId: created.line.id, role: "entity" as const }],
+        },
+      ],
+    };
+    const dof = analyzeDegreesOfFreedom(sketch);
+    expect(dof.degreesOfFreedom).toBeGreaterThan(0);
+    expect(dof.equationCount).toBeLessThanOrEqual(dof.variableCount);
+
+    const status = classifySketchStatus(sketch, {
+      residualSatisfied: false,
+      dof,
+    });
+    expect(status).toBe("failed");
+    expect(status).not.toBe("inconsistent");
   });
 });
 

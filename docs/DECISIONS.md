@@ -819,7 +819,7 @@ Updated: 2026-10-11
 
 Decision:
 1. Engineering residual gates (`listUnsatisfiedConstraints`, displayed ‖F‖) stay on **unscaled** mm / radian residuals.
-2. LM normal equations and Jacobian-rank DOF use **positive row weights** (length residuals ÷ characteristic sketch length; angle/unitless weight 1) via `ResidualScaling.ts`. Positive row weights do not change nullspace dimension — DOF is never invented from dimension counts. Variable column scaling is **not** used in LM (anisotropic λ damping regressed H/V settles).
+2. LM normal equations and Jacobian-rank DOF use **positive row weights** via `ResidualScaling.ts`: length **and** angle residuals use `1/L` (characteristic sketch length); unitless weight 1. Radians are already O(1); sharing `1/L` with lengths keeps a ~1 rad error from dominating a ~1 mm error. Positive row weights do not change nullspace dimension — DOF is never invented from dimension counts. Variable column scaling is **not** used in LM (anisotropic λ damping regressed H/V settles).
 3. Fillet rebuild retries the **opposite wedge pick** (and current arc center) when the primary wedge fails after large parent moves.
 4. `isReadyForPad` remains a **topology** gate only.
 
