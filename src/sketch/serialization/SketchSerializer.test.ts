@@ -139,6 +139,15 @@ describe("SketchSerializer", () => {
     expect(parsed.reason).toMatch(/schema version/i);
   });
 
+  it("rejects truncated JSON without throwing", () => {
+    const parsed = parseSketchJson("{");
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) {
+      return;
+    }
+    expect(parsed.reason.length).toBeGreaterThan(0);
+  });
+
   it("rejects zero-length lines and non-positive radii on load", () => {
     const document = sketchToDocument(createEmptySketch());
     const zeroLine = {

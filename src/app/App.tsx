@@ -160,6 +160,7 @@ export default function App() {
   } = useSketchFileIo({
     sketch,
     documentFileName,
+    hasUnsavedChanges,
     setDocumentFileName,
     setDocumentState,
     setLastCleanFingerprint,

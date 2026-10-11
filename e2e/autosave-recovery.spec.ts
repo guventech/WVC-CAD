@@ -40,4 +40,22 @@ test.describe("autosave recovery", () => {
     await expect(page.getByTestId("profile-outer-count")).toContainText("1 outer loop");
     await expect(page.getByTestId("unsaved-indicator")).toHaveText("Unsaved changes");
   });
+
+  test("edit → reload → Discard keeps an empty sketch", async ({ page }) => {
+    await page.goto("/");
+    await dismissRecoveryIfPresent(page);
+
+    await page.getByTestId("tool-shape-flyout").click();
+    await page.getByTestId("tool-rectangle").click();
+    await clickWorld(page, 0, 0);
+    await clickWorld(page, 60, 30);
+    await expect(page.getByTestId("unsaved-indicator")).toHaveText("Unsaved changes");
+    await page.waitForTimeout(1000);
+
+    await page.reload();
+    await expect(page.getByTestId("recovery-dialog")).toBeVisible();
+    await page.getByTestId("recovery-discard").click();
+    await expect(page.getByTestId("recovery-dialog")).toHaveCount(0);
+    await expect(page.getByTestId("profile-outer-count")).toHaveCount(0);
+  });
 });

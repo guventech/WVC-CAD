@@ -392,13 +392,30 @@ function dimensionAnchor(sketch: Sketch, constraint: Constraint): Point2D | null
       const line = referencedLine(sketch, constraint.references[0]);
       return line === null ? null : lineMidpoint(line.start, line.end);
     }
-    case "distance":
-    case "horizontal-distance":
-    case "vertical-distance": {
+    case "distance": {
       const handles = distanceHandles(sketch, constraint.references);
       const a = handles === null ? null : resolveConstraintPoint(sketch, handles[0]);
       const b = handles === null ? null : resolveConstraintPoint(sketch, handles[1]);
       return a === null || b === null ? null : lineMidpoint(a, b);
+    }
+    case "horizontal-distance": {
+      const handles = distanceHandles(sketch, constraint.references);
+      const a = handles === null ? null : resolveConstraintPoint(sketch, handles[0]);
+      const b = handles === null ? null : resolveConstraintPoint(sketch, handles[1]);
+      if (a === null || b === null) {
+        return null;
+      }
+      // Anchor on the horizontal dim line (above the higher point), not the diagonal chord.
+      return { x: (a.x + b.x) / 2, y: Math.max(a.y, b.y) };
+    }
+    case "vertical-distance": {
+      const handles = distanceHandles(sketch, constraint.references);
+      const a = handles === null ? null : resolveConstraintPoint(sketch, handles[0]);
+      const b = handles === null ? null : resolveConstraintPoint(sketch, handles[1]);
+      if (a === null || b === null) {
+        return null;
+      }
+      return { x: Math.max(a.x, b.x), y: (a.y + b.y) / 2 };
     }
     case "coordinate-x":
     case "coordinate-y": {

@@ -37,6 +37,10 @@
 
 ## Current
 
+**Phase 3 file safety (2026-10-11).** Open / Sample / Recent confirm before discarding dirty work; save I/O errors surface a message; recovery Discard + truncated-JSON load covered.
+
+**H/V dimension leaders (2026-10-11).** Horizontal/vertical distance (and coordinate) leaders stay axis-aligned with extension lines — no more diagonal “X” across filleted corners.
+
 **Phase 2 solver honesty (2026-10-11).** Unsatisfied underdetermined sketches report `failed` (not `inconsistent`); ADR-052/ROADMAP/PROGRESS docs synced to row scaling + angle `1/L`; diagnostics cover zero-length lines and invalid arcs.
 
 **Fillet radius leaders (2026-10-11).** Radial arrows/labels for arcs aim at the fillet sweep midpoint (no more shared up-right 0.7 rad leader for every corner).

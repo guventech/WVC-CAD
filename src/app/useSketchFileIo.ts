@@ -44,6 +44,7 @@ import { SAMPLE_SKETCHES } from "./sampleSketches.ts";
 export type UseSketchFileIoOptions = {
   readonly sketch: Sketch;
   readonly documentFileName: string | null;
+  readonly hasUnsavedChanges: boolean;
   readonly setDocumentFileName: (name: string | null) => void;
   readonly setDocumentState: (
     value: DocumentState | ((current: DocumentState) => DocumentState),
@@ -57,6 +58,14 @@ export type UseSketchFileIoOptions = {
   readonly setConstraintMessage: (message: string | null) => void;
   readonly setConstraintConflict: (conflict: ConstraintConflict | null) => void;
 };
+
+/** Shared dirty-document gate for New / Open / Sample / Recent. */
+export function confirmDiscardUnsavedChanges(hasUnsavedChanges: boolean): boolean {
+  if (!hasUnsavedChanges) {
+    return true;
+  }
+  return window.confirm("Discard unsaved changes and open another sketch?");
+}
 
 function isFileSystemFileHandle(value: unknown): value is FileSystemFileHandle {
   return (
@@ -81,6 +90,7 @@ function isReopenableRef(ref: SketchFileRef): boolean {
 export function useSketchFileIo({
   sketch,
   documentFileName,
+  hasUnsavedChanges,
   setDocumentFileName,
   setDocumentState,
   setLastCleanFingerprint,
@@ -191,13 +201,28 @@ export function useSketchFileIo({
     const suggested =
       documentFileName ?? sketchDownloadFileName(sketch.name);
     const json = serializeSketchToJson(sketch);
-    void storage.save(json, fileRef, suggested).then((ref) => {
-      if (ref === null) {
-        return;
-      }
-      markSaved(ref);
-    });
-  }, [documentFileName, fileRef, markSaved, sketch, storage]);
+    void storage
+      .save(json, fileRef, suggested)
+      .then((ref) => {
+        if (ref === null) {
+          return;
+        }
+        markSaved(ref);
+      })
+      .catch((error: unknown) => {
+        const detail = error instanceof Error ? error.message : "Unknown error";
+        setConstraintMessage(`Could not save sketch. ${detail}`);
+        setConstraintConflict(null);
+      });
+  }, [
+    documentFileName,
+    fileRef,
+    markSaved,
+    setConstraintConflict,
+    setConstraintMessage,
+    sketch,
+    storage,
+  ]);
 
   const handleSaveAs = useCallback(() => {
     if (storage === null) {
@@ -206,13 +231,27 @@ export function useSketchFileIo({
     const suggested =
       documentFileName ?? sketchDownloadFileName(sketch.name);
     const json = serializeSketchToJson(sketch);
-    void storage.saveAs(json, suggested).then((ref) => {
-      if (ref === null) {
-        return;
-      }
-      markSaved(ref);
-    });
-  }, [documentFileName, markSaved, sketch, storage]);
+    void storage
+      .saveAs(json, suggested)
+      .then((ref) => {
+        if (ref === null) {
+          return;
+        }
+        markSaved(ref);
+      })
+      .catch((error: unknown) => {
+        const detail = error instanceof Error ? error.message : "Unknown error";
+        setConstraintMessage(`Could not save sketch. ${detail}`);
+        setConstraintConflict(null);
+      });
+  }, [
+    documentFileName,
+    markSaved,
+    setConstraintConflict,
+    setConstraintMessage,
+    sketch,
+    storage,
+  ]);
 
   const handleExportDxf = useCallback(() => {
     const filename = dxfDownloadFileName(
@@ -227,19 +266,25 @@ export function useSketchFileIo({
     if (storage === null) {
       return;
     }
+    if (!confirmDiscardUnsavedChanges(hasUnsavedChanges)) {
+      return;
+    }
     void storage.open().then((opened) => {
       if (opened === null) {
         return;
       }
       applyOpenedSketch(opened.text, opened.ref);
     });
-  }, [applyOpenedSketch, storage]);
+  }, [applyOpenedSketch, hasUnsavedChanges, storage]);
 
   const handleOpenSample = useCallback(
     (sampleId: string) => {
       const sample = SAMPLE_SKETCHES.find((item) => item.id === sampleId);
       if (sample === undefined) {
         setConstraintMessage("Sample sketch not found.");
+        return;
+      }
+      if (!confirmDiscardUnsavedChanges(hasUnsavedChanges)) {
         return;
       }
       void fetch(sample.path)
@@ -262,12 +307,15 @@ export function useSketchFileIo({
           setConstraintMessage(`Could not open sample “${sample.label}”.`);
         });
     },
-    [applyOpenedSketch, setConstraintMessage],
+    [applyOpenedSketch, hasUnsavedChanges, setConstraintMessage],
   );
 
   const handleOpenRecent = useCallback(
     (entryId: string) => {
       if (storage === null) {
+        return;
+      }
+      if (!confirmDiscardUnsavedChanges(hasUnsavedChanges)) {
         return;
       }
       const entry = loadRecentFiles(createLocalStorageRecentStore()).find(
@@ -292,7 +340,7 @@ export function useSketchFileIo({
         applyOpenedSketch(opened.text, opened.ref);
       });
     },
-    [applyOpenedSketch, setConstraintMessage, storage],
+    [applyOpenedSketch, hasUnsavedChanges, setConstraintMessage, storage],
   );
 
   const clearDocumentFile = useCallback(() => {
