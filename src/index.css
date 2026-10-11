@@ -52,6 +52,16 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Keyboard focus: visible ring; mouse clicks keep a quieter path. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 button.is-active {
   border-color: var(--accent);
   background: var(--accent-soft);
@@ -456,6 +466,32 @@ button.is-active {
   overflow: hidden;
 }
 
+/* Compact desktop: keep a usable canvas; panels stay readable. */
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: 180px minmax(140px, 1fr);
+  }
+
+  .tool-row {
+    flex-wrap: wrap;
+  }
+
+  .status-bar {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side-panels {
+    display: none;
+  }
+}
+
 .side-panels {
   display: flex;
   flex-direction: column;
@@ -785,7 +821,7 @@ button.is-active {
   padding: 0.65rem 0.85rem;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
   color: var(--text);
   box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
   font-size: 0.85rem;

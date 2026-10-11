@@ -14,9 +14,15 @@ export function FirstRunHint({ onDismiss }: FirstRunHintProps) {
       <p>
         <strong>Quick start:</strong> draw a <em>Rectangle</em> (shape ▾), add{" "}
         <em>Distance</em> / <em>Size</em>, check Sketch Analysis, then{" "}
-        <em>File → Save</em>. Or open <em>File → Sample: …</em> for a ready sketch.
+        <em>File → Save</em>. <em>Escape</em> cancels tools and in-progress drags.
+        Or open <em>File → Sample: …</em> for a ready sketch.
       </p>
-      <button type="button" data-testid="first-run-dismiss" onClick={onDismiss}>
+      <button
+        type="button"
+        data-testid="first-run-dismiss"
+        aria-label="Dismiss getting started tip"
+        onClick={onDismiss}
+      >
         Got it
       </button>
     </div>

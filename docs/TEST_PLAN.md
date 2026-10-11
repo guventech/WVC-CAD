@@ -116,15 +116,16 @@ Keep selection/demo fixtures out of production App startup.
 
 ## E2E (Playwright)
 
-Landed smoke: `e2e/critical-path.spec.ts` — rectangle → closed profile → fillet → ready-for-pad → save download (`npm run test:e2e`).
+Landed (`npm run test:e2e`; needs `npx playwright install chromium` once):
 
-Further coverage candidates:
-
-- Create sketch → place points → select → delete
-- Create line → length/angle display → Escape finish
-- Create rectangle → remain rectangular under edit
-- Undo / redo
-- Save / reload → geometry + constraints identical
+| Spec | Focus |
+|------|--------|
+| `critical-path.spec.ts` | Rect → profile → fillet → ready-for-pad → save |
+| `save-reopen` / `autosave-recovery` / `malformed-open` / `dirty-open` | Persistence / recovery / dirty discard |
+| `dimension-edit` | Length edit + undo/redo |
+| `select-move` | Escape aborts in-progress drag |
+| `export-dxf` / `over-constrained-sample` / `sample-anchored-rect` | Samples + DXF info tone |
+| `onboarding` / `a11y-layout` / `status-bar-resize` | First-run tip, focus/compact layout, status bar |
 
 ## Known edge cases to keep covered
 

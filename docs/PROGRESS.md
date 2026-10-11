@@ -37,6 +37,8 @@
 
 ## Current
 
+**Phase 6 a11y / layout / onboarding (2026-10-11).** Keyboard `:focus-visible` rings; first-run tip uses `--bg-panel` (was broken `--panel`) and mentions Escape; recovery dialog focuses Restore; compact widths shrink/hide side panels so the canvas stays usable; shape flyout options expose `aria-label`; README Select Escape note; Playwright `a11y-layout` + onboarding Escape text.
+
 **Phase 5 UX journeys (2026-10-11).** Escape aborts in-progress Select drag (no commit); tool change clears drag preview; DXF success uses panel info tone (`constraint-info`) not error. Unit tests cover commit + Escape abort drag; Playwright covers Escape abort, over-constrained sample status, DXF download + info tone, and dimension redo.
 
 **Phase 4 DXF (2026-10-11).** Export fails closed on non-finite geometry; parser-independent coverage for POINT/CIRCLE/ARC (incl. 0°-crossing); UI notes geometry-only / no import after export.

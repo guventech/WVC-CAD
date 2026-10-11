@@ -121,6 +121,7 @@ export function ShapeToolFlyout({
                 <button
                   type="button"
                   role="menuitemradio"
+                  aria-label={option.label}
                   aria-checked={selected}
                   className={
                     selected

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 type RecoveryDialogProps = {
   readonly savedAt: string;
   readonly documentLabel: string | null;
@@ -13,7 +15,13 @@ export function RecoveryDialog({
   onRestore,
   onDiscard,
 }: RecoveryDialogProps) {
+  const restoreRef = useRef<HTMLButtonElement>(null);
   const when = formatSavedAt(savedAt);
+
+  useEffect(() => {
+    restoreRef.current?.focus();
+  }, []);
+
   return (
     <div className="modal-backdrop" role="presentation">
       <div
@@ -42,6 +50,7 @@ export function RecoveryDialog({
             Discard
           </button>
           <button
+            ref={restoreRef}
             type="button"
             className="is-active"
             data-testid="recovery-restore"

@@ -27,6 +27,7 @@ test.describe("first-run onboarding", () => {
     await expect(hint).toBeVisible();
     await expect(hint).toContainText("Quick start");
     await expect(hint).toContainText("File → Sample:");
+    await expect(hint).toContainText("Escape");
 
     await page.getByTestId("first-run-dismiss").click();
     await expect(hint).toHaveCount(0);

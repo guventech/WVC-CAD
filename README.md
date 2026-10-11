@@ -50,7 +50,7 @@ See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities.
 
 Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geometry/constraint toolbars.
 
-- **Select** — click to select; drag points, line ends/body, rect corners/edges, circle/arc centers or rims; Delete/Backspace to remove
+- **Select** — click to select; drag points, line ends/body, rect corners/edges, circle/arc centers or rims; Escape aborts an in-progress drag; Delete/Backspace to remove
 - **Point** — click to place; Escape → Select
 - **Line** — click start → end (L/∠); continues from the end; Escape cancels unfinished segment; perfect H/V lines get Horizontal/Vertical constraints
 - **Rectangle / Polygon / Slot** — click the shape flyout (▾) to pick rectangle, N-gon, or capsule slot
