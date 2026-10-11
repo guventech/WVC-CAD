@@ -289,6 +289,39 @@ export const SketchCanvas = memo(function SketchCanvas({
     applyToolResult(result, toolCallbacks, toolLocal);
   };
 
+  const clearPointDrag = () => {
+    if (dragRef.current === null && !isDraggingPoint) {
+      return;
+    }
+    dragRef.current = null;
+    setDragPreview(null);
+    setIsDraggingPoint(false);
+    setActiveSnap(null);
+  };
+
+  // Escape / tool change must discard in-progress select drag without committing.
+  useEffect(() => {
+    if (!isDraggingPoint) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      clearPointDrag();
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clearPointDrag reads latest drag refs
+  }, [isDraggingPoint]);
+
+  useEffect(() => {
+    clearPointDrag();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- abort drag when leaving Select or switching tools
+  }, [activeTool]);
+
   useEffect(() => {
     if (isCreationTool(activeTool) || isDraggingPoint) {
       onSnapChange?.(activeSnap);
@@ -540,10 +573,9 @@ export const SketchCanvas = memo(function SketchCanvas({
             return;
           }
 
-          const drag =
-            dragRef.current !== null && event.buttons !== 0
-              ? dragRef.current
-              : null;
+          // Once a point drag is active (pointer capture), keep updating even if
+          // the browser omits buttons on some move events (seen in automation).
+          const drag = dragRef.current;
           applyResult(
             dispatchToolPointerMove(
               activeTool,
@@ -576,12 +608,7 @@ export const SketchCanvas = memo(function SketchCanvas({
             panRef.current = null;
             setIsPanning(false);
           }
-          if (dragRef.current !== null) {
-            dragRef.current = null;
-            setDragPreview(null);
-            setIsDraggingPoint(false);
-            setActiveSnap(null);
-          }
+          clearPointDrag();
         }}
         onPointerLeave={() => {
           if (panRef.current !== null || dragRef.current !== null) {

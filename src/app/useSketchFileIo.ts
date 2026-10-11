@@ -55,7 +55,10 @@ export type UseSketchFileIoOptions = {
     updater: (current: SelectionState) => SelectionState,
   ) => void;
   readonly setActiveTool: (tool: ActiveTool) => void;
-  readonly setConstraintMessage: (message: string | null) => void;
+  readonly setConstraintMessage: (
+    message: string | null,
+    tone?: "error" | "info",
+  ) => void;
   readonly setConstraintConflict: (conflict: ConstraintConflict | null) => void;
 };
 
@@ -266,6 +269,7 @@ export function useSketchFileIo({
     downloadTextFile(filename, outcome.dxf);
     setConstraintMessage(
       "Exported geometry-only DXF. Constraints remain in .sketch.json (import not supported).",
+      "info",
     );
     setConstraintConflict(null);
   }, [documentFileName, setConstraintConflict, setConstraintMessage, sketch]);

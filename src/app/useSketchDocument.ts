@@ -91,8 +91,18 @@ export function useSketchDocument({
     () => analyzeUnderConstrainedVisualization(sketch),
     [sketch],
   );
-  const [constraintMessage, setConstraintMessage] = useState<string | null>(
+  const [constraintMessage, setConstraintMessageState] = useState<string | null>(
     null,
+  );
+  const [constraintMessageTone, setConstraintMessageTone] = useState<
+    "error" | "info"
+  >("error");
+  const setConstraintMessage = useCallback(
+    (message: string | null, tone: "error" | "info" = "error") => {
+      setConstraintMessageState(message);
+      setConstraintMessageTone(message === null ? "error" : tone);
+    },
+    [],
   );
   const [constraintConflict, setConstraintConflict] =
     useState<ConstraintConflict | null>(null);
@@ -623,6 +633,7 @@ export function useSketchDocument({
     solverResult,
     underConstrained,
     constraintMessage,
+    constraintMessageTone,
     constraintConflict,
     setConstraintMessage,
     setConstraintConflict,

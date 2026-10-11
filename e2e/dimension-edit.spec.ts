@@ -51,5 +51,8 @@ test.describe("dimension edit", () => {
 
     await page.keyboard.press("Control+z");
     await expect(value).toHaveValue("40.00");
+
+    await page.keyboard.press("Control+y");
+    await expect(value).toHaveValue("75.00");
   });
 });

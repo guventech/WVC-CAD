@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "../../app/App.tsx";
 import { resetEntityIdCounter } from "../../sketch/model/EntityId.ts";
@@ -278,5 +278,86 @@ describe("App arc tool", () => {
     });
 
     expect(screen.getByRole("status")).toHaveTextContent("Geometry: 1");
+  });
+});
+
+describe("App select drag", () => {
+  beforeEach(() => {
+    resetEntityIdCounter();
+  });
+
+  function drawHorizontalLine40(canvas: HTMLElement): void {
+    fireEvent.click(screen.getByRole("button", { name: "Line" }));
+    // World (0,0) → (40,0); default camera origin (400,300), scale 2.
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 400, clientY: 300 });
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 480, clientY: 300 });
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(window, { key: "Escape" });
+  }
+
+  function lengthValue(): HTMLElement {
+    const panel = screen.getByRole("region", { name: "Constraint status" });
+    return within(panel).getByRole("textbox", { name: /Length .* value/ });
+  }
+
+  it("commits an endpoint drag on pointer up", () => {
+    render(<App />);
+    const canvas = screen.getByLabelText("Sketch viewport");
+    drawHorizontalLine40(canvas);
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      buttons: 1,
+      clientX: 480,
+      clientY: 300,
+    });
+    fireEvent.pointerMove(canvas, {
+      button: 0,
+      buttons: 1,
+      clientX: 560,
+      clientY: 300,
+    });
+    fireEvent.pointerUp(canvas, {
+      button: 0,
+      buttons: 0,
+      clientX: 560,
+      clientY: 300,
+    });
+
+    fireEvent.click(screen.getByTestId("tool-dim-distance"));
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 480, clientY: 300 });
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 480, clientY: 300 });
+    expect(lengthValue()).toHaveValue("80.00");
+  });
+
+  it("Escape aborts an in-progress endpoint drag without committing", () => {
+    render(<App />);
+    const canvas = screen.getByLabelText("Sketch viewport");
+    drawHorizontalLine40(canvas);
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      buttons: 1,
+      clientX: 480,
+      clientY: 300,
+    });
+    fireEvent.pointerMove(canvas, {
+      button: 0,
+      buttons: 1,
+      clientX: 560,
+      clientY: 300,
+    });
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.pointerUp(canvas, {
+      button: 0,
+      buttons: 0,
+      clientX: 560,
+      clientY: 300,
+    });
+
+    fireEvent.click(screen.getByTestId("tool-dim-distance"));
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 440, clientY: 300 });
+    fireEvent.pointerDown(canvas, { button: 0, clientX: 440, clientY: 300 });
+    expect(lengthValue()).toHaveValue("40.00");
   });
 });

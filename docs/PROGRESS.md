@@ -37,6 +37,8 @@
 
 ## Current
 
+**Phase 5 UX journeys (2026-10-11).** Escape aborts in-progress Select drag (no commit); tool change clears drag preview; DXF success uses panel info tone (`constraint-info`) not error. Unit tests cover commit + Escape abort drag; Playwright covers Escape abort, over-constrained sample status, DXF download + info tone, and dimension redo.
+
 **Phase 4 DXF (2026-10-11).** Export fails closed on non-finite geometry; parser-independent coverage for POINT/CIRCLE/ARC (incl. 0°-crossing); UI notes geometry-only / no import after export.
 
 **Phase 3 file safety (2026-10-11).** Open / Sample / Recent confirm before discarding dirty work; save I/O errors surface a message; recovery Discard + truncated-JSON load covered.

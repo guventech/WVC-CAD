@@ -200,6 +200,7 @@ Canvas preview calls the same apply function with ephemeral state; the model upd
 - Viewport draw is split: `renderViewport` orchestrates; `drawViewportChrome` (grid/axes) and `drawToolPreviews` own stroke details.
 - Active tools: `select`, `point`, `line`, `rectangle`, `polygon`, `slot`, `circle`, `arc`, `arc3`, `arcTangent`, `trim`, `extend`, `offset`, `mirror`, `fillet`, `chamfer`, `coincident`, `horizontal`, `vertical`, `dim-*` (see `ActiveTool.ts`). Shape create tools share a Rectangle ▾ flyout in the geometry toolbar.
 - Line tool: click start → move with preview (X/Y/L/∠ + snap markers) → click end → continue from end; Escape cancels unfinished segment, second Escape (or Escape when idle) returns to Select.
+- Select drag: Escape (or switching tools) discards the in-progress point drag preview without committing a move command.
 - Rectangle tool: click opposite corners → 4 points + 4 lines + H/V/coincident + `rectangle` feature constraint (ADR-011). Feature-local corner/edge edit keeps axis-alignment (not the numerical solver).
 - Circle tool: click center → radius preview (R) → click rim; zero radius rejected.
 - Arc tools: center-point Arc; three-point Arc3; tangent Arc from a line endpoint.

@@ -499,6 +499,11 @@ button.is-active {
   color: var(--error);
 }
 
+.panel .panel-info {
+  margin: 6px 0;
+  color: var(--ok);
+}
+
 .panel .panel-dismiss {
   margin-top: 4px;
   padding: 2px 8px;

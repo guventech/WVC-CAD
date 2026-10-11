@@ -24,8 +24,10 @@ type ConstraintPanelProps = {
   readonly sketch: Sketch;
   readonly solverResult: SolverResult;
   readonly underConstrained?: UnderConstrainedVisualization | null;
-  /** Last rejected constraint operation (null when the last one succeeded). */
+  /** Last panel notice (rejection, save/export status, etc.). */
   readonly message: string | null;
+  /** Visual tone for `message` — info for success notices, error for failures. */
+  readonly messageTone?: "error" | "info";
   readonly conflict?: ConstraintConflict | null;
   readonly onDismissConflict?: () => void;
   readonly onEditDimension: (constraintId: string, edit: DimensionEdit) => void;
@@ -39,6 +41,7 @@ export const ConstraintPanel = memo(function ConstraintPanel({
   solverResult,
   underConstrained = null,
   message,
+  messageTone = "error",
   conflict = null,
   onDismissConflict,
   onEditDimension,
@@ -80,7 +83,13 @@ export const ConstraintPanel = memo(function ConstraintPanel({
         <p className="panel-note">{solverResult.warnings[0]}</p>
       )}
       {message !== null && (
-        <div className="panel-error" role="alert" data-testid="constraint-conflict">
+        <div
+          className={messageTone === "info" ? "panel-info" : "panel-error"}
+          role={messageTone === "info" ? "status" : "alert"}
+          data-testid={
+            messageTone === "info" ? "constraint-info" : "constraint-conflict"
+          }
+        >
           <p>{message}</p>
           {conflict !== null && conflict.conflictingConstraintIds.length > 0 && (
             <p className="panel-note">

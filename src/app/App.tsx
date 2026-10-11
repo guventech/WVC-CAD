@@ -89,6 +89,7 @@ export default function App() {
     solverResult,
     underConstrained,
     constraintMessage,
+    constraintMessageTone,
     constraintConflict,
     setConstraintMessage,
     setConstraintConflict,
@@ -540,6 +541,7 @@ export default function App() {
             solverResult={solverResult}
             underConstrained={underConstrained}
             message={constraintMessage}
+            messageTone={constraintMessageTone}
             conflict={constraintConflict}
             onDismissConflict={dismissConstraintConflict}
             onEditDimension={handleEditDimension}
