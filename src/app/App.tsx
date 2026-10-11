@@ -133,6 +133,8 @@ export default function App() {
     setLastCleanFingerprint,
     hasUnsavedChanges,
     pendingRecovery,
+    otherInstanceWarning,
+    autosaveWarning,
     handleRestoreRecovery,
     handleDiscardRecovery,
   } = autosave;
@@ -451,6 +453,7 @@ export default function App() {
         <RecoveryDialog
           savedAt={pendingRecovery.savedAt}
           documentLabel={pendingRecovery.documentFileName}
+          otherInstanceWarning={otherInstanceWarning}
           onRestore={handleRestoreRecovery}
           onDiscard={handleDiscardRecovery}
         />
@@ -579,6 +582,7 @@ export default function App() {
         canUndo={documentCanUndo}
         canRedo={documentCanRedo}
         hasUnsavedChanges={hasUnsavedChanges}
+        autosaveWarning={autosaveWarning}
       />
     </div>
   );

@@ -36,11 +36,13 @@ describe("SketchAutosave", () => {
     const a = buildAutosaveEnvelope(sketch, {
       documentFileName: null,
       lastCleanFingerprint: emptySketchCleanFingerprint(),
+      lastWriterInstanceId: "instance-a",
       savedAt: "2026-01-01T00:00:00.000Z",
     });
     const b = buildAutosaveEnvelope(sketch, {
       documentFileName: null,
       lastCleanFingerprint: emptySketchCleanFingerprint(),
+      lastWriterInstanceId: "instance-a",
       savedAt: "2026-12-31T23:59:59.000Z",
     });
     expect(a.contentFingerprint).toBe(b.contentFingerprint);
@@ -57,6 +59,7 @@ describe("SketchAutosave", () => {
     writeAutosaveStore(store, sketch, {
       documentFileName: "part.sketch.json",
       lastCleanFingerprint: clean,
+      lastWriterInstanceId: "instance-1",
     });
     expect(store.snapshots).toHaveLength(1);
 
@@ -87,6 +90,7 @@ describe("SketchAutosave", () => {
     const envelope = buildAutosaveEnvelope(createEmptySketch(), {
       documentFileName: null,
       lastCleanFingerprint: emptySketchCleanFingerprint(),
+      lastWriterInstanceId: "instance-1",
     });
     expect(shouldOfferRecovery(envelope)).toBe(false);
   });
@@ -94,5 +98,41 @@ describe("SketchAutosave", () => {
   it("rejects a corrupt autosave envelope", () => {
     const parsed = parseAutosaveEnvelope({ envelopeVersion: 99 });
     expect(parsed.ok).toBe(false);
+  });
+
+  it("rejects non-JSON autosave payloads from the store", () => {
+    const store = createMemoryAutosaveStore("not-json{");
+    const read = readAutosaveStore(store);
+    expect(read.ok).toBe(false);
+    if (read.ok) {
+      return;
+    }
+    expect(read.reason).toMatch(/valid JSON/i);
+  });
+
+  it("accepts legacy v1 envelopes and migrates writer id", () => {
+    resetEntityIdCounter();
+    const sketch = createEmptySketch();
+    const modern = buildAutosaveEnvelope(sketch, {
+      documentFileName: null,
+      lastCleanFingerprint: emptySketchCleanFingerprint(),
+      lastWriterInstanceId: "instance-modern",
+    });
+    const v1 = {
+      envelopeVersion: 1,
+      sketchSchemaVersion: modern.sketchSchemaVersion,
+      savedAt: modern.savedAt,
+      documentFileName: modern.documentFileName,
+      lastCleanFingerprint: modern.lastCleanFingerprint,
+      contentFingerprint: modern.contentFingerprint,
+      document: modern.document,
+    };
+    const parsed = parseAutosaveEnvelope(v1);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(parsed.envelope.envelopeVersion).toBe(2);
+    expect(parsed.envelope.lastWriterInstanceId).toBe("unknown");
   });
 });

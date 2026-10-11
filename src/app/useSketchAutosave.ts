@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { clearCommandHistory } from "../sketch/commands/Command.ts";
+import { getAutosaveInstanceId } from "./autosaveInstanceId.ts";
 import { createLocalStorageAutosaveStore } from "./localStorageAutosaveStore.ts";
+import { useTauriCloseGuard } from "./useTauriCloseGuard.ts";
 import {
   clearAutosaveStore,
   DEFAULT_AUTOSAVE_DEBOUNCE_MS,
@@ -9,6 +11,7 @@ import {
   readAutosaveStore,
   restoreSketchFromEnvelope,
   shouldOfferRecovery,
+  wasWrittenByOtherInstance,
   writeAutosaveStore,
   type AutosaveEnvelope,
 } from "../sketch/serialization/SketchAutosave.ts";
@@ -53,11 +56,40 @@ export function useSketchAutosave({
   const [pendingRecovery, setPendingRecovery] =
     useState<AutosaveEnvelope | null>(null);
   const [recoveryReady, setRecoveryReady] = useState(false);
+  const [autosaveWarning, setAutosaveWarning] = useState<string | null>(null);
+  const [otherInstanceWarning, setOtherInstanceWarning] = useState(false);
+  const instanceId = useMemo(() => getAutosaveInstanceId(), []);
   const autosaveStore = useMemo(() => createLocalStorageAutosaveStore(), []);
   const hasUnsavedChanges = useMemo(
     () => isSketchDirty(sketch, lastCleanFingerprint),
     [sketch, lastCleanFingerprint],
   );
+
+  const flushAutosave = useCallback((): void => {
+    if (!hasUnsavedChanges) {
+      return;
+    }
+    const result = writeAutosaveStore(autosaveStore, sketch, {
+      documentFileName,
+      lastCleanFingerprint,
+      lastWriterInstanceId: instanceId,
+    });
+    if (!result.ok) {
+      setAutosaveWarning(result.reason);
+    }
+  }, [
+    autosaveStore,
+    documentFileName,
+    hasUnsavedChanges,
+    instanceId,
+    lastCleanFingerprint,
+    sketch,
+  ]);
+
+  useTauriCloseGuard({
+    hasUnsavedChanges,
+    flushAutosave,
+  });
 
   const handleRestoreRecovery = useCallback(() => {
     if (pendingRecovery === null) {
@@ -78,11 +110,17 @@ export function useSketchAutosave({
     setLastCleanFingerprint(pendingRecovery.lastCleanFingerprint);
     setSelection((current) => clearSelection(current));
     setActiveTool("select");
-    setConstraintMessage(null);
+    setConstraintMessage(
+      otherInstanceWarning
+        ? "Restored autosave written by another window. Review before saving."
+        : null,
+    );
     setConstraintConflict(null);
     setPendingRecovery(null);
+    setOtherInstanceWarning(false);
   }, [
     autosaveStore,
+    otherInstanceWarning,
     pendingRecovery,
     setActiveTool,
     setConstraintConflict,
@@ -95,19 +133,23 @@ export function useSketchAutosave({
   const handleDiscardRecovery = useCallback(() => {
     clearAutosaveStore(autosaveStore);
     setPendingRecovery(null);
+    setOtherInstanceWarning(false);
   }, [autosaveStore]);
 
   useEffect(() => {
     const result = readAutosaveStore(autosaveStore);
     if (result.ok && shouldOfferRecovery(result.envelope)) {
       setPendingRecovery(result.envelope);
+      setOtherInstanceWarning(
+        wasWrittenByOtherInstance(result.envelope, instanceId),
+      );
     } else if (!result.ok && result.reason !== "No autosave present.") {
       clearAutosaveStore(autosaveStore);
     } else if (result.ok && !shouldOfferRecovery(result.envelope)) {
       clearAutosaveStore(autosaveStore);
     }
     setRecoveryReady(true);
-  }, [autosaveStore]);
+  }, [autosaveStore, instanceId]);
 
   useEffect(() => {
     if (!recoveryReady || pendingRecovery !== null) {
@@ -115,19 +157,27 @@ export function useSketchAutosave({
     }
     if (!hasUnsavedChanges) {
       clearAutosaveStore(autosaveStore);
+      setAutosaveWarning(null);
       return;
     }
     const timer = window.setTimeout(() => {
-      writeAutosaveStore(autosaveStore, sketch, {
+      const result = writeAutosaveStore(autosaveStore, sketch, {
         documentFileName,
         lastCleanFingerprint,
+        lastWriterInstanceId: instanceId,
       });
+      if (!result.ok) {
+        setAutosaveWarning(result.reason);
+      } else {
+        setAutosaveWarning(null);
+      }
     }, DEFAULT_AUTOSAVE_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
   }, [
     autosaveStore,
     documentFileName,
     hasUnsavedChanges,
+    instanceId,
     lastCleanFingerprint,
     pendingRecovery,
     recoveryReady,
@@ -142,6 +192,7 @@ export function useSketchAutosave({
       writeAutosaveStore(autosaveStore, sketch, {
         documentFileName,
         lastCleanFingerprint,
+        lastWriterInstanceId: instanceId,
       });
       event.preventDefault();
       event.returnValue = "";
@@ -152,6 +203,7 @@ export function useSketchAutosave({
     autosaveStore,
     documentFileName,
     hasUnsavedChanges,
+    instanceId,
     lastCleanFingerprint,
     sketch,
   ]);
@@ -162,6 +214,8 @@ export function useSketchAutosave({
     setLastCleanFingerprint,
     hasUnsavedChanges,
     pendingRecovery,
+    otherInstanceWarning,
+    autosaveWarning,
     handleRestoreRecovery,
     handleDiscardRecovery,
   };

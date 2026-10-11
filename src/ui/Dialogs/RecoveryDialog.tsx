@@ -1,6 +1,7 @@
 type RecoveryDialogProps = {
   readonly savedAt: string;
   readonly documentLabel: string | null;
+  readonly otherInstanceWarning?: boolean;
   readonly onRestore: () => void;
   readonly onDiscard: () => void;
 };
@@ -8,6 +9,7 @@ type RecoveryDialogProps = {
 export function RecoveryDialog({
   savedAt,
   documentLabel,
+  otherInstanceWarning = false,
   onRestore,
   onDiscard,
 }: RecoveryDialogProps) {
@@ -26,8 +28,10 @@ export function RecoveryDialog({
         <p id="recovery-body">
           A local autosave was found{when !== null ? ` from ${when}` : ""}
           {documentLabel !== null ? ` (${documentLabel})` : ""}. Restoring does
-          not overwrite your last downloaded file — use Save to write a new
-          copy.
+          not overwrite your last saved file — use Save to write changes.
+          {otherInstanceWarning
+            ? " Warning: this slot was last written by another window."
+            : ""}
         </p>
         <div className="modal-actions">
           <button

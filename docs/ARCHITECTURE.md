@@ -100,11 +100,12 @@ Pan and zoom never change geometry coordinates.
 - Load clears undo history and syncs entity ids.
 - Unsupported schema versions or non-`mm` units are rejected (no silent unit conversion).
 
-## Autosave / recovery (Chunk 26 / ADR-035)
+## Autosave / recovery (Chunk 26 / ADR-035 / review T6)
 
 - Dirty = content fingerprint ≠ last Save/Open baseline (`SketchAutosave.ts`).
-- Autosave writes a separate `localStorage` envelope (`wvc-cad.autosave.v1`), never the user download.
-- Debounced while dirty; flushed on `beforeunload`; cleared when clean / after Save/Open / Discard.
+- Autosave writes a separate `localStorage` envelope (`wvc-cad.autosave.v1`), never the user file.
+- Debounced while dirty; flushed on `beforeunload` (web) and Tauri `onCloseRequested` (confirm + flush).
+- Quota-safe writes with a non-blocking status warning; envelope v2 adds `lastWriterInstanceId` (v1 still loads).
 - Startup recovery dialog: Restore or Discard; toolbar `*` + status **Unsaved changes**.
 
 ## Constraint data model (Chunk 10 / ADR-016)

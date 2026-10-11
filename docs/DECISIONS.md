@@ -924,3 +924,18 @@ Browser download-on-every-Save created `sketch (1).sketch.json` duplicates and i
 
 Status:
 **Implemented.**
+
+---
+
+## ADR-059 — Autosave quota safety, instance id, Tauri close
+
+Date: 2026-10-11
+
+Decision:
+1. `AutosaveStore.write` returns success/failure; quota/`localStorage` failures never throw into the editor — surface a non-blocking status warning.
+2. Autosave envelope v2 records `lastWriterInstanceId` (per-tab session id); v1 envelopes still parse (writer id → `unknown`). Warn in the recovery dialog when another instance wrote the slot.
+3. Tauri uses `getCurrentWindow().onCloseRequested` to flush autosave and confirm on dirty close; web keeps `beforeunload`.
+4. Recovery payloads continue to go through `parseSketchDocument` (same hardening path as file open).
+
+Status:
+**Implemented.**

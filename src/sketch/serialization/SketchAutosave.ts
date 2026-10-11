@@ -11,12 +11,16 @@ import {
 } from "./SketchSchema.ts";
 
 /** Envelope version for the local autosave slot (independent of sketch schema). */
-export const AUTOSAVE_ENVELOPE_VERSION = 1 as const;
+export const AUTOSAVE_ENVELOPE_VERSION = 2 as const;
 
 /** Default localStorage key — never the user's primary download path. */
 export const DEFAULT_AUTOSAVE_STORAGE_KEY = "wvc-cad.autosave.v1";
 
 export const DEFAULT_AUTOSAVE_DEBOUNCE_MS = 750;
+
+export type AutosaveWriteResult =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly reason: string };
 
 export interface AutosaveEnvelope {
   readonly envelopeVersion: typeof AUTOSAVE_ENVELOPE_VERSION;
@@ -26,12 +30,14 @@ export interface AutosaveEnvelope {
   /** Fingerprint of the last explicit Save/Open baseline when this slot was written. */
   readonly lastCleanFingerprint: string;
   readonly contentFingerprint: string;
+  /** Writer instance id (multi-tab / multi-window awareness). */
+  readonly lastWriterInstanceId: string;
   readonly document: SketchDocument;
 }
 
 export interface AutosaveStore {
   read(): string | null;
-  write(text: string): void;
+  write(text: string): AutosaveWriteResult;
   clear(): void;
 }
 
@@ -73,6 +79,7 @@ export function buildAutosaveEnvelope(
   options: {
     readonly documentFileName: string | null;
     readonly lastCleanFingerprint: string;
+    readonly lastWriterInstanceId: string;
     readonly savedAt?: string;
   },
 ): AutosaveEnvelope {
@@ -84,6 +91,7 @@ export function buildAutosaveEnvelope(
     documentFileName: options.documentFileName,
     lastCleanFingerprint: options.lastCleanFingerprint,
     contentFingerprint: sketchContentFingerprint(sketch),
+    lastWriterInstanceId: options.lastWriterInstanceId,
     document,
   };
 }
@@ -96,10 +104,11 @@ export function parseAutosaveEnvelope(raw: unknown): AutosaveReadOutcome {
   if (!isRecord(raw)) {
     return { ok: false, reason: "Autosave envelope must be a JSON object." };
   }
-  if (raw.envelopeVersion !== AUTOSAVE_ENVELOPE_VERSION) {
+  const version = raw.envelopeVersion;
+  if (version !== 1 && version !== AUTOSAVE_ENVELOPE_VERSION) {
     return {
       ok: false,
-      reason: `Unsupported autosave envelope version ${String(raw.envelopeVersion)}.`,
+      reason: `Unsupported autosave envelope version ${String(version)}.`,
     };
   }
   if (raw.sketchSchemaVersion !== SKETCH_SCHEMA_VERSION) {
@@ -129,6 +138,12 @@ export function parseAutosaveEnvelope(raw: unknown): AutosaveReadOutcome {
     return { ok: false, reason: documentOutcome.reason };
   }
 
+  const lastWriterInstanceId =
+    typeof raw.lastWriterInstanceId === "string" &&
+    raw.lastWriterInstanceId.length > 0
+      ? raw.lastWriterInstanceId
+      : "unknown";
+
   return {
     ok: true,
     envelope: {
@@ -138,6 +153,7 @@ export function parseAutosaveEnvelope(raw: unknown): AutosaveReadOutcome {
       documentFileName: raw.documentFileName,
       lastCleanFingerprint: raw.lastCleanFingerprint,
       contentFingerprint: raw.contentFingerprint,
+      lastWriterInstanceId,
       document: documentOutcome.document,
     },
   };
@@ -163,11 +179,12 @@ export function writeAutosaveStore(
   options: {
     readonly documentFileName: string | null;
     readonly lastCleanFingerprint: string;
+    readonly lastWriterInstanceId: string;
     readonly savedAt?: string;
   },
-): void {
+): AutosaveWriteResult {
   const envelope = buildAutosaveEnvelope(sketch, options);
-  store.write(serializeAutosaveEnvelope(envelope));
+  return store.write(serializeAutosaveEnvelope(envelope));
 }
 
 export function clearAutosaveStore(store: AutosaveStore): void {
@@ -184,6 +201,17 @@ export function shouldOfferRecovery(envelope: AutosaveEnvelope): boolean {
     envelope.contentFingerprint !== envelope.lastCleanFingerprint ||
     envelope.document.geometry.length > 0 ||
     envelope.document.constraints.length > 0
+  );
+}
+
+/** True when the slot was last written by a different editor instance. */
+export function wasWrittenByOtherInstance(
+  envelope: AutosaveEnvelope,
+  currentInstanceId: string,
+): boolean {
+  return (
+    envelope.lastWriterInstanceId !== "unknown" &&
+    envelope.lastWriterInstanceId !== currentInstanceId
   );
 }
 
@@ -206,6 +234,7 @@ export function createMemoryAutosaveStore(
     write(text) {
       value = text;
       snapshots.push(text);
+      return { ok: true };
     },
     clear() {
       value = null;

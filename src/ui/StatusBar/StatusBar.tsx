@@ -32,6 +32,7 @@ type StatusBarProps = {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
   readonly hasUnsavedChanges?: boolean;
+  readonly autosaveWarning?: string | null;
 };
 
 /**
@@ -56,6 +57,7 @@ export function StatusBar({
   canUndo,
   canRedo,
   hasUnsavedChanges = false,
+  autosaveWarning = null,
 }: StatusBarProps) {
   const [sessionOpen, setSessionOpen] = useState(false);
   const grid = cameraScale == null ? null : chooseGridSpacing(cameraScale);
@@ -105,6 +107,15 @@ export function StatusBar({
         >
           {hasUnsavedChanges ? "Unsaved changes" : "Saved"}
         </span>
+        {autosaveWarning !== null ? (
+          <span
+            className="status-unsaved"
+            data-testid="autosave-warning"
+            title={autosaveWarning}
+          >
+            Autosave warning
+          </span>
+        ) : null}
         <span className="status-ready">Ready</span>
         <button
           type="button"
