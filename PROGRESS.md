@@ -37,6 +37,8 @@
 
 ## Current
 
+**Review brief P0 (2026-10-11).** Working through [WVC-CAD_review_and_fix_brief](https://github.com/guventech/WVC-CAD) external findings: CI/templates landed; docs tidy + solver cleanup in progress.
+
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
 ### Leftovers after 2D gap recheck (2026-10-10)

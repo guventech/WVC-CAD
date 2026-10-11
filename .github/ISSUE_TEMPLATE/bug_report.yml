@@ -1,0 +1,40 @@
+name: Bug report
+description: Something geometry, constraints, UI, or save/load related broke
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Attach a `.sketch.json` when possible — it is the best way to reproduce solver/geometry bugs.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Expected vs actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser or Tauri, OS, commit/version if known
+    validations:
+      required: false
+  - type: textarea
+    id: sketch
+    attributes:
+      label: Sample sketch
+      description: Paste or attach a minimal `.sketch.json` (File → Save)
+    validations:
+      required: false
