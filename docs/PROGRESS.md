@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed (FileStorage through samples/onboarding/alpha docs). Solver P2 (T10+) remains deferred.
+**Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed; `v0.1.0-alpha.1` tagged. Alpha Windows bundle is **NSIS-only** (MSI rejects `alpha` prerelease). Solver P2 (T10+) remains deferred.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 

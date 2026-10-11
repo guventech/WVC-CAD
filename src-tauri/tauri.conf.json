@@ -27,7 +27,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "msi"],
+    "targets": ["nsis"],
     "publisher": "WVC-CAD",
     "copyright": "Copyright © 2026 WVC-CAD contributors",
     "license": "MIT",
