@@ -19,18 +19,16 @@ npm run tauri:dev    # desktop window (needs Rust + WebView2)
 npm run tauri:build  # Windows NSIS/MSI installer
 ```
 
-## Quick start
+## Quick start (≈5 minutes)
 
-1. `npm run dev` and open the app (under 5 minutes to first closed profile).
-2. Dismiss the first-run tip, or choose **File → Sample: …** for a ready sketch from `public/samples/`:
-   - Anchored rectangle — fully constrained 100×50 mm
-   - Filleted plate with hole — outer profile + inner circle
-   - Capsule slot — slot create tool result
-   - Mirrored bracket — L-bracket mirrored about Y
-   - Over-constrained line — conflicting lengths (solver status honesty)
-3. Or draw: **Rectangle** from the shape flyout (▾), click two opposite corners.
-4. Add **Distance** / **Size** dimensions; check **Sketch Analysis** (“Ready for pad”).
-5. **File → Save** (overwrite when a file handle exists) or **Export DXF…**.
+1. `npm run dev` → open the app → dismiss the first-run tip (or keep it as a reminder).
+2. **Fastest path:** **File → Sample: Anchored rectangle** (also under `public/samples/`).
+3. **Or draw:** shape flyout (▾) → **Rectangle** → click two opposite corners.
+4. **Distance** / **Size** to drive lengths; double-click a dimension (or edit in the Constraints panel).
+5. Open **Sketch Analysis** — look for “Ready for pad” when the outer profile is closed.
+6. **File → Save** (or **Export DXF…** for geometry-only interchange).
+
+Other samples: filleted plate with hole, capsule slot, mirrored bracket, over-constrained line.
 
 ![WVC-CAD canvas](./docs/images/app-canvas.png)
 

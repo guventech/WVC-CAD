@@ -4,9 +4,9 @@ Public priorities only. This is **not** a promise of dates or a full business pl
 
 ## Now / next
 
-1. **Sample sketches** — checked-in `.sketch.json` examples for first-run learning.
-2. **Quick-start polish** — short tutorial path and clearer onboarding copy.
-3. **Reliability** — fix issues reported by early users; expand Playwright smoke where it protects save/reload and dimension edit.
+1. **Sample sketches** — done (`public/samples/` + File → Sample: …).
+2. **Quick-start polish** — first-run tip + README tutorial path tightened (2026-10-11).
+3. **Reliability** — Playwright covers critical path, save/reopen, autosave recovery, malformed open, dimension edit, and first-run dismiss; keep expanding as users report gaps.
 4. **Alpha feedback** — invite a small group; triage GitHub Issues before large features.
 5. **Installer polish** — original icons landed; signed Windows builds when a certificate is available (see PACKAGING.md).
 

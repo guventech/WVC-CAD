@@ -5,10 +5,16 @@ type FirstRunHintProps = {
 /** Dismissible empty-canvas tip for first-time users. */
 export function FirstRunHint({ onDismiss }: FirstRunHintProps) {
   return (
-    <div className="first-run-hint" data-testid="first-run-hint" role="region" aria-label="Getting started">
+    <div
+      className="first-run-hint"
+      data-testid="first-run-hint"
+      role="region"
+      aria-label="Getting started"
+    >
       <p>
-        <strong>Quick start:</strong> Rectangle → constrain → Save. Try{" "}
-        <em>File → Open sample…</em> for ready-made sketches.
+        <strong>Quick start:</strong> draw a <em>Rectangle</em> (shape ▾), add{" "}
+        <em>Distance</em> / <em>Size</em>, check Sketch Analysis, then{" "}
+        <em>File → Save</em>. Or open <em>File → Sample: …</em> for a ready sketch.
       </p>
       <button type="button" data-testid="first-run-dismiss" onClick={onDismiss}>
         Got it

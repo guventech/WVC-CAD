@@ -37,7 +37,9 @@
 
 ## Current
 
-**CURSOR_AGENT_BRIEFING (2026-10-11).** P1–P5 addressed: CI logs Node/TS versions; TS7/`@types/node` 26 held on `~6.0.2` / ^24; DXF + intersection snap tests expanded; **solver scale test established as regression baseline** (`SolverScale.test.ts` — ~1,000-constraint residual assembly; full LM/rank deferred per ADR-052); `CHANGELOG.md` added; ADR-052 TODOs on `Solver.ts` / `DegreesOfFreedom.ts`; samples documented in README. P6 E2E expansion optional/later. Configs (`.oxlintrc.json`, `.prettierrc.json`, `.editorconfig`, `strict: true`) already present.
+**Reliability + onboarding (2026-10-11).** Playwright `dimension-edit` + `onboarding` specs; first-run tip and README quick-start clarified; ROADMAP items 1–3 marked done/current.
+
+**CURSOR_AGENT_BRIEFING (2026-10-11).** P1–P5 addressed: CI logs Node/TS versions; TS7/`@types/node` 26 held on `~6.0.2` / ^24; DXF + intersection snap tests expanded; **solver scale test established as regression baseline** (`SolverScale.test.ts` — ~1,000-constraint residual assembly; full LM/rank deferred per ADR-052); `CHANGELOG.md` added; ADR-052 TODOs on `Solver.ts` / `DegreesOfFreedom.ts`; samples documented in README. Configs (`.oxlintrc.json`, `.prettierrc.json`, `.editorconfig`, `strict: true`) already present.
 
 **Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed; `v0.1.0-alpha.1` tagged (NSIS-only). Tauri close guard fixed (leaked `onCloseRequested` + `window.confirm` trapped the window). Solver residual scaling (ADR-052) remains deferred.
 

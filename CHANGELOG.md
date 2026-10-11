@@ -2,6 +2,13 @@
 
 All notable user-visible changes to WVC-CAD are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Playwright E2E for dimension edit (panel) and first-run tip dismiss persistence
+- Clearer first-run / README quick-start tutorial path
+
 ## [0.1.0-alpha.1] — 2026-10-11
 
 ### Added
