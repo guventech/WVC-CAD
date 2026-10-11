@@ -37,6 +37,8 @@
 
 ## Current
 
+**Canvas fill gap (2026-10-11).** `.canvas-pane` now flex-fills `.canvas-host` so the 2D sketch area no longer leaves an empty band below/right after resize (canvas intrinsic height was pinning the pane).
+
 **Phase 1 mutation audit (2026-10-11).** Fixed `MirrorCommand` dropping copied constraints; move undo restores constraints; selection prune after trim/extend/mirror/fillet/chamfer; architecture-boundary Vitest gate.
 
 **CI timing (2026-10-11).** `SolverScale` / `SolverPerformance` gate correctness + generous sanity ceilings; wall times logged (GHA was red on 15s/5s local-style thresholds).

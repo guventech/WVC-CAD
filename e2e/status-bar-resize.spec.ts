@@ -32,4 +32,33 @@ test.describe("status bar layout", () => {
     await expect(page.getByTestId("constraint-context-bar")).toBeVisible();
     await expect(status).toBeVisible();
   });
+
+  test("2D sketch pane fills the canvas host after resize", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await dismissRecoveryIfPresent(page);
+
+    await page.setViewportSize({ width: 1100, height: 720 });
+
+    const metrics = await page.evaluate(() => {
+      const host = document.querySelector(".canvas-host");
+      const pane = document.querySelector(".canvas-pane");
+      if (host === null || pane === null) {
+        return null;
+      }
+      const hostBox = host.getBoundingClientRect();
+      const paneBox = pane.getBoundingClientRect();
+      return {
+        hostHeight: hostBox.height,
+        paneHeight: paneBox.height,
+        hostWidth: hostBox.width,
+        paneWidth: paneBox.width,
+      };
+    });
+
+    expect(metrics).not.toBeNull();
+    expect(metrics!.paneHeight).toBeGreaterThan(100);
+    expect(Math.abs(metrics!.paneHeight - metrics!.hostHeight)).toBeLessThanOrEqual(2);
+    expect(Math.abs(metrics!.paneWidth - metrics!.hostWidth)).toBeLessThanOrEqual(2);
+  });
 });
