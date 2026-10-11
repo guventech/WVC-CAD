@@ -22,12 +22,18 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
     }
   },
   "bundle": {
     "active": true,
     "targets": ["nsis", "msi"],
+    "publisher": "WVC-CAD",
+    "copyright": "Copyright © 2026 WVC-CAD contributors",
+    "license": "MIT",
+    "category": "DeveloperTool",
+    "shortDescription": "Parametric 2D mechanical sketcher",
+    "longDescription": "WVC-CAD is a focused parametric 2D mechanical sketcher: create geometry, apply constraints, solve, and save versioned .sketch.json files. No accounts, cloud sync, or analytics.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

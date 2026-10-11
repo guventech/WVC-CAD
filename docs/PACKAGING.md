@@ -43,7 +43,21 @@ Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
 - App id: `com.wvccad.app` (`src-tauri/tauri.conf.json`)
 - Bundle targets: `nsis` + `msi` (Windows installers)
 - Dev URL: `http://localhost:5173` (Vite `strictPort`)
+- CSP: production WebView CSP in `tauri.conf.json` (no cloud `connect-src`); web `index.html` meta allows `ws:`/`wss:` for Vite HMR only
+- Icons: original mark from `branding/icon-source.png` via `npx tauri icon`
+- Capabilities: `dialog` + scoped `fs` only (no shell / HTTP plugins)
 - CAD logic stays in `src/sketch/**` — the shell only hosts WebView2
+
+### Windows code signing (plan)
+
+Unsigned NSIS/MSI builds trigger SmartScreen warnings. For alpha:
+
+1. Ship **unsigned** installers from the `tauri-build` tag workflow and document the warning in release notes.
+2. Before a public beta, obtain a standard code-signing certificate (OV or EV) and sign with `signtool` / Tauri bundle signing env vars in CI secrets.
+3. Prefer EV + Trusted Signing / Azure for fewer SmartScreen prompts once volume exists.
+4. Never commit certificates or private keys to the repo.
+
+Until signing lands, users can still run the installer by choosing “More info → Run anyway” on SmartScreen.
 
 ## Runtime rules that keep the app light
 
@@ -53,7 +67,7 @@ These are enforced in app code today; keep them when adding tools:
 2. **Memoize heavy UI** — canvas/panels skip re-render when only status chrome changes.
 3. **Batch canvas strokes** — grid uses few `stroke()` calls, not one per line.
 4. **No CAD math in React** — keeps the UI thin; solver stays isolated.
-5. **No heavy runtime deps** — production deps are only `react` + `react-dom`. Prefer algorithms in `src/sketch/**` over libraries.
+5. **Thin runtime deps** — web CAD core stays algorithm-first in `src/sketch/**`; allowed extras are React and Tauri plugins loaded only behind platform detection (ADR-058).
 6. **Ship modern JS** — Vite `build.target: es2022` (no legacy polyfill bloat).
 
 ## Weak-PC checklist (before each release)

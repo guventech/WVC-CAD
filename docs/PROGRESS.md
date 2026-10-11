@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P1 (2026-10-11).** P0 done; T5–T7 landed (FileStorage, autosave hardening, loader limits + fuzz). Next: T8 Tauri CSP/icons/metadata.
+**Review brief P1 (2026-10-11).** P0 done; T5–T8 landed (FileStorage, autosave, loader, Tauri CSP/icons/metadata). Next: T9 samples + alpha onboarding/tag.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -296,8 +296,8 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Sample sketches + File → Open sample…
 - Quick-start / first-run onboarding polish
 - Reliability fixes from alpha feedback; expand Playwright coverage
-- Review-brief P1 T8–T9 (Tauri CSP/icons; samples + alpha tag)
-- Installer polish (custom icons, unsigned→signed plan) — [PACKAGING.md](./PACKAGING.md)
+- Review-brief P1 T9 (samples, first-run hint, alpha tag/release notes)
+- Code signing for Windows installers when certificate is ready — [PACKAGING.md](./PACKAGING.md)
 - Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 
 ## Chunk 23 results (2026-10-05)
@@ -395,7 +395,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Perfect H/V lines get orientation constraints on create
 - Offset of mixed line+arc closed profiles is not rebuilt as a polyline loop
 - DXF export is geometry-only (no import; constraints omitted)
-- Tauri 2 scaffold exists (`npm run tauri:dev` / `tauri:build`); needs Rust; icons still defaults; no signed store release yet
+- Tauri 2 scaffold exists (`npm run tauri:dev` / `tauri:build`); needs Rust; original icons + CSP landed; Windows builds still unsigned
 - Parallel / perpendicular / tangent inference snaps during create remain a subset (intersection + H/V + on-entity are present)
 
 ## Living docs

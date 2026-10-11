@@ -69,7 +69,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - DXF is export-only (no import; constraints not in DXF)
 - Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./docs/ARCHITECTURE.md))
 - Residual/column scaling deferred (ADR-052); see [PROGRESS.md](./docs/PROGRESS.md) and [assessments.md](./docs/assessments.md)
-- Tauri installer requires a local Rust toolchain; app icons are still scaffold defaults
+- Tauri installer requires a local Rust toolchain; Windows builds are unsigned until code signing is configured (see [PACKAGING.md](./docs/PACKAGING.md))
 
 ## License
 

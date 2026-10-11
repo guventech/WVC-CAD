@@ -8,7 +8,7 @@ Public priorities only. This is **not** a promise of dates or a full business pl
 2. **Quick-start polish** — short tutorial path and clearer onboarding copy.
 3. **Reliability** — fix issues reported by early users; expand Playwright smoke where it protects save/reload and dimension edit.
 4. **Alpha feedback** — invite a small group; triage GitHub Issues before large features.
-5. **Installer polish** — custom icons and a signed Windows build when the Rust toolchain and branding are ready.
+5. **Installer polish** — original icons landed; signed Windows builds when a certificate is available (see PACKAGING.md).
 
 ## Explicitly not current work
 
