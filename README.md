@@ -1,8 +1,6 @@
-# Sketcher (working title)
+# WVC-CAD
 
-Experimental **parametric 2D mechanical sketcher**. Internal units are millimetres. The sketch model is the source of truth; React is a view only.
-
-The desktop window title is **Sketcher**. The GitHub repository name may change before a public launch.
+**Weekend Vibe-Coded CAD** — an experimental parametric 2D mechanical sketcher. Internal units are millimetres. The sketch model is the source of truth; React is a view only.
 
 > Not a production CAD product. No affiliation with Autodesk, Dassault Systèmes, Siemens, PTC, or other commercial CAD vendors. Icons and chrome are original — not copied from proprietary products.
 
@@ -20,6 +18,16 @@ npm run build
 npm run tauri:dev    # desktop window (needs Rust + WebView2)
 npm run tauri:build  # Windows NSIS/MSI installer
 ```
+
+## Quick start
+
+1. `npm run dev` and open the app.
+2. Choose **Rectangle** from the shape flyout (▾), click two opposite corners.
+3. Add **Distance** / **Size** dimensions from the Constraints toolbar as needed.
+4. Check **Sketch Analysis** for a closed profile (“Ready for pad”).
+5. **File → Save** for `.sketch.json`, or **Export DXF…** for geometry interchange.
+
+See [ROADMAP.md](./ROADMAP.md) for near-term priorities.
 
 ## Controls
 
@@ -65,13 +73,14 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT — see [LICENSE](./LICENSE). Third-party notices: [THIRD_PARTY.md](./THIRD_PARTY.md).
 
 ## Docs
 
 | File | Role |
 |------|------|
 | [PROGRESS.md](./PROGRESS.md) | Live checklist |
+| [ROADMAP.md](./ROADMAP.md) | Near-term public priorities |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Layers and edit pipeline |
 | [DECISIONS.md](./DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./TEST_PLAN.md) | Test coverage |
@@ -80,3 +89,4 @@ MIT — see [LICENSE](./LICENSE).
 | [AGENTS.md](./AGENTS.md) | Agent/contributor roadmap |
 | [assessments.md](./assessments.md) | Historical architecture snapshot |
 | [PACKAGING.md](./PACKAGING.md) | Tauri 2 installer notes |
+| [THIRD_PARTY.md](./THIRD_PARTY.md) | Dependency licenses |

@@ -14,7 +14,7 @@ import {
 export const AUTOSAVE_ENVELOPE_VERSION = 1 as const;
 
 /** Default localStorage key — never the user's primary download path. */
-export const DEFAULT_AUTOSAVE_STORAGE_KEY = "sketcher.autosave.v1";
+export const DEFAULT_AUTOSAVE_STORAGE_KEY = "wvc-cad.autosave.v1";
 
 export const DEFAULT_AUTOSAVE_DEBOUNCE_MS = 750;
 

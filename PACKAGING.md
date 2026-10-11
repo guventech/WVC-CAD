@@ -1,6 +1,6 @@
 # Packaging — Windows desktop (target)
 
-Goal: ship Sketcher as a **Windows installer** (`.msi` / `.exe`) that runs well on modest PCs.
+Goal: ship WVC-CAD as a **Windows installer** (`.msi` / `.exe`) that runs well on modest PCs.
 
 ## Decision: Tauri 2 (not Electron)
 
@@ -40,7 +40,7 @@ Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
 
 ### Config notes
 
-- App id: `com.sketcher.app` (`src-tauri/tauri.conf.json`)
+- App id: `com.wvccad.app` (`src-tauri/tauri.conf.json`)
 - Bundle targets: `nsis` + `msi` (Windows installers)
 - Dev URL: `http://localhost:5173` (Vite `strictPort`)
 - CAD logic stays in `src/sketch/**` — the shell only hosts WebView2

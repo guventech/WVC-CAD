@@ -27,7 +27,7 @@ test.describe("critical path smoke", () => {
     await page.goto("/");
     await dismissRecoveryIfPresent(page);
 
-    await expect(page.getByTestId("app-title")).toHaveText("Sketcher");
+    await expect(page.getByTestId("app-title")).toHaveText("WVC-CAD");
 
     await page.getByTestId("tool-shape-flyout").click();
     await page.getByTestId("tool-rectangle").click();

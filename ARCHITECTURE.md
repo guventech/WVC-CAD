@@ -98,7 +98,7 @@ Pan and zoom never change geometry coordinates.
 ## Autosave / recovery (Chunk 26 / ADR-035)
 
 - Dirty = content fingerprint ≠ last Save/Open baseline (`SketchAutosave.ts`).
-- Autosave writes a separate `localStorage` envelope (`sketcher.autosave.v1`), never the user download.
+- Autosave writes a separate `localStorage` envelope (`wvc-cad.autosave.v1`), never the user download.
 - Debounced while dirty; flushed on `beforeunload`; cleared when clean / after Save/Open / Discard.
 - Startup recovery dialog: Restore or Discard; toolbar `*` + status **Unsaved changes**.
 

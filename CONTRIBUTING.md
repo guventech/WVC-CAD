@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for interest in this experimental 2D parametric sketcher.
+Thanks for interest in WVC-CAD, an experimental 2D parametric sketcher.
 
 ## Scope
 

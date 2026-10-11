@@ -606,7 +606,7 @@ Status:
 Date: 2026-10-05
 
 Decision:
-Chunk 26 writes dirty sketches to a dedicated browser `localStorage` autosave envelope (`sketcher.autosave.v1`), never to the user's last downloaded `.sketch.json`. Dirty state is content-fingerprint vs last explicit Save/Open. On startup, a recovery dialog offers Restore or Discard. Save/Open clear the autosave slot; `beforeunload` flushes autosave and warns when dirty. Status/toolbar show an unsaved-changes indicator.
+Chunk 26 writes dirty sketches to a dedicated browser `localStorage` autosave envelope (`wvc-cad.autosave.v1`), never to the user's last downloaded `.sketch.json`. Dirty state is content-fingerprint vs last explicit Save/Open. On startup, a recovery dialog offers Restore or Discard. Save/Open clear the autosave slot; `beforeunload` flushes autosave and warns when dirty. Status/toolbar show an unsaved-changes indicator.
 
 Reason:
 AGENTS requires local autosave, crash recovery, and an unsaved indicator without overwriting the primary user file.

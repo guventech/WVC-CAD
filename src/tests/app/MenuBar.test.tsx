@@ -15,7 +15,7 @@ describe("Chunk 27 menu bar", () => {
     expect(screen.getByTestId("menu-sketch")).toBeInTheDocument();
     expect(screen.getByTestId("menu-constraints")).toBeInTheDocument();
     expect(screen.getByTestId("menu-tools")).toBeInTheDocument();
-    expect(screen.getByTestId("app-title")).toHaveTextContent("Sketcher");
+    expect(screen.getByTestId("app-title")).toHaveTextContent("WVC-CAD");
     expect(screen.getByText("2D Sketch")).toBeInTheDocument();
   });
 

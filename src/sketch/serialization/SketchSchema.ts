@@ -37,4 +37,4 @@ export interface SketchDocument {
   readonly metadata?: SketchDocumentMetadata;
 }
 
-export const SKETCH_APP_NAME = "sketcher";
+export const SKETCH_APP_NAME = "wvc-cad";

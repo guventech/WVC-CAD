@@ -240,7 +240,7 @@ Editing a fillet radius on a located box is covered by regression fixtures (100Ã
 
 | Area | What landed |
 |------|-------------|
-| Autosave | Debounced dirty writes to `localStorage` envelope (`sketcher.autosave.v1`) |
+| Autosave | Debounced dirty writes to `localStorage` envelope (`wvc-cad.autosave.v1`) |
 | Recovery | Startup Restore / Discard dialog; never overwrites downloaded user file |
 | Dirty | Content fingerprint vs last Save/Open; toolbar `*` + status **Unsaved changes** |
 | Flush | `beforeunload` warns + writes autosave when dirty |

@@ -187,7 +187,7 @@ export function MenuBar({
   return (
     <nav className="menu-bar" aria-label="Application menu" ref={rootRef}>
       <span className="app-title" data-testid="app-title">
-        Sketcher
+        WVC-CAD
       </span>
       <ul className="menu-bar-list" role="menubar">
         {menus.map((menu) => {

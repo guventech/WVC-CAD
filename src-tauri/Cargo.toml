@@ -1,8 +1,8 @@
 [package]
-name = "sketcher"
+name = "wvc-cad"
 version = "0.1.0"
-description = "Parametric 2D mechanical sketcher (Tauri shell)"
-authors = ["Sketcher"]
+description = "WVC-CAD — parametric 2D mechanical sketcher (Tauri shell)"
+authors = ["WVC-CAD"]
 license = "MIT"
 edition = "2024"
 rust-version = "1.90"

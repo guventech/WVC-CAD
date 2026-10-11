@@ -16,6 +16,8 @@
 
 **Current gate:** Chunks 0–27 and Pre–Chunk 16 (World Datum Frame) are complete — see PROGRESS.md. Prefer Tauri 2 (not Electron) for the Windows installer; `src-tauri/` is scaffolded — extend packaging only when asked.
 
+**Out of scope unless the active task asks:** payments, accounts, cloud sync, analytics, or AI infrastructure. Keep the local sketching workflow independent of monetization.
+
 # Architecture Preservation Rules
 
 Before implementing any new chunk:
