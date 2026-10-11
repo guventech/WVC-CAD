@@ -2,7 +2,6 @@ import {
   analyzeDegreesOfFreedom,
   classifySketchStatus,
 } from "../constraints/DegreesOfFreedom.ts";
-import { TOLERANCE } from "../geometry/GeometryMath.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { solveLevenbergMarquardt } from "./LevenbergMarquardt.ts";
 import {
@@ -25,15 +24,15 @@ export interface SolveApplyResult {
 /**
  * Diagnose the current sketch without mutating it.
  * Status and DOF come from residual satisfaction + Jacobian rank (Chunk 15)
- * on the **stored** geometry — this does not run LM.
+ * on the **stored** geometry — this does not run LM (options belong on
+ * `solveSketch` / `solveLevenbergMarquardt` only).
  *
  * Interactive edits go through `solveSketch` / `maintainConstraints`, which
  * settle geometry first. After load (or external edits), call `solve` for a
  * non-mutating report of the stored state, or `solveSketch` if you need to
  * settle residuals before trusting status.
  */
-export function solve(sketch: Sketch, options?: SolverOptions): SolverResult {
-  void options;
+export function solve(sketch: Sketch): SolverResult {
   return diagnoseSketch(sketch, 0);
 }
 
@@ -93,8 +92,6 @@ export function solveSketch(
 export function isSketchSatisfied(sketch: Sketch): boolean {
   return listUnsatisfiedConstraints(sketch).length === 0;
 }
-
-export const SOLVER_DEFAULT_TOLERANCE = TOLERANCE.solverResidual;
 
 function diagnoseSketch(sketch: Sketch, iterations: number): SolverResult {
   const residual = maxSupportedResidual(sketch);

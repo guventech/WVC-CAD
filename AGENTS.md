@@ -918,7 +918,7 @@ A numerical method such as Newton-Raphson or Levenberg-Marquardt may be used, bu
 
 ```ts
 interface Solver {
-  solve(sketch: Sketch, options?: SolverOptions): SolverResult;
+  solve(sketch: Sketch): SolverResult;
 }
 ```
 

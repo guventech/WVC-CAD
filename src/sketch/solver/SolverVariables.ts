@@ -1,8 +1,5 @@
 import type { PositionAnchor } from "../constraints/Coincident.ts";
-import {
-  handleKey,
-  normalizePointLikeRef,
-} from "../constraints/ConstraintRef.ts";
+import { normalizePointLikeRef } from "../constraints/ConstraintRef.ts";
 import type { Geometry } from "../model/Geometry.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { syncFilletArcAngles } from "../geometry/FilletTopology.ts";
@@ -248,7 +245,6 @@ function fixedKeysFromAnchors(
         keys.add(`arc:${entity.id}:centerY`);
         break;
     }
-    void handleKey(ref);
   }
   return keys;
 }

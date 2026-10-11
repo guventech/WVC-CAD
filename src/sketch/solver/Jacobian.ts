@@ -37,7 +37,6 @@ export function buildJacobian(
   const nR = baseResidual.length;
   const nV = values.length;
   const jacobian = new Array<number>(nR * nV).fill(0);
-  void baseResidual;
 
   for (let j = 0; j < nV; j += 1) {
     const step = Math.max(FD_ABSOLUTE, FD_RELATIVE * Math.abs(values[j]!));

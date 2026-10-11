@@ -37,7 +37,7 @@
 
 ## Current
 
-**Review brief P0 (2026-10-11).** T1 CI, T2 docs fixes, and T3 (`docs/` move, `0.1.0-alpha.1`, Prettier, `npm run check`) landed. Next: T4 drop ignored `solve()` options.
+**Review brief P0 (2026-10-11).** T1–T4 landed (CI, docs fixes, `docs/` + package tidy, drop ignored `solve()` options). Next: P1 T5 real Save / Save As.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -296,7 +296,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Sample sketches + File → Open sample…
 - Quick-start / first-run onboarding polish
 - Reliability fixes from alpha feedback; expand Playwright coverage
-- Review-brief P0 T4 (drop ignored `solve()` options); then P1 (real Save/Save As; loader harden)
+- Review-brief P1 (real Save/Save As; autosave Tauri close; loader harden)
 - Installer polish (custom icons, unsigned→signed plan) — [PACKAGING.md](./PACKAGING.md)
 - Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
 

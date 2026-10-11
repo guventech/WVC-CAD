@@ -116,7 +116,7 @@ export function drawSketchFrame(
     }
     ctx.stroke();
 
-    drawAxisLabel(ctx, camera, viewport, axis.tag.toUpperCase(), axis.tag, origin);
+    drawAxisLabel(ctx, viewport, axis.tag.toUpperCase(), axis.tag, origin);
   }
 
   const originSelected = selection?.selectedIds.includes(frame.originId) ?? false;
@@ -159,7 +159,6 @@ export function drawOriginMarker(
 
 function drawAxisLabel(
   ctx: CanvasRenderingContext2D,
-  camera: Camera,
   viewport: ViewportSize,
   label: string,
   tag: string,
@@ -176,7 +175,6 @@ function drawAxisLabel(
     ctx.textAlign = "left";
     ctx.fillText(label, originScreen.x + 8, 14);
   }
-  void camera;
   ctx.restore();
 }
 
