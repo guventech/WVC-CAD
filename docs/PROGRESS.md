@@ -37,13 +37,15 @@
 
 ## Current
 
-**Alpha UX + deferred items (2026-10-11).** Status bar resize fix; hardened samples + tests; icon concept A. **ADR-052 scaling landed** (`ResidualScaling.ts` row/column equilibration; DOF honesty preserved). Fillet rebuild retries opposite wedge on large moves. Targeting `v0.1.0-alpha.2` installer republish.
+**CI timing (2026-10-11).** `SolverScale` / `SolverPerformance` gate correctness + generous sanity ceilings; wall times logged (GHA was red on 15s/5s local-style thresholds).
+
+**Alpha UX + deferred items (2026-10-11).** Status bar resize fix; hardened samples + tests; icon concept A. **ADR-052 row scaling landed** (`ResidualScaling.ts`; column scaling not used). Fillet rebuild retries opposite wedge on large moves. `v0.1.0-alpha.2` published.
 
 **Reliability + onboarding (2026-10-11).** Playwright `dimension-edit` + `onboarding` specs; first-run tip and README quick-start clarified; ROADMAP items 1–3 marked done/current.
 
 **CURSOR_AGENT_BRIEFING (2026-10-11).** P1–P5 addressed: CI logs Node/TS versions; TS7/`@types/node` 26 held on `~6.0.2` / ^24; DXF + intersection snap tests expanded; **solver scale test established as regression baseline** (`SolverScale.test.ts` — ~1,000-constraint residual assembly; full LM/rank deferred per ADR-052); `CHANGELOG.md` added; ADR-052 TODOs on `Solver.ts` / `DegreesOfFreedom.ts`; samples documented in README. Configs (`.oxlintrc.json`, `.prettierrc.json`, `.editorconfig`, `strict: true`) already present.
 
-**Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed; `v0.1.0-alpha.1` tagged (NSIS-only). Tauri close guard fixed (leaked `onCloseRequested` + `window.confirm` trapped the window). Solver residual scaling (ADR-052) remains deferred.
+**Review brief P1 (2026-10-11).** P0–P1 T5–T9 landed; `v0.1.0-alpha.1` tagged (NSIS-only). Tauri close guard fixed (leaked `onCloseRequested` + `window.confirm` trapped the window). ADR-052 row scaling landed later the same day.
 
 **Post–Chunk 27 + leftovers (2026-10-10).** N-gon sides, loop/chain offset, and Tauri 2 scaffold shipped (ADR-057 / ADR-010).
 
@@ -74,7 +76,7 @@
 | Tier | What landed |
 |------|-------------|
 | A Profile | Stronger arc loop densify; non-manifold + self-intersection counts; construction exclusion; `isReadyForPad` + diagnostics “Ready for pad”; fixtures in `ProfileAnalyzer.test.ts` |
-| A Solver | Residual/column scaling **deferred** with honesty docs (ADR-052); no fake fully-constrained; Jacobian comment |
+| A Solver | Residual **row** scaling landed (ADR-052); no fake fully-constrained; Jacobian comment |
 | A Contract | ARCHITECTURE “Sketch → feature contract”; bridge = `analyzeProfiles` / `isReadyForPad` only (ADR-053) |
 | B Snap/Arc | Intersection snap (`intersectionSnap.ts`); **Arc3** three-point tool + glyph/toolbar/menu (ADR-054) |
 | C E2E | Playwright `e2e/critical-path.spec.ts` — rect → profile → fillet → ready-for-pad → save download (`npm run test:e2e`) |
@@ -304,7 +306,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Reliability fixes from alpha feedback; expand Playwright coverage
 - Review-brief P2 solver robustness (T10 scaling) when a concrete failure appears; else expand E2E (T18)
 - Code signing for Windows installers when certificate is ready — [PACKAGING.md](./PACKAGING.md)
-- Solver residual/column scaling remains deferred (ADR-052) until a concrete failure or dedicated milestone
+- ADR-052 residual **row** scaling is in; column scaling intentionally not used (H/V regressions)
 
 ## Chunk 23 results (2026-10-05)
 
@@ -395,7 +397,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Tangent uses supporting circle (contact may lie off a drawn arc sweep)
 - Frozen sign/side/mode captures can trap LM on large branch-crossing moves
 - Dense solver: interactive comfort is tens–low hundreds of constraints (not yet 1,000)
-- Mixed mm/radian residuals are unscaled (column scaling deferred; ADR-052)
+- Mixed mm/radian residuals use ADR-052 row weights (column scaling not used)
 - Whole-rectangle body drag translate still limited (Offset X/Y: locate rigid-translates; opposing same-axis Offsets size one edge + rebuild blends)
 - Profile analyzer: line + arc wire loops + circles; area uses arc mid-samples
 - Perfect H/V lines get orientation constraints on create
