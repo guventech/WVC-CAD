@@ -160,7 +160,7 @@ Consolidated under `src/sketch/geometry/` (not the older AGENTS one-file-per-pri
 
 ## App shell
 
-`App.tsx` composes hooks: `useSketchDocument` (sketch+history+commands), `useSketchAutosave`, `useSketchFileIo`. Domain logic stays in `src/sketch/**`.
+`App.tsx` composes the shell: `useSketchDocument` (sketch+history+commands), `useSketchAutosave`, `useSketchFileIo`, plus `useAppKeybindings` and pure `dispatchMenuAction` for menu/keyboard routing. Creation preview chrome clears via `clearCreationChrome`. Domain logic stays in `src/sketch/**`.
 
 ### CAD-like UI (Chunk 27 / ADR-046)
 

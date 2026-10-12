@@ -1,13 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { createCommandHistory } from "../sketch/commands/Command.ts";
-import {
-  selectionIsOnlyDatums,
-  WORLD_FRAME_DELETE_BLOCKED_REASON,
-} from "../sketch/commands/DeleteGeometryCommand.ts";
 import type { Point2D } from "../sketch/geometry/Point2D.ts";
 import { createEmptySketch } from "../sketch/model/Sketch.ts";
 import {
-  clearSelection,
   createSelectionState,
   type SelectionState,
 } from "../sketch/selection/SelectionManager.ts";
@@ -35,28 +30,13 @@ import {
   FirstRunHint,
   shouldShowFirstRunHint,
 } from "../ui/Dialogs/FirstRunHint.tsx";
+import { clearCreationChrome } from "./clearCreationChrome.ts";
+import { dispatchMenuAction } from "./dispatchMenuAction.ts";
+import { SAMPLE_SKETCHES } from "./sampleSketches.ts";
+import { useAppKeybindings } from "./useAppKeybindings.ts";
 import { useSketchAutosave } from "./useSketchAutosave.ts";
 import { useSketchDocument } from "./useSketchDocument.ts";
 import { useSketchFileIo } from "./useSketchFileIo.ts";
-import { SAMPLE_SKETCHES } from "./sampleSketches.ts";
-
-function clearCreationChrome(
-  setActiveSnap: (snap: SnapCandidate | null) => void,
-  setLineMetrics: (metrics: LineMetrics | null) => void,
-  setRectMetrics: (metrics: RectMetrics | null) => void,
-  setCircleRadiusMm: (radius: number | null) => void,
-  setArcSweepDegrees: (sweep: number | null) => void,
-  setPolygonSides: (sides: number | null) => void,
-  setCreationSessionActive: (active: boolean) => void,
-): void {
-  setActiveSnap(null);
-  setLineMetrics(null);
-  setRectMetrics(null);
-  setCircleRadiusMm(null);
-  setArcSweepDegrees(null);
-  setPolygonSides(null);
-  setCreationSessionActive(false);
-}
 
 export default function App() {
   const [cursorWorld, setCursorWorld] = useState<Point2D | null>(null);
@@ -192,7 +172,7 @@ export default function App() {
     }));
   }, []);
 
-  const handleNewSketch = useCallback(() => {
+  const handleNew = useCallback(() => {
     if (hasUnsavedChanges) {
       const proceed = window.confirm(
         "Discard unsaved changes and start a new sketch?",
@@ -232,71 +212,30 @@ export default function App() {
     setLastCleanFingerprint,
   ]);
 
-  const handleNew = handleNewSketch;
+  const toggleCreateAsConstruction = useCallback(() => {
+    setCreateAsConstruction((value) => !value);
+  }, []);
 
   const handleMenuAction = useCallback(
     (action: MenuActionId) => {
-      if (action === "file-new") {
-        handleNew();
-        return;
-      }
-      if (action === "file-open") {
-        handleOpen();
-        return;
-      }
-      if (action === "file-save") {
-        handleSave();
-        return;
-      }
-      if (action === "file-save-as") {
-        handleSaveAs();
-        return;
-      }
-      if (action.startsWith("file-recent:")) {
-        const recentId = action.slice("file-recent:".length);
-        if (recentId !== "__none__") {
-          handleOpenRecent(recentId);
-        }
-        return;
-      }
-      if (action.startsWith("file-sample:")) {
-        handleOpenSample(action.slice("file-sample:".length));
-        return;
-      }
-      if (action === "file-export-dxf") {
-        handleExportDxf();
-        return;
-      }
-      if (action === "edit-undo") {
-        handleUndo();
-        return;
-      }
-      if (action === "edit-redo") {
-        handleRedo();
-        return;
-      }
-      if (action === "edit-delete") {
-        if (selection.selectedIds.length === 0) {
-          return;
-        }
-        if (selectionIsOnlyDatums(sketch, selection.selectedIds)) {
-          setConstraintMessage(WORLD_FRAME_DELETE_BLOCKED_REASON);
-          return;
-        }
-        handleDeleteSelectedGeometry();
-        return;
-      }
-      if (action === "edit-toggle-construction") {
-        toggleSelectedConstruction();
-        return;
-      }
-      if (action === "edit-construction-mode") {
-        setCreateAsConstruction((value) => !value);
-        return;
-      }
-      if (action.startsWith("tool:")) {
-        handleToolChange(action.slice("tool:".length) as ActiveTool);
-      }
+      dispatchMenuAction(action, {
+        onNew: handleNew,
+        onOpen: handleOpen,
+        onSave: handleSave,
+        onSaveAs: handleSaveAs,
+        onOpenRecent: handleOpenRecent,
+        onOpenSample: handleOpenSample,
+        onExportDxf: handleExportDxf,
+        onUndo: handleUndo,
+        onRedo: handleRedo,
+        onDeleteSelected: handleDeleteSelectedGeometry,
+        onToggleSelectedConstruction: toggleSelectedConstruction,
+        onToggleCreateAsConstruction: toggleCreateAsConstruction,
+        onToolChange: handleToolChange,
+        onWorldFrameDeleteBlocked: setConstraintMessage,
+        sketch,
+        selectedIds: selection.selectedIds,
+      });
     },
     [
       handleDeleteSelectedGeometry,
@@ -313,122 +252,37 @@ export default function App() {
       selection.selectedIds,
       setConstraintMessage,
       sketch,
+      toggleCreateAsConstruction,
       toggleSelectedConstruction,
     ],
   );
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
-
-      const mod = event.ctrlKey || event.metaKey;
-
-      if (mod && event.key.toLowerCase() === "n") {
-        event.preventDefault();
-        handleNew();
-        return;
-      }
-
-      if (mod && event.key.toLowerCase() === "s") {
-        event.preventDefault();
-        if (event.shiftKey) {
-          handleSaveAs();
-        } else {
-          handleSave();
-        }
-        return;
-      }
-
-      if (mod && event.key.toLowerCase() === "o") {
-        event.preventDefault();
-        handleOpen();
-        return;
-      }
-
-      if (mod && event.key.toLowerCase() === "z" && !event.shiftKey) {
-        event.preventDefault();
-        handleUndo();
-        return;
-      }
-
-      if (
-        mod &&
-        (event.key.toLowerCase() === "y" ||
-          (event.key.toLowerCase() === "z" && event.shiftKey))
-      ) {
-        event.preventDefault();
-        handleRedo();
-        return;
-      }
-
-      if (event.key === "Escape") {
-        if (creationSessionActive) {
-          event.preventDefault();
-          setCreationCancelRequest((value) => value + 1);
-          return;
-        }
-        setActiveTool("select");
-        clearCreationChrome(
-          setActiveSnap,
-          setLineMetrics,
-          setRectMetrics,
-          setCircleRadiusMm,
-          setArcSweepDegrees,
-          setPolygonSides,
-          setCreationSessionActive,
-        );
-        setSelection((current) => clearSelection(current));
-        return;
-      }
-
-      if (event.key.toLowerCase() === "c" && !mod) {
-        event.preventDefault();
-        if (activeTool === "select" && selection.selectedIds.length > 0) {
-          toggleSelectedConstruction();
-        } else {
-          setCreateAsConstruction((value) => !value);
-        }
-        return;
-      }
-
-      if (event.key === "Delete" || event.key === "Backspace") {
-        event.preventDefault();
-        if (selection.selectedIds.length === 0) {
-          return;
-        }
-        if (selectionIsOnlyDatums(sketch, selection.selectedIds)) {
-          setConstraintMessage(WORLD_FRAME_DELETE_BLOCKED_REASON);
-          return;
-        }
-        handleDeleteSelectedGeometry();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [
+  useAppKeybindings({
+    sketch,
     activeTool,
     creationSessionActive,
-    handleDeleteSelectedGeometry,
-    handleNew,
-    handleOpen,
-    handleRedo,
-    handleSave,
-    handleSaveAs,
-    handleUndo,
-    selection.selectedIds,
-    setConstraintMessage,
-    sketch,
-    toggleSelectedConstruction,
-  ]);
+    selectedIds: selection.selectedIds,
+    onNew: handleNew,
+    onOpen: handleOpen,
+    onSave: handleSave,
+    onSaveAs: handleSaveAs,
+    onUndo: handleUndo,
+    onRedo: handleRedo,
+    onDeleteSelected: handleDeleteSelectedGeometry,
+    onToggleSelectedConstruction: toggleSelectedConstruction,
+    onToggleCreateAsConstruction: toggleCreateAsConstruction,
+    onWorldFrameDeleteBlocked: setConstraintMessage,
+    setActiveTool,
+    setSelection,
+    setCreationCancelRequest,
+    setActiveSnap,
+    setLineMetrics,
+    setRectMetrics,
+    setCircleRadiusMm,
+    setArcSweepDegrees,
+    setPolygonSides,
+    setCreationSessionActive,
+  });
 
   const handleCreationCancelled = useCallback(() => {
     setCreationSessionActive(false);
