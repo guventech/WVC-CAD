@@ -402,6 +402,89 @@ describe("FilletChamfer apply", () => {
     );
   });
 
+  it("keeps top-right chamfer on the inner profile even when the size pick is outside", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 100, y: 50 })!;
+    const sketch = add.apply(createEmptySketch());
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+    // Cursor outside the profile (common when dragging size) must not fail or
+    // flip to an exterior bevel past (100,50) — bias wedge to segment bodies.
+    const outcome = applyChamferLines(
+      sketch,
+      rect.edges.top,
+      rect.edges.right,
+      { x: 115, y: 65 },
+      10,
+    );
+    expect(outcome.ok, outcome.ok ? "" : outcome.reason).toBe(true);
+    if (!outcome.ok) {
+      return;
+    }
+    const chamfer = outcome.sketch.geometry.find(
+      (e) =>
+        e.type === "line" &&
+        outcome.sketch.constraints.some(
+          (c) =>
+            c.type === "chamfer" &&
+            c.references.some((r) => r.entityId === e.id && r.role === "entity"),
+        ),
+    );
+    expect(chamfer?.type).toBe("line");
+    if (chamfer?.type !== "line") {
+      return;
+    }
+    for (const p of [chamfer.start, chamfer.end]) {
+      expect(p.x).toBeLessThanOrEqual(100 + 1e-6);
+      expect(p.y).toBeLessThanOrEqual(50 + 1e-6);
+      expect(p.x).toBeGreaterThanOrEqual(0 - 1e-6);
+      expect(p.y).toBeGreaterThanOrEqual(0 - 1e-6);
+    }
+    // Interior setbacks from the virtual corner.
+    expect(
+      [chamfer.start, chamfer.end].some((p) => Math.abs(p.x - 90) < 1e-3),
+    ).toBe(true);
+    expect(
+      [chamfer.start, chamfer.end].some((p) => Math.abs(p.y - 40) < 1e-3),
+    ).toBe(true);
+  });
+
+  it("top-right interior pick yields an inner bevel", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 100, y: 50 })!;
+    const sketch = add.apply(createEmptySketch());
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+    const outcome = applyChamferLines(
+      sketch,
+      rect.edges.top,
+      rect.edges.right,
+      { x: 90, y: 40 },
+      10,
+    );
+    expect(outcome.ok, outcome.ok ? "" : outcome.reason).toBe(true);
+    if (!outcome.ok) {
+      return;
+    }
+    const chamfer = outcome.sketch.geometry.find(
+      (e) =>
+        e.type === "line" &&
+        outcome.sketch.constraints.some(
+          (c) =>
+            c.type === "chamfer" &&
+            c.references.some((r) => r.entityId === e.id && r.role === "entity"),
+        ),
+    );
+    expect(chamfer?.type).toBe("line");
+    if (chamfer?.type !== "line") {
+      return;
+    }
+    for (const p of [chamfer.start, chamfer.end]) {
+      expect(p.x).toBeLessThanOrEqual(100 + 1e-6);
+      expect(p.y).toBeLessThanOrEqual(50 + 1e-6);
+    }
+  });
+
   it("rejects an impossible chamfer distance and leaves the sketch unchanged", () => {
     const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 40, y: 20 })!;
     const sketch = add.apply(createEmptySketch());

@@ -1,5 +1,6 @@
 import type { Constraint, ConstraintId } from "./Constraint.ts";
 import type { EntityId } from "./Geometry.ts";
+import type { Sketch } from "./Sketch.ts";
 
 export interface FilletFeatureIds {
   readonly constraintId: ConstraintId;
@@ -145,4 +146,38 @@ export function filletEntityIds(feature: FilletFeatureIds): EntityId[] {
 
 export function chamferEntityIds(feature: ChamferFeatureIds): EntityId[] {
   return [feature.line1Id, feature.line2Id, feature.chamferLineId];
+}
+
+/**
+ * Legacy chamfer create added endpoint coincidents with parents. Topology is
+ * now owned by feature residuals — strip those blend coincidents on load so
+ * they do not double-count with `appendChamferTopologyResiduals`.
+ */
+export function stripChamferBlendCoincidents(sketch: Sketch): Sketch {
+  const removeIds = new Set<string>();
+  for (const constraint of sketch.constraints) {
+    const feature = parseChamferFeature(constraint);
+    if (feature === null) {
+      continue;
+    }
+    const parents = new Set([feature.line1Id, feature.line2Id]);
+    for (const other of sketch.constraints) {
+      if (other.type !== "coincident" || other.references.length < 2) {
+        continue;
+      }
+      const ids = other.references.map((ref) => ref.entityId);
+      const touchesFace = ids.includes(feature.chamferLineId);
+      const touchesParent = ids.some((id) => parents.has(id));
+      if (touchesFace && touchesParent) {
+        removeIds.add(other.id);
+      }
+    }
+  }
+  if (removeIds.size === 0) {
+    return sketch;
+  }
+  return {
+    ...sketch,
+    constraints: sketch.constraints.filter((c) => !removeIds.has(c.id)),
+  };
 }

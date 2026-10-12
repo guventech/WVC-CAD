@@ -1,7 +1,6 @@
 import {
   createAngleConstraint,
   createChamferFeatureConstraint,
-  createCoincidentConstraint,
   createFilletFeatureConstraint,
   createLengthConstraint,
   createRadiusConstraint,
@@ -30,9 +29,9 @@ import {
   blockRectangle,
   finalizeAfterCornerEdit,
   findLine,
-  nearerEndpointRole,
   orientChamferToReference,
   resolveChamferDistance,
+  resolveCornerWedgePickPoint,
   resolveFilletRadius,
   type ChamferOutcome,
   type FilletOutcome,
@@ -127,7 +126,8 @@ export function applyChamferLines(
   }
 
   const d = resolveChamferDistance(line1, line2, pickPoint, chamferDistance);
-  const plan = computeLineLineChamfer(line1, line2, d, pickPoint);
+  const wedgePick = resolveCornerWedgePickPoint(line1, line2, pickPoint);
+  const plan = computeLineLineChamfer(line1, line2, d, wedgePick);
   if (plan === null) {
     return { ok: false, reason: "Lines are not valid for chamfer" };
   }
@@ -184,29 +184,8 @@ export function applyChamferLines(
     angleRad,
     { driving: true },
   );
-  const line1After = findLine(withOriented, line1Id);
-  const line2After = findLine(withOriented, line2Id);
-  const blendCoincidents =
-    line1After !== null && line2After !== null
-      ? [
-          createCoincidentConstraint(
-            createEntityId("constraint"),
-            { entityId: orientedChamfer.id, role: "start" },
-            {
-              entityId: line1Id,
-              role: nearerEndpointRole(line1After, orientedChamfer.start),
-            },
-          ),
-          createCoincidentConstraint(
-            createEntityId("constraint"),
-            { entityId: orientedChamfer.id, role: "end" },
-            {
-              entityId: line2Id,
-              role: nearerEndpointRole(line2After, orientedChamfer.end),
-            },
-          ),
-        ]
-      : [];
+  // Connectivity is owned by chamfer feature topology residuals (on-parent +
+  // along-line glue), matching fillet — no blend coincidents (ADR-061).
   const withConstraints: Sketch = {
     ...withOriented,
     constraints: [
@@ -214,7 +193,6 @@ export function applyChamferLines(
       feature,
       lengthDim,
       angleDim,
-      ...blendCoincidents,
     ],
   };
   return finalizeAfterCornerEdit(
@@ -253,7 +231,8 @@ export function previewChamferLines(
     return null;
   }
   const d = resolveChamferDistance(line1, line2, pickPoint, undefined);
-  return computeLineLineChamfer(line1, line2, d, pickPoint);
+  const wedgePick = resolveCornerWedgePickPoint(line1, line2, pickPoint);
+  return computeLineLineChamfer(line1, line2, d, wedgePick);
 }
 
 /** Resolve fillet feature for an arc (used by drag / dimension edit). */

@@ -421,7 +421,7 @@ Status:
 Date: 2026-10-05
 
 Decision:
-Chunk 21 implements fillet (trim + arc) and chamfer (trim + connecting line) for two intersecting lines. Corner wedge and size come from the third click. Fillet is stored as a `fillet` feature plus a driving radius dimension; radius edits and arc-rim drags rebuild both line trims and the arc so endpoints stay coincident/tangent by construction. The `fillet` feature also contributes **topology residuals** (center-to-parent distance = R, and each parent's near-end glued **along the parent line** to the tangent foot), so a located/sized R-driven filleted rectangle can honestly report FULLY CONSTRAINED without catalog `tangent` equations yet. 2-D XY endpoint glue is avoided — line endpoints already lie on their parents, and the extra equations falsely removed width/height/locate DOF. Arc angles are resynced after solve write-back (derived, not free DOF). Chamfer is stored as a `chamfer` feature plus driving **length** (face) and **angle** (vs the first parent) dimensions; create still picks equal setback, then records the resulting length×angle. Editing either dimension, or dragging a connected line, rebuilds via length×angle construction (not equal-setback-only). Adjacent rectangle edges are allowed: the `rectangle` feature stays, but the blended corner is opened (corner point + topology residuals dropped; H/V kept) so Offset / drag still treat edges + blends as one group. Chamfer create also adds endpoint coincidents between the face and its parents. Offset X/Y on a rectangle group follows CAD locate-vs-size intent: if no other driving same-axis Offset pins the group, edit rigid-translates the whole group (locate); if another same-axis Offset already exists, edit moves only that edge and rebuilds blends (size). Catalog `tangent` / `fix` remain Tier 2 (listed, not enforced as tools). Ops reject when `maintainConstraints` fails after trim.
+Chunk 21 implements fillet (trim + arc) and chamfer (trim + connecting line) for two intersecting lines. Corner wedge and size come from the third click. Fillet is stored as a `fillet` feature plus a driving radius dimension; radius edits and arc-rim drags rebuild both line trims and the arc so endpoints stay coincident/tangent by construction. The `fillet` feature also contributes **topology residuals** (center-to-parent distance = R, and each parent's near-end glued **along the parent line** to the tangent foot), so a located/sized R-driven filleted rectangle can honestly report FULLY CONSTRAINED without catalog `tangent` equations yet. 2-D XY endpoint glue is avoided — line endpoints already lie on their parents, and the extra equations falsely removed width/height/locate DOF. Arc angles are resynced after solve write-back (derived, not free DOF). Chamfer is stored as a `chamfer` feature plus driving **length** (face) and **angle** (vs the first parent) dimensions; create still picks equal setback, then records the resulting length×angle. Editing either dimension, or dragging a connected line, rebuilds via length×angle construction (not equal-setback-only). Adjacent rectangle edges are allowed: the `rectangle` feature stays, but the blended corner is opened (corner point + topology residuals dropped; H/V kept) so Offset / drag still treat edges + blends as one group. Chamfer topology residuals (ADR-061) own face↔parent connectivity (no blend coincidents). Offset X/Y on a rectangle group follows CAD locate-vs-size intent: if no other driving same-axis Offset pins the group, edit rigid-translates the whole group (locate); if another same-axis Offset already exists, edit moves only that edge and rebuilds blends (size). Catalog `tangent` / `fix` remain Tier 2 (listed, not enforced as tools). Ops reject when `maintainConstraints` fails after trim.
 
 Reason:
 AGENTS Chunk 21 requires topology-safe trim and new geometry; adding unsolved catalog tangent tools would fake solver behavior. Feature topology residuals enforce corner connectivity for DOF/status while rebuild continues to seat geometry on edits. Length×angle matches common chamfer annotation. Keeping the rectangle feature with open corners preserves locate/Offset; opposing Offsets size one edge. Always rigid-translating on Offset broke size edits.
@@ -688,7 +688,7 @@ Address the post–Chunk-26 architecture assessment before Chunk 27 UI polish:
 3. Treat `reconcileCornerFeaturesAfterSolve` as documented *geometry re-seating* after LM (not a second solver); non-null returns must remain residual-satisfied.
 4. Document dense-solver practical limits; add a ~100-constraint performance baseline test; switch Jacobian to central differences; add mixed length+angle DOF fixture.
 5. Reject zero-length lines / non-positive radii on load; clarify `solve()` diagnoses stored geometry only.
-6. Chamfer remains rebuild-only (no topology residual) — intentional vs fillet.
+6. ~~Chamfer remains rebuild-only (no topology residual)~~ — superseded by ADR-061 (chamfer topology residuals).
 7. Parallel/perpendicular between two user lines anchors the first-picked line so the second follows (datum relations leave the user line free).
 8. Decompose `App.tsx` into `useSketchDocument` / `useSketchAutosave` / `useSketchFileIo`.
 9. Line–circle and circle–circle intersections land in `Intersections.ts` for future curve trim/fillet.
@@ -957,6 +957,23 @@ Decision:
 
 Reason:
 Pre-3D handoff needs a stable place for plane identity without pretending a 3D product exists yet.
+
+Status:
+**Implemented.**
+
+---
+
+## ADR-061 — Chamfer topology residuals (parity with fillet)
+
+Date: 2026-10-12
+
+Decision:
+1. The `chamfer` feature contributes topology residuals: each face endpoint lies on its parent (`signedDistance = 0`) and the parent's near end is glued **along** that parent to the face endpoint (1-D). Parent↔endpoint pairing is by proximity (not assumed start↔line1), because `orientChamferToReference` may swap ends.
+2. Create no longer adds blend coincidents; length + angle dimensions remain the size drivers. Rebuild (`rebuildChamferGeometry` / reconcile) still re-seats trims after LM.
+3. `settleLoadedSketch` strips legacy chamfer↔parent blend coincidents so old files do not double-count with the new residuals.
+
+Reason:
+Fillet already owned connectivity in the feature residual vector; chamfer's coincidents worked for DOF but left an intentional asymmetry (ADR-045 §6). Feature-owned topology keeps the constraint list honest and matches fillet.
 
 Status:
 **Implemented.**

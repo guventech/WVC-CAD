@@ -1,5 +1,6 @@
 import type { Constraint, ConstraintId } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
+import { stripChamferBlendCoincidents } from "../model/FilletChamferFeature.ts";
 import {
   promoteFilletedRectangleEdgeLengths,
   restoreFilletedRectangleAxisCoordinates,
@@ -84,7 +85,8 @@ export function maintainConstraints(
  * axis locate (broken saves stay documentary; recreate/fix the live path).
  */
 export function settleLoadedSketch(sketch: Sketch): Sketch {
-  const promoted = promoteFilletedRectangleEdgeLengths(sketch);
+  const stripped = stripChamferBlendCoincidents(sketch);
+  const promoted = promoteFilletedRectangleEdgeLengths(stripped);
   const located = restoreFilletedRectangleAxisCoordinates(promoted);
   return maintainConstraints(located).sketch;
 }

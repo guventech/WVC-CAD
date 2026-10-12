@@ -37,6 +37,8 @@
 
 ## Current
 
+**Chamfer topology residuals (ADR-061, 2026-10-12).** Chamfer features contribute on-parent + along-line glue residuals (parity with fillet); create no longer adds blend coincidents; `settleLoadedSketch` strips legacy blend coincidents. Fully located D20 chamfered rectangle DOF=0 regression added.
+
 **Pre-3D priorities R1–R3 (2026-10-12).** Pad handoff fixtures + topology-only `readyForPad` honesty (ADR-053); `SketchPlane` on `SketchFrame` (ADR-060, schema v1, no 3D UI); closed line+arc offset via densified polyline (`OffsetWire`, DIY — not Clipper / exact arc offset).
 
 **Packaging discipline spot-check (Slice C / review findings, 2026-10-12).** Confirmed `v0.1.0-alpha.3` NSIS asset on GitHub Releases (`WVC-CAD_0.1.0-alpha.3_x64-setup.exe`, unsigned). PACKAGING release gate wording updated (solver timing ceilings stay generous); README / CHANGELOG unsigned + alpha warnings remain accurate. No signing work.
@@ -440,7 +442,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 ## Known limitations (product)
 
 - Fillet/chamfer: line–line corners and rectangle corners (opens corner on `rectangle` feature; Offset locate vs size)
-- Chamfer topology is rebuild-only (no solver residual, unlike fillet)
+- Chamfer still rebuilds trims after LM (topology residuals + length/angle; not a substitute for seating)
 - Tangent uses supporting circle (contact may lie off a drawn arc sweep)
 - Frozen sign/side/mode captures can trap LM on large branch-crossing moves
 - Dense solver: interactive comfort is tens–low hundreds of constraints (not yet 1,000)

@@ -135,10 +135,10 @@ describe("rectangle multi-fillet", () => {
     expect(parseRectangleFeature(
       sketch.constraints.find((c) => c.type === "rectangle")!,
     )).not.toBeNull();
-    // Each chamfer adds two endpoint coincidents with its parents.
+    // Connectivity is feature topology residuals — no blend coincidents.
     expect(
       sketch.constraints.filter((c) => c.type === "coincident"),
-    ).toHaveLength(8);
+    ).toHaveLength(0);
   });
 
   it("Offset on a blended edge translates the whole rectangle group", () => {
@@ -487,6 +487,66 @@ describe("rectangle multi-fillet", () => {
     ] as const;
     for (const corner of corners) {
       const outcome = applyFilletLines(sketch, corner.a, corner.b, corner.pick, 20);
+      expect(outcome.ok, outcome.ok ? "" : outcome.reason).toBe(true);
+      if (!outcome.ok) {
+        return;
+      }
+      sketch = outcome.sketch;
+    }
+
+    for (const { type, edge, value } of [
+      { type: "coordinate-x" as const, edge: rect.edges.left, value: 0 },
+      { type: "coordinate-y" as const, edge: rect.edges.bottom, value: 0 },
+      { type: "coordinate-x" as const, edge: rect.edges.right, value: 200 },
+      { type: "coordinate-y" as const, edge: rect.edges.top, value: 200 },
+    ]) {
+      const add = createAddMaintainedConstraintCommand(sketch, {
+        type,
+        references: [{ entityId: edge, role: "start" }],
+      });
+      expect(add.ok).toBe(true);
+      if (!add.ok) {
+        return;
+      }
+      sketch = add.command.apply(sketch);
+      const id = sketch.constraints.find(
+        (c) => c.type === type && c.references[0]?.entityId === edge,
+      )!.id;
+      const measured = sketch.constraints.find((c) => c.id === id)!.value!;
+      if (Math.abs(measured - value) > 1e-6) {
+        const edited = createEditDimensionCommand(sketch, id, { value });
+        expect(edited.ok, edited.ok ? "" : edited.reason).toBe(true);
+        if (!edited.ok) {
+          return;
+        }
+        sketch = edited.command.apply(sketch);
+      }
+    }
+
+    expect(listUnsatisfiedConstraints(sketch)).toEqual([]);
+    const dof = analyzeDegreesOfFreedom(sketch);
+    expect(dof.degreesOfFreedom).toBe(0);
+    const result = solve(sketch);
+    expect(result.status).toBe("solved");
+    expect(result.degreesOfFreedom).toBe(0);
+  });
+
+  it("200×200 D20 chamfered box with opposing Offsets is fully constrained", () => {
+    let sketch = createAddRectangleCommand({ x: 0, y: 0 }, { x: 200, y: 200 })!.apply(
+      createEmptySketch(),
+    );
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+
+    const corners = [
+      { a: rect.edges.bottom, b: rect.edges.right, pick: { x: 190, y: 10 } },
+      { a: rect.edges.right, b: rect.edges.top, pick: { x: 190, y: 190 } },
+      { a: rect.edges.top, b: rect.edges.left, pick: { x: 10, y: 190 } },
+      { a: rect.edges.left, b: rect.edges.bottom, pick: { x: 10, y: 10 } },
+    ] as const;
+    for (const corner of corners) {
+      const outcome = applyChamferLines(sketch, corner.a, corner.b, corner.pick, 20);
       expect(outcome.ok, outcome.ok ? "" : outcome.reason).toBe(true);
       if (!outcome.ok) {
         return;

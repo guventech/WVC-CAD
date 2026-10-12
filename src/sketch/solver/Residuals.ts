@@ -67,7 +67,10 @@ import {
 } from "../geometry/FilletTopology.ts";
 import type { Constraint, ConstraintId } from "../model/Constraint.ts";
 import { isDrivingConstraint } from "../model/Constraint.ts";
-import { parseFilletFeature } from "../model/FilletChamferFeature.ts";
+import {
+  parseChamferFeature,
+  parseFilletFeature,
+} from "../model/FilletChamferFeature.ts";
 import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import type { LineGeometry } from "../model/Geometry.ts";
 import type { Sketch } from "../model/Sketch.ts";
@@ -163,7 +166,7 @@ export function createResidualContext(sketch: Sketch): ResidualContext {
 
 /**
  * Build the signed residual vector F(X) for every supported, driving constraint.
- * Feature records (`rectangle`, `fillet`) contribute topology residuals.
+ * Feature records (`rectangle`, `fillet`, `chamfer`) contribute topology residuals.
  * Reference dimensions contribute nothing.
  */
 export function buildResidualVector(
@@ -242,6 +245,9 @@ export function constraintResidual(
   if (constraint.type === "fillet") {
     return filletTopologyResidual(sketch, constraint);
   }
+  if (constraint.type === "chamfer") {
+    return chamferTopologyResidual(sketch, constraint);
+  }
   if (isSupportedDimensionType(constraint.type)) {
     return dimensionResidual(sketch, constraint);
   }
@@ -265,6 +271,15 @@ function filletTopologyResidual(
   // Diagnosis path: capture signs from current geometry.
   const context = createResidualContext(sketch);
   appendFilletTopologyResiduals(sketch, constraint, context, equations);
+  return maxAbsEquation(equations);
+}
+
+function chamferTopologyResidual(
+  sketch: Sketch,
+  constraint: Constraint,
+): number | null {
+  const equations: ResidualEquation[] = [];
+  appendChamferTopologyResiduals(sketch, constraint, equations);
   return maxAbsEquation(equations);
 }
 
@@ -498,6 +513,93 @@ function appendFilletTopologyResiduals(
   out.push({ constraintId: constraint.id, value: glue2 });
 }
 
+/**
+ * Chamfer feature topology: each face endpoint lies on its parent (signed
+ * distance) and the parent's near end is glued along that parent to the face
+ * endpoint (1-D). Pairing is by proximity — `orientChamferToReference` may put
+ * start on line2, so start↔line1 must not be assumed.
+ */
+function appendChamferTopologyResiduals(
+  sketch: Sketch,
+  constraint: Constraint,
+  out: ResidualEquation[],
+): void {
+  const feature = parseChamferFeature(constraint);
+  if (feature === null) {
+    return;
+  }
+  const bevel = findEntity(sketch, feature.chamferLineId);
+  const line1 = findEntity(sketch, feature.line1Id);
+  const line2 = findEntity(sketch, feature.line2Id);
+  if (
+    bevel?.type !== "line" ||
+    line1?.type !== "line" ||
+    line2?.type !== "line"
+  ) {
+    return;
+  }
+
+  const joints = pairChamferEndpointsToParents(bevel, line1, line2);
+  if (joints === null) {
+    return;
+  }
+  for (const joint of joints) {
+    const role = nearEndpointRoleForFillet(
+      joint.parent,
+      joint.partner,
+      joint.point,
+    );
+    const dist = signedDistanceToLine(joint.point, joint.parent);
+    const glue = alongLineGlueResidual(
+      lineEndpoint(joint.parent, role),
+      joint.point,
+      joint.parent,
+    );
+    if (dist === null || glue === null) {
+      return;
+    }
+    out.push({ constraintId: constraint.id, value: dist });
+    out.push({ constraintId: constraint.id, value: glue });
+  }
+}
+
+/** Match each parent to the bevel endpoint that already lies nearer that line. */
+function pairChamferEndpointsToParents(
+  bevel: LineGeometry,
+  line1: LineGeometry,
+  line2: LineGeometry,
+):
+  | readonly {
+      readonly parent: LineGeometry;
+      readonly partner: LineGeometry;
+      readonly point: { readonly x: number; readonly y: number };
+    }[]
+  | null {
+  const distTo = (
+    point: { readonly x: number; readonly y: number },
+    line: LineGeometry,
+  ): number => Math.abs(signedDistanceToLine(point, line) ?? Number.POSITIVE_INFINITY);
+
+  const startOn1 = distTo(bevel.start, line1);
+  const endOn1 = distTo(bevel.end, line1);
+  let point1 = startOn1 <= endOn1 ? bevel.start : bevel.end;
+  let point2 = point1 === bevel.start ? bevel.end : bevel.start;
+
+  // If both endpoints prefer the same parent, assign by which pairing is closer overall.
+  if (
+    distTo(point1, line1) + distTo(point2, line2) >
+    distTo(bevel.end, line1) + distTo(bevel.start, line2) + 1e-12
+  ) {
+    point1 = bevel.end;
+    point2 = bevel.start;
+  }
+
+  return [
+    { parent: line1, partner: line2, point: point1 },
+    { parent: line2, partner: line1, point: point2 },
+  ];
+}
+
 function captureFilletSideSigns(
   sketch: Sketch,
   constraint: Constraint,
@@ -675,6 +777,11 @@ function appendConstraintResiduals(
 
   if (constraint.type === "fillet") {
     appendFilletTopologyResiduals(sketch, constraint, context, out);
+    return;
+  }
+
+  if (constraint.type === "chamfer") {
+    appendChamferTopologyResiduals(sketch, constraint, out);
     return;
   }
 

@@ -31,6 +31,7 @@ import {
   computeLineLineChamferFromLengthAngle,
   computeLineLineFillet,
   filletRadiusFromPick,
+  pickCornerDirections,
   type ChamferGeometryPlan,
   type FilletGeometryPlan,
 } from "./FilletChamferMath.ts";
@@ -357,6 +358,36 @@ export function resolveChamferDistance(
     return chamferDistanceFromPick(pickPoint, pickPoint);
   }
   return chamferDistanceFromPick(hit.point, pickPoint);
+}
+
+/**
+ * Prefer the wedge along the finite segment bodies (inner corner) when the
+ * cursor lies in the exterior wedge — size still comes from `pickPoint`.
+ */
+export function resolveCornerWedgePickPoint(
+  line1: LineGeometry,
+  line2: LineGeometry,
+  pickPoint: Point2D,
+): Point2D {
+  const bodyPick = filletWedgePickPoint(line1, line2);
+  if (bodyPick === null) {
+    return pickPoint;
+  }
+  const hit = intersectInfiniteLines(
+    line1.start,
+    line1.end,
+    line2.start,
+    line2.end,
+    TOLERANCE.coincidence,
+  );
+  if (hit === null) {
+    return pickPoint;
+  }
+  const cursorDirs = pickCornerDirections(line1, line2, hit.point, pickPoint);
+  if (cursorDirs !== null) {
+    return pickPoint;
+  }
+  return bodyPick;
 }
 
 export function syncFilletRadiusConstraints(
