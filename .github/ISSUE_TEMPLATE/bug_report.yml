@@ -6,12 +6,20 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the report. Attach a `.sketch.json` when possible — it is the best way to reproduce solver/geometry bugs.
+        Thanks for the report. Attach a minimal `.sketch.json` when possible — it is the best way to reproduce solver/geometry bugs.
+        This is an **alpha** sketcher (not production / not safety-critical).
   - type: textarea
-    id: summary
+    id: expected
     attributes:
-      label: What happened?
-      description: Expected vs actual behaviour
+      label: Expected behavior
+      description: What you expected to happen
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead (include error text / status bar if relevant)
     validations:
       required: true
   - type: textarea
@@ -24,17 +32,36 @@ body:
         3.
     validations:
       required: true
-  - type: textarea
-    id: environment
+  - type: input
+    id: version
     attributes:
-      label: Environment
-      description: Browser or Tauri, OS, commit/version if known
+      label: App version
+      description: Tag, release, or `git` commit (e.g. v0.1.0-alpha.2 or 52ca38c)
+      placeholder: v0.1.0-alpha.2
     validations:
-      required: false
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: How you ran the app
+      options:
+        - Browser (npm run dev / built web)
+        - Tauri desktop (Windows)
+        - Other / unsure
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: e.g. Windows 11, Ubuntu 24.04
+      placeholder: Windows 11
+    validations:
+      required: true
   - type: textarea
     id: sketch
     attributes:
-      label: Sample sketch
-      description: Paste or attach a minimal `.sketch.json` (File → Save)
+      label: Sample sketch (recommended)
+      description: Paste or attach a minimal `.sketch.json` (File → Save). Omit secrets; sketches are local files only.
     validations:
       required: false

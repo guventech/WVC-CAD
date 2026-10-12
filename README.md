@@ -42,15 +42,18 @@ Other samples: filleted plate with hole, capsule slot, L-bracket, over-constrain
 
 | Area | Status |
 |------|--------|
-| Points, lines, circles, arcs, rectangle, polygon, slot | Supported |
-| Fillet / chamfer / trim / extend / offset / mirror | Supported (offset: line/chain/loop/circle) |
-| Geometric + dimensional constraints + LM solver | Supported |
-| DOF / over-constraint honesty | Supported (no fake “fully constrained”) |
-| Save / Save As / recent / samples / autosave | Supported |
-| DXF | Export only |
-| 3D Pad/Pocket / STEP / cloud / AI | Not yet |
+| Points, lines, circles, arcs, rectangle, polygon, slot | **Supported** |
+| Fillet / trim / extend / mirror | **Supported** |
+| Chamfer | **Partial** — rebuild-only (no topology residual like fillet) |
+| Offset | **Partial** — line / open chain / closed line loop / concentric circle; mixed line+arc closed loops not rebuilt |
+| Geometric + dimensional constraints + LM solver | **Supported** |
+| DOF / over-constraint honesty | **Supported** (Jacobian rank; no fake “fully constrained”) |
+| Save / Save As / recent / samples / autosave | **Supported** |
+| DXF | **Partial** — R12 export only (no import; constraints stay in `.sketch.json`) |
+| Windows installer (Tauri 2) | **Partial** — NSIS alpha builds work; **unsigned** until code signing |
+| 3D Pad/Pocket / STEP / cloud / AI / payments | **Unsupported** |
 
-See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities.
+See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities. Full limitation list under [Current limitations](#current-limitations).
 
 ## Controls
 
@@ -88,11 +91,16 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 ## Current limitations
 
+Easy to find for alpha testers — also mirrored in [CHANGELOG.md](./CHANGELOG.md) and [PROGRESS.md](./docs/PROGRESS.md):
+
+- **Alpha quality** — not production-ready; not suitable for safety-critical engineering
 - Offset of mixed line+arc closed profiles falls back to single-segment / is skipped for polyline rebuild
+- Chamfer is rebuild-only (no solver residual), unlike fillet
 - DXF is **export-only** geometry interchange (R12 ASCII; no import; constraints stay in `.sketch.json`)
 - Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./docs/ARCHITECTURE.md))
-- ADR-052 residual **row** scaling is in; column scaling unused (see [PROGRESS.md](./docs/PROGRESS.md))
-- Tauri installer requires a local Rust toolchain; Windows builds are unsigned until code signing is configured (see [PACKAGING.md](./docs/PACKAGING.md))
+- ADR-052 residual **row** scaling is in; column scaling unused
+- Windows NSIS builds are **unsigned** (SmartScreen warning expected) until code signing is configured ([PACKAGING.md](./docs/PACKAGING.md))
+- Reporting a bug: use [GitHub Issues](https://github.com/guventech/WVC-CAD/issues/new/choose) — include steps, expected/actual, version, OS, and a `.sketch.json` when safe
 
 ## License
 

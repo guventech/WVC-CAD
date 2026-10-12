@@ -11,6 +11,9 @@ Read [README.md](./README.md) and [ARCHITECTURE.md](./docs/ARCHITECTURE.md) befo
 
 ## Dev setup
 
+- **Node.js ≥ 22** ([`.nvmrc`](./.nvmrc)); prefer the `packageManager` npm in `package.json` (Corepack).
+- Desktop: Rust + WebView2 — [PACKAGING.md](./docs/PACKAGING.md).
+
 ```bash
 npm install
 npx playwright install chromium   # once, for E2E
@@ -20,10 +23,7 @@ npm run dev
 ## Checks before a PR
 
 ```bash
-npm run typecheck
-npm run test
-npm run lint
-npm run build
+npm run check      # typecheck + lint + test + build (matches CI)
 npm run test:e2e   # when UI workflows change
 ```
 

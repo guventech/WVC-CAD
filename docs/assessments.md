@@ -1,6 +1,6 @@
 # Architecture Assessment
 
-> **Historical snapshot (2026-10-06).** Not the live project status. For current state use [PROGRESS.md](./PROGRESS.md), [README.md](../README.md), and [ARCHITECTURE.md](./ARCHITECTURE.md). Chunk 27 and later 2D gap-recheck work landed after this review.
+> **Historical snapshot (2026-10-06).** Not the live project status. For current state use [PROGRESS.md](./PROGRESS.md), [README.md](../README.md), and [ARCHITECTURE.md](./ARCHITECTURE.md). Chunk 27, ADR-052 **row** scaling, Tauri scaffold, and review-plan Phases 0–8 landed after this review — ignore deferred “row scaling” notes below for live status.
 
 **Date:** 2026-10-06  
 **Scope (at time of review):** Post–Chunk 26 sketcher (Chunks 0–26 + Pre–Chunk 16 World Datum Frame; Tier 1–3 geometric constraints + Fix + dimensions). Next gated work then: Chunk 27 (CAD-like UI refinement).  

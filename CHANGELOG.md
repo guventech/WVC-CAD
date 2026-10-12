@@ -12,9 +12,10 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ### Changed
 
-- Review-plan Phases 1–8: mutation/undo safety, solver honesty, file safety, DXF fail-closed, UX journeys, a11y/layout, performance, CI/Corepack alignment
+- Review-plan Phases 1–9: mutation/undo safety through CI hygiene and documentation readiness
 - CI / Tauri workflows read Node from `.nvmrc` and activate `packageManager` via Corepack before `npm ci`
 - [`THIRD_PARTY.md`](./THIRD_PARTY.md) lists Tauri JS plugins + Cargo crates and FS capability scope
+- README feature-status (Supported / Partial / Unsupported); bug report template asks for version, OS, expected/actual
 
 ### Known limitations (current)
 
