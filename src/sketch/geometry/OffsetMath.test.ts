@@ -46,4 +46,32 @@ describe("OffsetMath", () => {
     expect(offset[0]!.y).toBeCloseTo(2, 5);
     expect(offset[2]!.x).toBeCloseTo(8, 5);
   });
+
+  it("rejects zero / near-zero offset distance", () => {
+    const square = [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+    ];
+    expect(offsetClosedPolygon(square, 0)).toBeNull();
+    expect(offsetOpenPolyline([{ x: 0, y: 0 }, { x: 10, y: 0 }], 0)).toBeNull();
+    expect(offsetLineSegment({ x: 0, y: 0 }, { x: 10, y: 0 }, 0)).toBeNull();
+  });
+
+  it("returns finite corners for a large inward offset (no NaN spikes)", () => {
+    const square = [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+    ];
+    // Inward for CCW: +d. Past half-size miters may self-intersect but stay finite.
+    const offset = offsetClosedPolygon(square, 8);
+    expect(offset).not.toBeNull();
+    for (const p of offset!) {
+      expect(Number.isFinite(p.x)).toBe(true);
+      expect(Number.isFinite(p.y)).toBe(true);
+    }
+  });
 });

@@ -37,6 +37,8 @@
 
 ## Current
 
+**Geometry edge-case hardening (Slice B / review findings, 2026-10-12).** Regression coverage: offset source refuses arcs and does not rebuild fully filleted (line+arc) profiles as closed offset loops; OffsetMath rejects zero distance and keeps large inward miters finite; chamfer rejects impossible distance / same-line picks without mutating the sketch. Conflict-reject unchanged-sketch cases already covered in OverConstraint / Dimensions tests.
+
 **App shell split (Slice A / review findings, 2026-10-12).** Extracted `useAppKeybindings`, `dispatchMenuAction`, and `clearCreationChrome` from `App.tsx` (menu/keyboard routing only; sketch SoT unchanged). Unit tests for menu dispatch; existing App Escape→Select E2E/unit coverage still covers keybindings.
 
 **`v0.1.0-alpha.3` (2026-10-12).** Version bump + CHANGELOG for review-plan Phases 0–10. Tag triggers Windows NSIS build (unsigned). Still alpha — not production-ready.

@@ -401,4 +401,37 @@ describe("FilletChamfer apply", () => {
       true,
     );
   });
+
+  it("rejects an impossible chamfer distance and leaves the sketch unchanged", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 40, y: 20 })!;
+    const sketch = add.apply(createEmptySketch());
+    const before = structuredClone(sketch);
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+    const outcome = applyChamferLines(
+      sketch,
+      rect.edges.bottom,
+      rect.edges.right,
+      { x: 35, y: 5 },
+      500,
+    );
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) {
+      return;
+    }
+    expect(outcome.reason.length).toBeGreaterThan(0);
+    expect(sketch).toEqual(before);
+    expect(sketch.constraints.some((c) => c.type === "chamfer")).toBe(false);
+  });
+
+  it("rejects chamfer of a line with itself without mutating", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 40, y: 20 })!;
+    const sketch = add.apply(createEmptySketch());
+    const before = structuredClone(sketch);
+    const lineId = sketch.geometry.find((g) => g.type === "line")!.id;
+    const outcome = applyChamferLines(sketch, lineId, lineId, { x: 1, y: 1 }, 2);
+    expect(outcome.ok).toBe(false);
+    expect(sketch).toEqual(before);
+  });
 });

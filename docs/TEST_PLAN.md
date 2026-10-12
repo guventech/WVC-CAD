@@ -100,6 +100,7 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 - [x] Sketch diagnostics report + panel (Chunk 22)
 - [x] Closed-profile / ProfileLoop analyzer (Chunk 23)
 - [x] Performance baselines (Phase 7): `SolverPerformance` / `SolverScale` + `SelectionPerformance` (hit-test/snap); wall times logged, generous CI ceilings
+- [x] Offset/chamfer edge cases (review Slice B): mixed line+arc offset honesty, zero-distance reject, impossible chamfer leaves sketch unchanged
 
 ## Mandatory regression fixtures (AGENTS §9)
 
