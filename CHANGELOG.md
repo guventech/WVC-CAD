@@ -12,10 +12,16 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ### Changed
 
-- Review-plan Phases 1–9: mutation/undo safety through CI hygiene and documentation readiness
+- Review-plan Phases 1–10 complete (mutation safety through final regression gate)
 - CI / Tauri workflows read Node from `.nvmrc` and activate `packageManager` via Corepack before `npm ci`
 - [`THIRD_PARTY.md`](./THIRD_PARTY.md) lists Tauri JS plugins + Cargo crates and FS capability scope
 - README feature-status (Supported / Partial / Unsupported); bug report template asks for version, OS, expected/actual
+
+### Verification (Phase 10, 2026-10-12)
+
+- Local: typecheck, lint, 531 unit tests (+1 skipped), build, 17 Playwright E2E — pass
+- GitHub `main` CI — pass after malformed-open dirty-discard fix
+- Does **not** promote the app beyond alpha; Windows installers remain unsigned
 
 ### Known limitations (current)
 

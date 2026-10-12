@@ -37,6 +37,19 @@
 
 ## Current
 
+**Phase 10 final regression / release gate (2026-10-12).** Local gate recorded: `typecheck` OK; `lint` OK (pre-existing warnings only); `test` 531 passed / 1 skipped; `build` OK; `test:e2e` 17 passed. `main` CI green after malformed-open dirty-confirm fix. Working tree: no secrets/lockfile churn in review commits; README canvas screenshot refreshed by E2E. Tauri desktop build **not** re-run locally (no `rustc` on this machine); Windows NSIS for `v0.1.0-alpha.2` remains on GitHub Releases (**unsigned**). Review-plan Phases 0–10 complete. **Not** a claim of production readiness.
+
+### Release-readiness snapshot (alpha)
+
+| Check | Result |
+|-------|--------|
+| typecheck / lint / unit / build / e2e | Pass (local 2026-10-12) |
+| GitHub CI on `main` | Pass (post–`1bba92a`) |
+| Lockfile / secrets in gate diff | Clean |
+| Browser smoke (Playwright critical path) | Pass |
+| Tauri rebuild this session | Skipped (Rust absent locally); last tag artifact exists |
+| Known risks | Unsigned installer; dense solver scale; DXF export-only; offset/chamfer partial; alpha quality |
+
 **Phase 9 documentation / product readiness (2026-10-12).** README feature-status table now Supported / Partial / Unsupported; known-limitations section calls out alpha/not safety-critical + bug-report path; CONTRIBUTING documents Node ≥22 + `npm run check`; ROADMAP notes review Phases 0–8 done and Phase 10 as next cut gate; bug template requires expected/actual, version, platform, OS; samples README lists fixtures; `assessments.md` banner clarifies post-snapshot ADR-052/Tauri/review work. Samples remain validated by `SampleSketches.test.ts`.
 
 **Phase 8 CI / deps / release hygiene (2026-10-12).** CI runs `npm run check` + separate E2E; Node via `.nvmrc` + Corepack `packageManager` (npm 12) before `npm ci` (CI + Tauri Windows). Solver timing-gate fix pushed with Phases 1–8. `npm audit --omit=dev`: 0 vulns. Tauri capabilities: dialog + scoped `$HOME/$DOCUMENT/$DESKTOP/$DOWNLOAD` text FS. `THIRD_PARTY.md` + PACKAGING release gate keep unsigned-installer + not-production-ready visible.
