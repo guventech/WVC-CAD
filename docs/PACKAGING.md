@@ -41,7 +41,7 @@ Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
 ### Config notes
 
 - App id: `com.wvccad.app` (`src-tauri/tauri.conf.json`)
-- Bundle targets: **NSIS only** for alpha (`0.1.0-alpha.3`). WiX/MSI rejects non-numeric prerelease labels like `alpha`; re-enable `"msi"` when the version is MSI-safe (e.g. `0.1.0` or `0.1.0-1`).
+- Bundle targets: **NSIS only** for alpha (`0.1.0-alpha.4`). WiX/MSI rejects non-numeric prerelease labels like `alpha`; re-enable `"msi"` when the version is MSI-safe (e.g. `0.1.0` or `0.1.0-1`).
 - Dev URL: `http://localhost:5173` (Vite `strictPort`)
 - CSP: production WebView CSP in `tauri.conf.json` (no cloud `connect-src`); web `index.html` meta allows `ws:`/`wss:` for Vite HMR only
 - Icons: original mark from `branding/icon-source.png` via `npx tauri icon`
@@ -72,6 +72,7 @@ Until signing lands, users can still run the installer by choosing “More info 
 
 | Tag | Artifact | Notes |
 |-----|----------|--------|
+| `v0.1.0-alpha.4` | `WVC-CAD_0.1.0-alpha.4_x64-setup.exe` | NSIS; **unsigned**; attached on GitHub Releases (tag workflow) |
 | `v0.1.0-alpha.3` | `WVC-CAD_0.1.0-alpha.3_x64-setup.exe` | NSIS; **unsigned**; attached on GitHub Releases |
 
 ## Runtime rules that keep the app light

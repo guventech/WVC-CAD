@@ -4,11 +4,31 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ## [Unreleased]
 
+## [0.1.0-alpha.4] — 2026-10-12
+
+Pre-3D handoff + chamfer topology since `v0.1.0-alpha.3`.
+
 ### Added
 
 - Pre-3D handoff: Pad topology fixtures; `SketchPlane` on frame (ADR-060, schema v1); closed line+arc offset via densified polyline (`OffsetWire`)
 - Diagnostics `readyForPad` aligned with topology-only `isReadyForPad` (ADR-053)
 - Chamfer topology residuals (ADR-061) — feature-owned connectivity; no blend coincidents on create
+
+### Fixed
+
+- Top-right / bottom-left rectangle chamfers no longer settle outside the profile (parent↔endpoint proximity pairing + inner wedge bias)
+
+### Verification
+
+- Local gate: typecheck, unit tests (551 passed / 1 skipped), build — pass
+- Windows NSIS still **unsigned** (see PACKAGING.md)
+
+### Known limitations
+
+- **Alpha** — not production-ready; not suitable for safety-critical engineering
+- Windows NSIS installers remain **unsigned** (SmartScreen warning expected; see PACKAGING.md)
+- ADR-052 residual **row** scaling active; column scaling unused; dense solver comfortable for tens–low hundreds of constraints
+- DXF export-only; approximate densified arc offset remains partial (see README)
 
 ## [0.1.0-alpha.3] — 2026-10-12
 

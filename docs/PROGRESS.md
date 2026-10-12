@@ -37,7 +37,9 @@
 
 ## Current
 
-**Chamfer topology residuals (ADR-061, 2026-10-12).** Chamfer features contribute on-parent + along-line glue residuals (parity with fillet); create no longer adds blend coincidents; `settleLoadedSketch` strips legacy blend coincidents. Fully located D20 chamfered rectangle DOF=0 regression added.
+**`v0.1.0-alpha.4` (2026-10-12).** Pre-3D R1–R3 + chamfer topology residuals (ADR-061) + TR/BL outer-bevel fix. Tag triggers Windows NSIS (unsigned).
+
+**Chamfer topology residuals (ADR-061, 2026-10-12).** Chamfer features contribute on-parent + along-line glue residuals (parity with fillet); create no longer adds blend coincidents; `settleLoadedSketch` strips legacy blend coincidents. Fully located D20 chamfered rectangle DOF=0 regression added. Proximity pairing keeps top-right / bottom-left chamfers inside the profile.
 
 **Pre-3D priorities R1–R3 (2026-10-12).** Pad handoff fixtures + topology-only `readyForPad` honesty (ADR-053); `SketchPlane` on `SketchFrame` (ADR-060, schema v1, no 3D UI); closed line+arc offset via densified polyline (`OffsetWire`, DIY — not Clipper / exact arc offset).
 
