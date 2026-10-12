@@ -62,11 +62,17 @@ Until signing lands, users can still run the installer by choosing “More info 
 ### Release gate (before tagging `v*`)
 
 1. `main` CI green: `typecheck · lint · test · build` and Playwright E2E (tag builds do not re-run the full web CI job).
-2. Push the commit that loosens solver timing ceilings (`SolverPerformance` / `SolverScale`) — older tags failed GHA on 5s/15s budgets.
+2. Solver performance baselines use generous CI ceilings (`SolverPerformance` / `SolverScale`) — do not reintroduce tight 5s/15s local-style gates.
 3. `npm run check` locally on the release commit; Node ≥ 22 matching `.nvmrc`.
 4. Tag `vX.Y.Z-alpha.N` → `Tauri build (Windows)` uploads NSIS under `windows-installers` and attaches to the GitHub Release.
 5. Release notes must state: **unsigned installer**, DXF export-only, alpha quality — not production / not safety-critical.
 6. Confirm [`THIRD_PARTY.md`](../THIRD_PARTY.md) matches current `package.json` / `Cargo.toml` deps.
+
+### Latest alpha installer (verified)
+
+| Tag | Artifact | Notes |
+|-----|----------|--------|
+| `v0.1.0-alpha.3` | `WVC-CAD_0.1.0-alpha.3_x64-setup.exe` | NSIS; **unsigned**; attached on GitHub Releases |
 
 ## Runtime rules that keep the app light
 

@@ -37,6 +37,8 @@
 
 ## Current
 
+**Packaging discipline spot-check (Slice C / review findings, 2026-10-12).** Confirmed `v0.1.0-alpha.3` NSIS asset on GitHub Releases (`WVC-CAD_0.1.0-alpha.3_x64-setup.exe`, unsigned). PACKAGING release gate wording updated (solver timing ceilings stay generous); README / CHANGELOG unsigned + alpha warnings remain accurate. No signing work.
+
 **Geometry edge-case hardening (Slice B / review findings, 2026-10-12).** Regression coverage: offset source refuses arcs and does not rebuild fully filleted (line+arc) profiles as closed offset loops; OffsetMath rejects zero distance and keeps large inward miters finite; chamfer rejects impossible distance / same-line picks without mutating the sketch. Conflict-reject unchanged-sketch cases already covered in OverConstraint / Dimensions tests.
 
 **App shell split (Slice A / review findings, 2026-10-12).** Extracted `useAppKeybindings`, `dispatchMenuAction`, and `clearCreationChrome` from `App.tsx` (menu/keyboard routing only; sketch SoT unchanged). Unit tests for menu dispatch; existing App Escape→Select E2E/unit coverage still covers keybindings.
