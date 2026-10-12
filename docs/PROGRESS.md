@@ -37,7 +37,9 @@
 
 ## Current
 
-**Phase 10 final regression / release gate (2026-10-12).** Local gate recorded: `typecheck` OK; `lint` OK (pre-existing warnings only); `test` 531 passed / 1 skipped; `build` OK; `test:e2e` 17 passed. `main` CI green after malformed-open dirty-confirm fix. Working tree: no secrets/lockfile churn in review commits; README canvas screenshot refreshed by E2E. Tauri desktop build **not** re-run locally (no `rustc` on this machine); Windows NSIS for `v0.1.0-alpha.2` remains on GitHub Releases (**unsigned**). Review-plan Phases 0–10 complete. **Not** a claim of production readiness.
+**`v0.1.0-alpha.3` (2026-10-12).** Version bump + CHANGELOG for review-plan Phases 0–10. Tag triggers Windows NSIS build (unsigned). Still alpha — not production-ready.
+
+**Phase 10 final regression / release gate (2026-10-12).** Local gate recorded: `typecheck` OK; `lint` OK (pre-existing warnings only); `test` 531 passed / 1 skipped; `build` OK; `test:e2e` 17 passed. `main` CI green after malformed-open dirty-confirm fix. Working tree: no secrets/lockfile churn in review commits; README canvas screenshot refreshed by E2E. Tauri desktop build **not** re-run locally (no `rustc` on this machine). Review-plan Phases 0–10 complete.
 
 ### Release-readiness snapshot (alpha)
 

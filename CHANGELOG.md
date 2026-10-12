@@ -4,30 +4,41 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] — 2026-10-12
+
+Repo review remediation (Phases 0–10) since `v0.1.0-alpha.2`.
+
 ### Fixed
 
-- CI solver timing gates use generous sanity ceilings (GHA runners were failing 5s/15s local-style budgets)
-- Canvas no longer re-runs under-constrained Jacobian visualization on every pan/zoom/preview frame (reuses App memo; recompute while dragging)
-- Diagnostics panel reuses App `solve` / under-constrained results instead of solving twice per edit
+- Mirror command preserves copied constraints; move undo restores constraints; selection pruned after trim/extend/mirror/fillet/chamfer
+- Unsatisfied underdetermined sketches report `failed` (not mislabeled `inconsistent`)
+- Dirty Open / Sample / Recent confirm before discarding work; save and open errors surface clearly
+- DXF export fails closed on non-finite geometry
+- Escape aborts in-progress Select drag without committing a move
+- Keyboard `:focus-visible` rings; compact layout keeps the canvas usable; first-run tip Escape hint
+- Canvas no longer re-runs under-constrained Jacobian visualization on every pan/zoom/preview frame
+- Diagnostics reuses App solver / DOF viz results (no double solve per edit)
+- CI solver timing gates use generous sanity ceilings; malformed-open E2E accepts dirty-discard confirm
+- Axis-aligned H/V dimension leaders; fillet radius leaders aim at each corner arc; canvas pane fills host after resize
 
 ### Changed
 
-- Review-plan Phases 1–10 complete (mutation safety through final regression gate)
-- CI / Tauri workflows read Node from `.nvmrc` and activate `packageManager` via Corepack before `npm ci`
+- CI / Tauri workflows use `.nvmrc` + Corepack `packageManager` (npm 12) before `npm ci`
 - [`THIRD_PARTY.md`](./THIRD_PARTY.md) lists Tauri JS plugins + Cargo crates and FS capability scope
 - README feature-status (Supported / Partial / Unsupported); bug report template asks for version, OS, expected/actual
+- Selection/snap performance baseline test (`SelectionPerformance.test.ts`)
 
-### Verification (Phase 10, 2026-10-12)
+### Verification
 
-- Local: typecheck, lint, 531 unit tests (+1 skipped), build, 17 Playwright E2E — pass
-- GitHub `main` CI — pass after malformed-open dirty-discard fix
-- Does **not** promote the app beyond alpha; Windows installers remain unsigned
+- Local Phase 10 gate: typecheck, lint, 531 unit tests (+1 skipped), build, 17 Playwright E2E — pass
+- GitHub `main` CI green before tag
 
-### Known limitations (current)
+### Known limitations
 
+- **Alpha** — not production-ready; not suitable for safety-critical engineering
 - Windows NSIS installers remain **unsigned** (SmartScreen warning expected; see PACKAGING.md)
-- ADR-052 **row** scaling is active; column scaling unused; dense solver still tens–low hundreds of constraints for interactive work
-- Not production-ready or suitable for safety-critical engineering
+- ADR-052 residual **row** scaling active; column scaling unused; dense solver comfortable for tens–low hundreds of constraints
+- DXF export-only; offset of mixed line+arc closed profiles and chamfer topology remain partial (see README)
 
 ## [0.1.0-alpha.2] — 2026-10-11
 
@@ -43,20 +54,6 @@ All notable user-visible changes to WVC-CAD are documented here.
 ### Fixed
 
 - Bottom status bar disappearing on window resize / tool switch (shell layout)
-
-## [0.1.0-alpha.1] — 2026-10-11
-
-### Added
-
-- Parametric 2D sketch with geometric and dimensional constraints
-- Levenberg–Marquardt solver with Jacobian-rank DOF (no fake fully-constrained)
-- Undo/redo command history (Chunks 0–27 complete)
-- Save / load versioned `.sketch.json`
-- DXF R12 export (geometry-only; constraints stay in `.sketch.json`)
-- Autosave + crash recovery
-- Sample sketches under `public/samples/` (File → Sample: …)
-- Tauri 2 desktop scaffold (Windows NSIS installer; MSI not used for `alpha` tags)
-- Playwright critical-path E2E smoke test
 
 ### Dependency policy (PR review)
 
@@ -78,3 +75,17 @@ All notable user-visible changes to WVC-CAD are documented here.
 - See [PROGRESS.md](./docs/PROGRESS.md) for chunk history
 - See [ROADMAP.md](./docs/ROADMAP.md) for next priorities
 - See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for design details
+
+## [0.1.0-alpha.1] — 2026-10-11
+
+### Added
+
+- Parametric 2D sketch with geometric and dimensional constraints
+- Levenberg–Marquardt solver with Jacobian-rank DOF (no fake fully-constrained)
+- Undo/redo command history (Chunks 0–27 complete)
+- Save / load versioned `.sketch.json`
+- DXF R12 export (geometry-only; constraints stay in `.sketch.json`)
+- Autosave + crash recovery
+- Sample sketches under `public/samples/` (File → Sample: …)
+- Tauri 2 desktop scaffold (Windows NSIS installer; MSI not used for `alpha` tags)
+- Playwright critical-path E2E smoke test
