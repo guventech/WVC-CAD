@@ -4,6 +4,24 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- CI solver timing gates use generous sanity ceilings (GHA runners were failing 5s/15s local-style budgets)
+- Canvas no longer re-runs under-constrained Jacobian visualization on every pan/zoom/preview frame (reuses App memo; recompute while dragging)
+- Diagnostics panel reuses App `solve` / under-constrained results instead of solving twice per edit
+
+### Changed
+
+- Review-plan Phases 1–8: mutation/undo safety, solver honesty, file safety, DXF fail-closed, UX journeys, a11y/layout, performance, CI/Corepack alignment
+- CI / Tauri workflows read Node from `.nvmrc` and activate `packageManager` via Corepack before `npm ci`
+- [`THIRD_PARTY.md`](./THIRD_PARTY.md) lists Tauri JS plugins + Cargo crates and FS capability scope
+
+### Known limitations (current)
+
+- Windows NSIS installers remain **unsigned** (SmartScreen warning expected; see PACKAGING.md)
+- ADR-052 **row** scaling is active; column scaling unused; dense solver still tens–low hundreds of constraints for interactive work
+- Not production-ready or suitable for safety-critical engineering
+
 ## [0.1.0-alpha.2] — 2026-10-11
 
 ### Added
@@ -43,8 +61,8 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ### Known Limitations
 
-- Residual/column scaling deferred (ADR-052)
-- Solver comfortable for tens–low hundreds of constraints; 1,000-constraint residual-assembly baseline in `SolverScale.test.ts` (full LM/rank deferred, ADR-052)
+- ADR-052 residual **row** scaling shipped in this release; column scaling unused
+- Solver comfortable for tens–low hundreds of constraints; 1,000-constraint residual-assembly baseline in `SolverScale.test.ts` (full LM/rank deferred)
 - DXF export-only (import not yet supported)
 - Windows builds unsigned (code signing not configured)
 

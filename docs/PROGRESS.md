@@ -37,6 +37,10 @@
 
 ## Current
 
+**Phase 8 CI / deps / release hygiene (2026-10-12).** CI already runs `npm run check` + separate E2E; Node via `.nvmrc` + Corepack `packageManager` (npm 12) before `npm ci` (CI + Tauri Windows). Latest tagged CI on origin failed on old 5s/15s solver gates — fix is in local history (`aa7641a`) awaiting push with Phases 1–7. `npm audit --omit=dev`: 0 vulns. No open Dependabot PRs. Tauri capabilities remain dialog + scoped `$HOME/$DOCUMENT/$DESKTOP/$DOWNLOAD` text FS (no shell/HTTP). `THIRD_PARTY.md` lists Tauri JS + Cargo crates; CHANGELOG/PACKAGING keep unsigned-installer + not-production-ready visible; release gate checklist in PACKAGING.
+
+**Phase 7 performance / responsiveness (2026-10-12).** Audit: pointer-move does snap/hit-test (expected); `solve` / DOF viz were memoized at App but canvas redraw re-ran `analyzeUnderConstrainedVisualization` on every pan/zoom/preview frame, and Diagnostics re-solved + re-vizzed. Fix: canvas reuses App viz (recomputes only while dragging); diagnostics accepts optional `solverResult` / `underConstrained`. Non-solver baseline: `SelectionPerformance.test.ts` (~200 entities × 200 hit/snap probes). Solver baselines unchanged. Env note: Vitest/Node local timings; CI uses generous ceilings.
+
 **Phase 6 a11y / layout / onboarding (2026-10-11).** Keyboard `:focus-visible` rings; first-run tip uses `--bg-panel` (was broken `--panel`) and mentions Escape; recovery dialog focuses Restore; compact widths shrink/hide side panels so the canvas stays usable; shape flyout options expose `aria-label`; README Select Escape note; Playwright `a11y-layout` + onboarding Escape text.
 
 **Phase 5 UX journeys (2026-10-11).** Escape aborts in-progress Select drag (no commit); tool change clears drag preview; DXF success uses panel info tone (`constraint-info`) not error. Unit tests cover commit + Escape abort drag; Playwright covers Escape abort, over-constrained sample status, DXF download + info tone, and dimension redo.

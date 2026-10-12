@@ -4,6 +4,11 @@
 
 > Not a production CAD product. No affiliation with Autodesk, Dassault Systèmes, Siemens, PTC, or other commercial CAD vendors. Icons and chrome are original — not copied from proprietary products.
 
+## Prerequisites
+
+- **Node.js ≥ 22** (see [`.nvmrc`](./.nvmrc)); `package.json` pins `packageManager` to npm 12 for lockfile reproducibility (Corepack / matching npm recommended).
+- Desktop builds also need a Rust toolchain + WebView2 (see [PACKAGING.md](./docs/PACKAGING.md)).
+
 ## Scripts
 
 ```bash
@@ -15,8 +20,9 @@ npm run test
 npm run test:e2e
 npm run lint
 npm run build
+npm run check        # typecheck + lint + test + build (same as CI check job)
 npm run tauri:dev    # desktop window (needs Rust + WebView2)
-npm run tauri:build  # Windows NSIS/MSI installer
+npm run tauri:build  # Windows NSIS installer (alpha tags; unsigned)
 ```
 
 ## Quick start (≈5 minutes)

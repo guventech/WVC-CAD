@@ -549,7 +549,11 @@ export default function App() {
             onParseError={handleDimensionParseError}
             selectedIds={selection.selectedIds}
           />
-          <DiagnosticsPanel sketch={sketch} />
+          <DiagnosticsPanel
+            sketch={sketch}
+            solverResult={solverResult}
+            underConstrained={underConstrained}
+          />
         </aside>
         <div className="canvas-host">
         {showFirstRunHint && sketch.geometry.length === 0 ? (
@@ -562,6 +566,7 @@ export default function App() {
         ) : null}
         <SketchCanvas
           sketch={sketch}
+          underConstrained={underConstrained}
           selection={selection}
           activeTool={activeTool}
           onSelectionChange={setSelection}

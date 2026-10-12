@@ -4,16 +4,31 @@ import {
   type DiagnosticFinding,
   type DiagnosticSeverity,
 } from "../../sketch/analysis/SketchDiagnostics.ts";
+import type { UnderConstrainedVisualization } from "../../sketch/constraints/UnderConstrainedViz.ts";
 import type { Sketch } from "../../sketch/model/Sketch.ts";
+import type { SolverResult } from "../../sketch/solver/SolverResult.ts";
 
 type DiagnosticsPanelProps = {
   readonly sketch: Sketch;
+  /** Reuse App `solve(sketch)` — avoid a second diagnose on every edit. */
+  readonly solverResult?: SolverResult;
+  /** Reuse App under-constrained viz — avoid a second Jacobian assemble. */
+  readonly underConstrained?: UnderConstrainedVisualization;
 };
 
 export const DiagnosticsPanel = memo(function DiagnosticsPanel({
   sketch,
+  solverResult,
+  underConstrained,
 }: DiagnosticsPanelProps) {
-  const report = useMemo(() => analyzeSketchDiagnostics(sketch), [sketch]);
+  const report = useMemo(
+    () =>
+      analyzeSketchDiagnostics(sketch, {
+        solverResult,
+        underConstrained,
+      }),
+    [sketch, solverResult, underConstrained],
+  );
   const { summary, findings } = report;
 
   const geometryFindings = findings.filter((f) => f.category === "geometry");

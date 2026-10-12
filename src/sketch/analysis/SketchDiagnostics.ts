@@ -12,10 +12,20 @@ import {
   analyzeDegreesOfFreedom,
   type DofAnalysis,
 } from "../constraints/DegreesOfFreedom.ts";
-import { analyzeUnderConstrainedVisualization } from "../constraints/UnderConstrainedViz.ts";
+import {
+  analyzeUnderConstrainedVisualization,
+  type UnderConstrainedVisualization,
+} from "../constraints/UnderConstrainedViz.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import { solve } from "../solver/Solver.ts";
 import type { SolverResult } from "../solver/SolverResult.ts";
+
+/** Optional App-level results so the panel does not re-solve / re-viz. */
+export interface SketchDiagnosticsOptions {
+  readonly solverResult?: SolverResult;
+  readonly underConstrained?: UnderConstrainedVisualization;
+  readonly dof?: DofAnalysis;
+}
 
 export type {
   DiagnosticCategory,
@@ -49,14 +59,17 @@ export interface SketchDiagnosticsReport {
 /**
  * Analyze a sketch for geometry, constraint, and provisional profile issues.
  * Pure domain function — no React. Profile loops via `analyzeProfiles` (Chunk 23).
+ * Pass App-memoized solver/viz results when available to avoid duplicate work.
  */
 export function analyzeSketchDiagnostics(
   sketch: Sketch,
+  options: SketchDiagnosticsOptions = {},
 ): SketchDiagnosticsReport {
   const findings: DiagnosticFinding[] = [];
-  const solverResult = solve(sketch);
-  const dof = analyzeDegreesOfFreedom(sketch);
-  const under = analyzeUnderConstrainedVisualization(sketch);
+  const solverResult = options.solverResult ?? solve(sketch);
+  const under =
+    options.underConstrained ?? analyzeUnderConstrainedVisualization(sketch);
+  const dof = options.dof ?? analyzeDegreesOfFreedom(sketch);
   const profiles = analyzeProfiles(sketch);
 
   const geometryIssues = collectGeometryIssues(sketch.geometry);

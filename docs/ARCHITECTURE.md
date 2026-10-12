@@ -287,9 +287,13 @@ Keep the app usable on weak machines (and a future Tauri WebView2 shell):
 | Camera ownership | Camera lives in `SketchCanvas`. App only gets `camera.scale` (pan must not re-render App). |
 | React cost | Memoize canvas/panels; stabilize document callbacks with `useCallback`. |
 | Canvas cost | Batch grid into few `stroke()` calls; avoid per-line strokes. |
-| Dependencies | Production: `react` + `react-dom` only. Prefer in-repo sketch code over new libs. |
+| DOF viz hot path | `analyzeUnderConstrainedVisualization` runs on sketch/drag changes only — not every pan/zoom/preview frame. App memoizes viz + `solve`; canvas and diagnostics reuse them. |
+| Dependencies | Prefer in-repo sketch code over new CAD libs. Runtime deps stay minimal (`react` / `react-dom` + Tauri plugins when packaged). |
 | Build | Vite `target: es2022`, minify on, no release sourcemaps. |
 | Placeholders | Do not ship unused capability stubs; add modules when the chunk lands. |
+| Baselines | Solver: `SolverPerformance` / `SolverScale`. Non-solver: `SelectionPerformance` (hit-test + snap). Log wall times; CI uses generous sanity ceilings, not interactive budgets. |
+
+Practical limit (honest): dense LM + Jacobian-rank DOF is comfortable for tens–low hundreds of constraints; ~1k assemble is tracked, full settle remains aspirational (ADR-052).
 
 Desktop packaging scaffold: [PACKAGING.md](./PACKAGING.md) (`src-tauri/`, Tauri 2).
 

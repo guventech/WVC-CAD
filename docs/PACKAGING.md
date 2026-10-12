@@ -59,6 +59,15 @@ Unsigned NSIS/MSI builds trigger SmartScreen warnings. For alpha:
 
 Until signing lands, users can still run the installer by choosing “More info → Run anyway” on SmartScreen.
 
+### Release gate (before tagging `v*`)
+
+1. `main` CI green: `typecheck · lint · test · build` and Playwright E2E (tag builds do not re-run the full web CI job).
+2. Push the commit that loosens solver timing ceilings (`SolverPerformance` / `SolverScale`) — older tags failed GHA on 5s/15s budgets.
+3. `npm run check` locally on the release commit; Node ≥ 22 matching `.nvmrc`.
+4. Tag `vX.Y.Z-alpha.N` → `Tauri build (Windows)` uploads NSIS under `windows-installers` and attaches to the GitHub Release.
+5. Release notes must state: **unsigned installer**, DXF export-only, alpha quality — not production / not safety-critical.
+6. Confirm [`THIRD_PARTY.md`](../THIRD_PARTY.md) matches current `package.json` / `Cargo.toml` deps.
+
 ## Runtime rules that keep the app light
 
 These are enforced in app code today; keep them when adding tools:

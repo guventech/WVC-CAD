@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { addLineToSketch, createAddCircleCommand } from "../commands/CreateGeometryCommand.ts";
 import { createAddRectangleCommand } from "../commands/CreateRectangleCommand.ts";
+import { analyzeUnderConstrainedVisualization } from "../constraints/UnderConstrainedViz.ts";
 import { resetEntityIdCounter } from "../model/EntityId.ts";
 import { createEmptySketch } from "../model/Sketch.ts";
+import { solve } from "../solver/Solver.ts";
 import {
   analyzeSketchDiagnostics,
   formatDiagnosticsLines,
@@ -147,5 +149,23 @@ describe("SketchDiagnostics (Chunk 22)", () => {
     expect(
       report.findings.some((f) => f.code === "construction-in-profile"),
     ).toBe(true);
+  });
+
+  it("reuses App-level solverResult and underConstrained without changing findings", () => {
+    const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 80, y: 40 })!;
+    const sketch = add.apply(createEmptySketch());
+    const solverResult = solve(sketch);
+    const underConstrained = analyzeUnderConstrainedVisualization(sketch);
+    const fresh = analyzeSketchDiagnostics(sketch);
+    const reused = analyzeSketchDiagnostics(sketch, {
+      solverResult,
+      underConstrained,
+    });
+
+    expect(reused.solverResult).toBe(solverResult);
+    expect(reused.summary.degreesOfFreedom).toBe(fresh.summary.degreesOfFreedom);
+    expect(reused.findings.map((f) => f.code)).toEqual(
+      fresh.findings.map((f) => f.code),
+    );
   });
 });

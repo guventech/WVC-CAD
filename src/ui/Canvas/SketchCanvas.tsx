@@ -1,11 +1,21 @@
-import { memo, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import type { GeometryDragTarget } from "../../sketch/commands/GeometryDrag.ts";
 import { applyGeometryDragWithConstraints } from "../../sketch/commands/GeometryEdit.ts";
 import {
   formatDimensionInputValue,
 } from "../../sketch/constraints/DimensionInput.ts";
 import { isSupportedDimensionType } from "../../sketch/constraints/Dimensions.ts";
-import { analyzeUnderConstrainedVisualization } from "../../sketch/constraints/UnderConstrainedViz.ts";
+import {
+  analyzeUnderConstrainedVisualization,
+  type UnderConstrainedVisualization,
+} from "../../sketch/constraints/UnderConstrainedViz.ts";
 import type { Point2D } from "../../sketch/geometry/Point2D.ts";
 import type { ConstraintReference } from "../../sketch/model/Constraint.ts";
 import { isDrivingConstraint } from "../../sketch/model/Constraint.ts";
@@ -59,6 +69,11 @@ import {
 
 type SketchCanvasProps = {
   readonly sketch: Sketch;
+  /**
+   * App-level under-constrained viz for the committed sketch. Reused when not
+   * dragging so pan/zoom/preview redraws do not reassemble the Jacobian.
+   */
+  readonly underConstrained?: UnderConstrainedVisualization;
   readonly selection: SelectionState;
   readonly activeTool: ActiveTool;
   readonly onSelectionChange: (selection: SelectionState) => void;
@@ -169,6 +184,7 @@ function isCreationTool(activeTool: ActiveTool): boolean {
 
 export const SketchCanvas = memo(function SketchCanvas({
   sketch,
+  underConstrained: underConstrainedProp,
   selection,
   activeTool,
   onSelectionChange,
@@ -426,6 +442,15 @@ export const SketchCanvas = memo(function SketchCanvas({
           dragPreview.currentPosition,
         );
 
+  // Jacobian-rank viz is expensive; only recompute when displayed geometry
+  // changes (commit or drag preview), not on every pan/zoom/preview frame.
+  const underConstrained = useMemo(() => {
+    if (dragPreview === null && underConstrainedProp !== undefined) {
+      return underConstrainedProp;
+    }
+    return analyzeUnderConstrainedVisualization(displaySketch);
+  }, [displaySketch, dragPreview, underConstrainedProp]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas === null || size.width === 0 || size.height === 0) {
@@ -443,7 +468,6 @@ export const SketchCanvas = memo(function SketchCanvas({
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     const showPreview = isCreationTool(activeTool) || isDraggingPoint;
-    const underConstrained = analyzeUnderConstrainedVisualization(displaySketch);
     renderViewport(context, {
       camera,
       viewport: size,
@@ -493,6 +517,7 @@ export const SketchCanvas = memo(function SketchCanvas({
     selection,
     size,
     sketch.settings.gridVisible,
+    underConstrained,
   ]);
 
   const grid = chooseGridSpacing(camera.scale);

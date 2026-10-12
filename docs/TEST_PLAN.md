@@ -99,6 +99,7 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 - [x] Line–line fillet / chamfer (Chunk 21)
 - [x] Sketch diagnostics report + panel (Chunk 22)
 - [x] Closed-profile / ProfileLoop analyzer (Chunk 23)
+- [x] Performance baselines (Phase 7): `SolverPerformance` / `SolverScale` + `SelectionPerformance` (hit-test/snap); wall times logged, generous CI ceilings
 
 ## Mandatory regression fixtures (AGENTS §9)
 
