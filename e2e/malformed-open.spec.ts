@@ -95,6 +95,12 @@ test.describe("malformed open", () => {
     await clickWorld(page, 0, 0);
     await clickWorld(page, 50, 25);
     await expect(page.getByTestId("profile-outer-count")).toContainText("1 outer loop");
+    await expect(page.getByTestId("unsaved-indicator")).toHaveText("Unsaved changes");
+
+    // Dirty sketch → Open prompts discard; accept so the bad file is parsed.
+    page.once("dialog", (dialog) => {
+      void dialog.accept();
+    });
 
     await page.getByTestId("open-button").click();
     await expect(page.getByTestId("constraint-conflict")).toContainText(
