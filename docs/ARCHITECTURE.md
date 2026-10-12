@@ -207,7 +207,7 @@ Canvas preview calls the same apply function with ephemeral state; the model upd
 
 ## World Datum Frame (Pre–Chunk 16 / ADR-022)
 
-Every sketch has `frame: SketchFrame` — origin + in-plane X/Y axes with stable datum ids. Datums are **not** in `geometry[]`. They participate in hit-test, selection, snap, and coincident residuals, but contribute **0** solver variables and cannot be deleted or dragged. Viewport axes/origin are drawn from `sketch.frame`. `FrameAxisTag` includes `"z"` for a future 3D Frame3D / sketch-plane binding.
+Every sketch has `frame: SketchFrame` — origin + in-plane X/Y axes with stable datum ids, plus a model-only `plane: SketchPlane` (default world XY, normal +Z) for a future Pad host. Datums are **not** in `geometry[]`. They participate in hit-test, selection, snap, and coincident residuals, but contribute **0** solver variables and cannot be deleted or dragged. Viewport axes/origin are drawn from `sketch.frame`. `FrameAxisTag` includes `"z"` (reserved; 2D sketches instantiate only x/y). Non-default planes are rejected on load until a 3D feature module exists (ADR-060). No schema version bump: missing `frame.plane` loads as the default.
 
 Typical absolute lock: coincident a corner/center to `datum:origin`, **or** driving `coordinate-x` / `coordinate-y` via the unified **Distance** tool (axis locate picks; formerly Offset X/Y — ADR-048) plus sizes → `FULLY CONSTRAINED`.
 
@@ -261,10 +261,10 @@ isReadyForPad(analysis) → boolean          // topology gate for a single outer
 | Units | Millimetres; areas mm² |
 | Construction | Never in solid loops (`listSolidProfileGeometry`) |
 | Outer / holes | One preferred outer; holes nest via `parentLoopId` |
-| Honesty | `readyForPad` does not imply DOF = 0; solver status stays separate |
+| Honesty | `isReadyForPad` / `summary.readyForPad` are **topology only** — not DOF = 0, not a solver verdict |
 | Bridge | No React, canvas, or SVG types cross this boundary |
 
-Diagnostics may surface “Ready for pad” when `summary.readyForPad` is true (same domain gate).
+Diagnostics may surface “Ready for pad” when `isReadyForPad` is true (`summary.readyForPad` mirrors that gate). Consumers must still read `solverResult` before any future Pad.
 
 ## Line orientation on create
 

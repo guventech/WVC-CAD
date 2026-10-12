@@ -98,11 +98,8 @@ export function analyzeSketchDiagnostics(
       outerLoopCount: profiles.outerLoopCount,
       holeLoopCount: profiles.holeLoopCount,
       openWireCount: profiles.openEntityIds.length,
-      readyForPad:
-        isReadyForPad(profiles) &&
-        solverResult.status !== "over-constrained" &&
-        solverResult.status !== "inconsistent" &&
-        solverResult.status !== "failed",
+      // Topology gate only (ADR-053). Solver status stays in `solverResult`.
+      readyForPad: isReadyForPad(profiles),
     },
     solverResult,
     dof,

@@ -37,9 +37,11 @@
 
 ## Current
 
+**Pre-3D priorities R1–R3 (2026-10-12).** Pad handoff fixtures + topology-only `readyForPad` honesty (ADR-053); `SketchPlane` on `SketchFrame` (ADR-060, schema v1, no 3D UI); closed line+arc offset via densified polyline (`OffsetWire`, DIY — not Clipper / exact arc offset).
+
 **Packaging discipline spot-check (Slice C / review findings, 2026-10-12).** Confirmed `v0.1.0-alpha.3` NSIS asset on GitHub Releases (`WVC-CAD_0.1.0-alpha.3_x64-setup.exe`, unsigned). PACKAGING release gate wording updated (solver timing ceilings stay generous); README / CHANGELOG unsigned + alpha warnings remain accurate. No signing work.
 
-**Geometry edge-case hardening (Slice B / review findings, 2026-10-12).** Regression coverage: offset source refuses arcs and does not rebuild fully filleted (line+arc) profiles as closed offset loops; OffsetMath rejects zero distance and keeps large inward miters finite; chamfer rejects impossible distance / same-line picks without mutating the sketch. Conflict-reject unchanged-sketch cases already covered in OverConstraint / Dimensions tests.
+**Geometry edge-case hardening (Slice B / review findings, 2026-10-12).** OffsetMath rejects zero distance and keeps large inward miters finite; chamfer rejects impossible distance / same-line picks without mutating the sketch. (Closed line+arc offset later landed in pre-3D R3 via densified polylines.) Conflict-reject unchanged-sketch cases already covered in OverConstraint / Dimensions tests.
 
 **App shell split (Slice A / review findings, 2026-10-12).** Extracted `useAppKeybindings`, `dispatchMenuAction`, and `clearCreationChrome` from `App.tsx` (menu/keyboard routing only; sketch SoT unchanged). Unit tests for menu dispatch; existing App Escape→Select E2E/unit coverage still covers keybindings.
 
@@ -446,7 +448,7 @@ Near-term priorities (see [ROADMAP.md](./ROADMAP.md)):
 - Whole-rectangle body drag translate still limited (Offset X/Y: locate rigid-translates; opposing same-axis Offsets size one edge + rebuild blends)
 - Profile analyzer: line + arc wire loops + circles; area uses arc mid-samples
 - Perfect H/V lines get orientation constraints on create
-- Offset of mixed line+arc closed profiles is not rebuilt as a polyline loop
+- Offset of closed line+arc profiles densifies arcs to polylines (approximate DIY offset; not exact parallel arcs)
 - DXF export is geometry-only (no import; constraints omitted)
 - Tauri 2 scaffold exists (`npm run tauri:dev` / `tauri:build`); needs Rust; original icons + CSP landed; Windows builds still unsigned
 - Parallel / perpendicular / tangent inference snaps during create remain a subset (intersection + H/V + on-entity are present)

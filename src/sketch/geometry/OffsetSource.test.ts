@@ -42,7 +42,7 @@ describe("OffsetSource", () => {
     });
   });
 
-  it("does not treat arcs as offset sources", () => {
+  it("resolves a fillet arc on a closed loop to the densified closed polyline", () => {
     const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 80, y: 40 })!;
     let sketch = add.apply(createEmptySketch());
     const rect = parseRectangleFeature(
@@ -62,10 +62,16 @@ describe("OffsetSource", () => {
     sketch = filleted.sketch;
     const arc = sketch.geometry.find((g) => g.type === "arc");
     expect(arc).toBeDefined();
-    expect(resolveOffsetSource(sketch, arc!.id)).toBeNull();
+    const source = resolveOffsetSource(sketch, arc!.id);
+    expect(source?.kind).toBe("polyline");
+    if (source?.kind === "polyline") {
+      expect(source.closed).toBe(true);
+      // 3 lines + densified 90° arc (>2 interior samples) → more than 4 verts.
+      expect(source.vertices.length).toBeGreaterThan(4);
+    }
   });
 
-  it("does not rebuild mixed line+arc closed profiles as a closed offset loop", () => {
+  it("rebuilds fully filleted (line+arc) profiles as a closed densified offset loop", () => {
     const add = createAddRectangleCommand({ x: 0, y: 0 }, { x: 80, y: 40 })!;
     let sketch = add.apply(createEmptySketch());
     const rect = parseRectangleFeature(
@@ -101,12 +107,11 @@ describe("OffsetSource", () => {
       return;
     }
     const source = resolveOffsetSource(sketch, remainingBottom.id);
-    // Honest limitation: no closed polyline rebuild for mixed line+arc loops.
-    expect(source).not.toBeNull();
+    expect(source?.kind).toBe("polyline");
     if (source?.kind === "polyline") {
-      expect(source.closed).toBe(false);
-    } else {
-      expect(source?.kind).toBe("segment");
+      expect(source.closed).toBe(true);
+      // 4 straight corners densified away → many vertices, still a single loop.
+      expect(source.vertices.length).toBeGreaterThan(8);
     }
   });
 });

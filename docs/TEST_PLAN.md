@@ -47,7 +47,7 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 | Selection | `src/sketch/selection/SelectionManager.test.ts` | single/multi/clear/hover |
 | Snap | `src/sketch/selection/SnapEngine.test.ts` | origin, grid, endpoint/point, midpoint, center, intersection, onEntity, H/V compose |
 | 3-pt arc | `src/sketch/tools/Arc3Tool.test.ts` | circle-from-3-pts, reject collinear, three-click commit |
-| Profiles / pad | `src/sketch/analysis/ProfileAnalyzer.test.ts` | open/hole/fillet/construction; `isReadyForPad` |
+| Profiles / pad | `src/sketch/analysis/ProfileAnalyzer.test.ts` | open/hole/fillet/construction; `isReadyForPad`; Pad handoff (self-intersect / construction / under-constrained topology-only) |
 | Construction | `src/sketch/commands/ToggleConstructionCommand.test.ts` | create-as-construction, toggle, rectangle expand, profile filter |
 | Point commands | `src/sketch/commands/PointCommands.test.ts` | create / move / delete |
 | Line commands | `src/sketch/commands/LineCommands.test.ts` | create, endpoint/body move, reject zero-length, undo |
@@ -100,7 +100,7 @@ Hit / snap: screen-pixel tolerances (`HIT_TOLERANCE_PX`, `SNAP_TOLERANCE_PX`), i
 - [x] Sketch diagnostics report + panel (Chunk 22)
 - [x] Closed-profile / ProfileLoop analyzer (Chunk 23)
 - [x] Performance baselines (Phase 7): `SolverPerformance` / `SolverScale` + `SelectionPerformance` (hit-test/snap); wall times logged, generous CI ceilings
-- [x] Offset/chamfer edge cases (review Slice B): mixed line+arc offset honesty, zero-distance reject, impossible chamfer leaves sketch unchanged
+- [x] Offset/chamfer edge cases: closed line+arc densified offset loop, zero-distance reject, impossible chamfer leaves sketch unchanged
 
 ## Mandatory regression fixtures (AGENTS §9)
 

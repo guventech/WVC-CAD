@@ -45,7 +45,7 @@ Other samples: filleted plate with hole, capsule slot, L-bracket, over-constrain
 | Points, lines, circles, arcs, rectangle, polygon, slot | **Supported** |
 | Fillet / trim / extend / mirror | **Supported** |
 | Chamfer | **Partial** — rebuild-only (no topology residual like fillet) |
-| Offset | **Partial** — line / open chain / closed line loop / concentric circle; mixed line+arc closed loops not rebuilt |
+| Offset | **Partial** — line / open chain / closed line+arc loop (arcs densified) / concentric circle; not exact parallel-arc offset |
 | Geometric + dimensional constraints + LM solver | **Supported** |
 | DOF / over-constraint honesty | **Supported** (Jacobian rank; no fake “fully constrained”) |
 | Save / Save As / recent / samples / autosave | **Supported** |
@@ -94,7 +94,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 Easy to find for alpha testers — also mirrored in [CHANGELOG.md](./CHANGELOG.md) and [PROGRESS.md](./docs/PROGRESS.md):
 
 - **Alpha quality** — not production-ready; not suitable for safety-critical engineering
-- Offset of mixed line+arc closed profiles falls back to single-segment / is skipped for polyline rebuild
+- Offset of closed line+arc profiles densifies arcs to polylines (approximate DIY; not exact parallel arcs)
 - Chamfer is rebuild-only (no solver residual), unlike fillet
 - DXF is **export-only** geometry interchange (R12 ASCII; no import; constraints stay in `.sketch.json`)
 - Dense solver is comfortable for tens–low hundreds of constraints (see [ARCHITECTURE.md](./docs/ARCHITECTURE.md))

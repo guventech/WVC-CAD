@@ -20,7 +20,10 @@ import {
   DATUM_AXIS_Y_ID,
   DATUM_ORIGIN_ID,
   DEFAULT_FRAME_ID,
+  DEFAULT_SKETCH_PLANE,
+  isDefaultSketchPlane,
   type SketchFrame,
+  type SketchPlane,
 } from "../model/SketchFrame.ts";
 import {
   createDefaultSketchSettings,
@@ -331,6 +334,15 @@ function cloneFrame(frame: SketchFrame): SketchFrame {
       tag: axis.tag,
       direction: { ...axis.direction },
     })),
+    plane: clonePlane(frame.plane),
+  };
+}
+
+function clonePlane(plane: SketchPlane): SketchPlane {
+  return {
+    kind: plane.kind,
+    origin: { ...plane.origin },
+    normal: { ...plane.normal },
   };
 }
 
@@ -686,7 +698,73 @@ function parseFrame(
     };
   }
 
-  return { ok: true, frame: expected };
+  const planeResult = parsePlane(raw.plane);
+  if (!planeResult.ok) {
+    return planeResult;
+  }
+
+  return { ok: true, frame: { ...expected, plane: planeResult.plane } };
+}
+
+function parsePlane(
+  raw: unknown,
+): { ok: true; plane: SketchPlane } | { ok: false; reason: string } {
+  if (raw === undefined) {
+    return { ok: true, plane: clonePlane(DEFAULT_SKETCH_PLANE) };
+  }
+  if (!isRecord(raw)) {
+    return { ok: false, reason: "frame.plane must be an object when present." };
+  }
+  if (raw.kind !== "world-xy") {
+    return {
+      ok: false,
+      reason: `Unsupported sketch plane kind "${String(raw.kind)}" (expected "world-xy").`,
+    };
+  }
+  const origin = parsePoint3D(raw.origin, "frame.plane.origin");
+  if (!origin.ok) {
+    return origin;
+  }
+  const normal = parsePoint3D(raw.normal, "frame.plane.normal");
+  if (!normal.ok) {
+    return normal;
+  }
+  const plane: SketchPlane = {
+    kind: "world-xy",
+    origin: origin.point,
+    normal: normal.point,
+  };
+  if (!isDefaultSketchPlane(plane)) {
+    return {
+      ok: false,
+      reason:
+        "Only the default world-xy plane (origin 0, normal +Z) is supported.",
+    };
+  }
+  return { ok: true, plane };
+}
+
+function parsePoint3D(
+  raw: unknown,
+  label: string,
+): { ok: true; point: { x: number; y: number; z: number } } | { ok: false; reason: string } {
+  if (!isRecord(raw)) {
+    return { ok: false, reason: `${label} must be an object.` };
+  }
+  if (
+    typeof raw.x !== "number" ||
+    typeof raw.y !== "number" ||
+    typeof raw.z !== "number" ||
+    !Number.isFinite(raw.x) ||
+    !Number.isFinite(raw.y) ||
+    !Number.isFinite(raw.z)
+  ) {
+    return {
+      ok: false,
+      reason: `${label} needs finite numeric x, y, z.`,
+    };
+  }
+  return { ok: true, point: { x: raw.x, y: raw.y, z: raw.z } };
 }
 
 function parseMetadata(

@@ -276,7 +276,7 @@ export function migrateDatumCoincidentsFromCorner(
       continue;
     }
     const axis = findFrameAxis(sketch.frame, other.entityId);
-    if (axis !== null) {
+    if (axis !== null && (axis.tag === "x" || axis.tag === "y")) {
       removeIds.push(constraint.id);
       wantAxisTags.add(axis.tag);
     }

@@ -145,4 +145,42 @@ describe("ProfileAnalyzer (Chunk 23)", () => {
     )!.apply(createEmptySketch());
     expect(isReadyForPad(analyzeProfiles(sketch))).toBe(true);
   });
+
+  it("Pad handoff: self-intersecting wires are not ready for pad", () => {
+    let sketch = createEmptySketch();
+    sketch = addLineToSketch(sketch, { x: 0, y: 0 }, { x: 10, y: 10 })!.sketch;
+    sketch = addLineToSketch(sketch, { x: 0, y: 10 }, { x: 10, y: 0 })!.sketch;
+    const analysis = analyzeProfiles(sketch);
+    expect(analysis.selfIntersectionCount).toBeGreaterThan(0);
+    expect(isReadyForPad(analysis)).toBe(false);
+  });
+
+  it("Pad handoff: construction beside a solid rectangle does not block pad", () => {
+    let sketch = createAddRectangleCommand(
+      { x: 0, y: 0 },
+      { x: 60, y: 40 },
+    )!.apply(createEmptySketch());
+    sketch = addLineToSketch(
+      sketch,
+      { x: -20, y: 0 },
+      { x: -20, y: 40 },
+      { construction: true },
+    )!.sketch;
+    const analysis = analyzeProfiles(sketch);
+    expect(analysis.outerLoopCount).toBe(1);
+    expect(isReadyForPad(analysis)).toBe(true);
+  });
+
+  it("Pad handoff: readyForPad is topology-only (under-constrained still ok)", () => {
+    const sketch = createAddRectangleCommand(
+      { x: 0, y: 0 },
+      { x: 80, y: 40 },
+    )!.apply(createEmptySketch());
+    const analysis = analyzeProfiles(sketch);
+    expect(isReadyForPad(analysis)).toBe(true);
+    // No world fix / sizes — still under-constrained for the solver.
+    const report = analyzeSketchDiagnostics(sketch);
+    expect(report.solverResult.degreesOfFreedom).toBeGreaterThan(0);
+    expect(report.summary.readyForPad).toBe(true);
+  });
 });

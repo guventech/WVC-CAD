@@ -1,8 +1,10 @@
 import { analyzeProfiles } from "../analysis/ProfileAnalyzer.ts";
 import type { EntityId, LineGeometry } from "../model/Geometry.ts";
 import type { Sketch } from "../model/Sketch.ts";
+import { pointOnCircle } from "./EntityFeatures.ts";
 import { pointsApproximatelyEqual, TOLERANCE } from "./GeometryMath.ts";
 import type { Point2D } from "./Point2D.ts";
+import { orderedClosedLoopPolyline } from "./OffsetWire.ts";
 
 export type OffsetSource =
   | {
@@ -26,7 +28,8 @@ export type OffsetSource =
 
 /**
  * Resolve what the offset tool should copy when the user picks `entityId`.
- * Prefers a closed profile loop, then an open degree-2 line chain, else a single segment/circle.
+ * Prefers a closed profile loop (lines and densified arcs), then an open
+ * degree-2 line chain, else a single line segment or concentric circle.
  */
 export function resolveOffsetSource(
   sketch: Sketch,
@@ -48,13 +51,12 @@ export function resolveOffsetSource(
     };
   }
 
-  if (entity.type !== "line") {
+  if (entity.type !== "line" && entity.type !== "arc") {
     return null;
   }
-  if (
-    Math.hypot(entity.end.x - entity.start.x, entity.end.y - entity.start.y) <=
-    TOLERANCE.coincidence
-  ) {
+
+  const seedSegment = seedSegmentForEntity(entity);
+  if (seedSegment === null) {
     return null;
   }
 
@@ -63,16 +65,27 @@ export function resolveOffsetSource(
     (item) => item.closed && item.entityIds.includes(entityId),
   );
   if (loop !== undefined) {
-    const vertices = orderedLoopVertices(sketch, loop.entityIds);
+    const vertices = orderedClosedLoopPolyline(sketch, loop.entityIds);
     if (vertices !== null && vertices.length >= 3) {
       return {
         kind: "polyline",
         vertices,
         closed: true,
-        seedStart: entity.start,
-        seedEnd: entity.end,
+        seedStart: seedSegment.start,
+        seedEnd: seedSegment.end,
       };
     }
+  }
+
+  // Open chains and lone segments: lines only (arcs need a closed loop).
+  if (entity.type !== "line") {
+    return null;
+  }
+  if (
+    Math.hypot(entity.end.x - entity.start.x, entity.end.y - entity.start.y) <=
+    TOLERANCE.coincidence
+  ) {
+    return null;
   }
 
   const chain = walkOpenLineChain(sketch, entity);
@@ -93,55 +106,39 @@ export function resolveOffsetSource(
   };
 }
 
-function orderedLoopVertices(
-  sketch: Sketch,
-  entityIds: readonly EntityId[],
-): Point2D[] | null {
-  const lines = entityIds
-    .map((id) => sketch.geometry.find((g) => g.id === id))
-    .filter((g): g is LineGeometry => g !== undefined && g.type === "line");
-  if (lines.length < 3 || lines.length !== entityIds.length) {
-    // Arc/circle mixed loops are not offset as polylines yet.
-    return null;
-  }
-
-  const remaining = new Map(lines.map((line) => [line.id, line]));
-  const first = lines[0]!;
-  remaining.delete(first.id);
-  const vertices: Point2D[] = [first.start, first.end];
-  let tip = first.end;
-
-  while (remaining.size > 0) {
-    let nextId: EntityId | null = null;
-    let nextPoint: Point2D | null = null;
-    for (const [id, line] of remaining) {
-      if (pointsApproximatelyEqual(line.start, tip, TOLERANCE.coincidence)) {
-        nextId = id;
-        nextPoint = line.end;
-        break;
-      }
-      if (pointsApproximatelyEqual(line.end, tip, TOLERANCE.coincidence)) {
-        nextId = id;
-        nextPoint = line.start;
-        break;
-      }
-    }
-    if (nextId === null || nextPoint === null) {
+function seedSegmentForEntity(
+  entity: Extract<
+    Sketch["geometry"][number],
+    { type: "line" } | { type: "arc" }
+  >,
+): { readonly start: Point2D; readonly end: Point2D } | null {
+  if (entity.type === "line") {
+    if (
+      Math.hypot(entity.end.x - entity.start.x, entity.end.y - entity.start.y) <=
+      TOLERANCE.coincidence
+    ) {
       return null;
     }
-    remaining.delete(nextId);
-    if (remaining.size === 0) {
-      // Closing edge — tip should meet first vertex; do not duplicate.
-      if (!pointsApproximatelyEqual(nextPoint, vertices[0]!, TOLERANCE.coincidence)) {
-        return null;
-      }
-      break;
-    }
-    vertices.push(nextPoint);
-    tip = nextPoint;
+    return { start: entity.start, end: entity.end };
   }
-
-  return vertices.length >= 3 ? vertices : null;
+  if (!(entity.radius > TOLERANCE.coincidence)) {
+    return null;
+  }
+  // Chord of the arc for signed-distance side (same as a short tangent proxy).
+  const start = pointOnCircle(entity.center, entity.radius, entity.startAngle);
+  const end = pointOnCircle(entity.center, entity.radius, entity.endAngle);
+  if (
+    Math.hypot(end.x - start.x, end.y - start.y) <= TOLERANCE.coincidence
+  ) {
+    // Near-full circle chord collapses — use a short tangent at startAngle.
+    const tx = -Math.sin(entity.startAngle);
+    const ty = Math.cos(entity.startAngle);
+    return {
+      start,
+      end: { x: start.x + tx, y: start.y + ty },
+    };
+  }
+  return { start, end };
 }
 
 function walkOpenLineChain(

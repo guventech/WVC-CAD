@@ -4,9 +4,11 @@ import {
   DATUM_AXIS_X_ID,
   DATUM_AXIS_Y_ID,
   DATUM_ORIGIN_ID,
+  DEFAULT_SKETCH_PLANE,
   createDefaultSketchFrame,
   datumDisplayName,
   isDatumId,
+  isDefaultSketchPlane,
   listDatumIds,
   resolveFrameAxisLine,
   resolveFrameOrigin,
@@ -21,6 +23,8 @@ describe("SketchFrame", () => {
       DATUM_AXIS_X_ID,
       DATUM_AXIS_Y_ID,
     ]);
+    expect(isDefaultSketchPlane(sketch.frame.plane)).toBe(true);
+    expect(sketch.frame.plane).toEqual(DEFAULT_SKETCH_PLANE);
     expect(sketch.geometry).toEqual([]);
   });
 

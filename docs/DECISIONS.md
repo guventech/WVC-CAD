@@ -833,15 +833,17 @@ Status:
 
 ## ADR-053 — Sketch → 3D feature contract via ProfileAnalyzer only
 
-Date: 2026-10-10
+Date: 2026-10-10  
+Updated: 2026-10-12
 
 Decision:
 1. Future Pad/Pocket/Revolve modules consume **`analyzeProfiles(sketch)`** (and optionally `isReadyForPad`) as the only geometry bridge from the sketcher. No React types, no canvas paths, no ad-hoc loop tracing in the 3D layer.
 2. Invariants: units mm; construction excluded from solid loops; at most one outer loop per solid profile set with holes nested via `parentLoopId`; areas in mm².
-3. Diagnostics may show “Ready for pad” when `isReadyForPad` is true; that label is advisory UI over the same domain gate.
+3. `isReadyForPad` is a **topology** gate only (one outer solid loop, no open solid wire, no self-intersections, no non-manifold junctions). It does **not** require DOF = 0.
+4. Diagnostics `summary.readyForPad` and the “Ready for pad” finding mirror `isReadyForPad`. Solver status (`under-constrained` / `over-constrained` / …) stays separate in `solverResult` — Pad must not treat topology readiness as a solve verdict.
 
 Reason:
-Keeps 3D features independent of the sketcher UI and prevents duplicate topology math.
+Keeps 3D features independent of the sketcher UI and prevents duplicate topology math. Mixing solver failure into the pad label previously diverged from the finding and from this ADR.
 
 Status:
 **Accepted.**
@@ -937,6 +939,24 @@ Decision:
 2. Autosave envelope v2 records `lastWriterInstanceId` (per-tab session id); v1 envelopes still parse (writer id → `unknown`). Warn in the recovery dialog when another instance wrote the slot.
 3. Tauri uses `getCurrentWindow().onCloseRequested` to flush autosave and confirm on dirty close; web keeps `beforeunload`.
 4. Recovery payloads continue to go through `parseSketchDocument` (same hardening path as file open).
+
+Status:
+**Implemented.**
+
+---
+
+## ADR-060 — SketchPlane on frame (model-only, no 3D UI)
+
+Date: 2026-10-12
+
+Decision:
+1. `SketchFrame.plane: SketchPlane` records where the sketch sits in world 3D (`kind: "world-xy"`, origin, unit normal). Default is origin `(0,0,0)` and normal `+Z`.
+2. UI, camera, and solver remain strictly 2D. No 3D viewport, plane picker, or Pad feature in this change.
+3. Serialization keeps schema version **1**. `frame.plane` is written on save; omitted / legacy frames load as the default plane. Non-default planes are rejected until a host-plane feature exists.
+4. `FrameAxisTag` includes `"z"` as a reserved tag; default frames still expose only X/Y datums.
+
+Reason:
+Pre-3D handoff needs a stable place for plane identity without pretending a 3D product exists yet.
 
 Status:
 **Implemented.**

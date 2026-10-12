@@ -33,6 +33,40 @@ describe("SketchSerializer", () => {
     expect(parsed.document.schemaVersion).toBe(SKETCH_SCHEMA_VERSION);
     expect(parsed.document.units).toBe(SKETCH_UNITS);
     expect(parsed.document.metadata?.savedAt).toBe("2026-10-05T12:00:00.000Z");
+    expect(parsed.document.frame?.plane).toEqual(sketch.frame.plane);
+  });
+
+  it("loads legacy frames missing plane as world-xy default", () => {
+    const document = sketchToDocument(createEmptySketch());
+    const { plane: _omit, ...frameWithoutPlane } = document.frame!;
+    const legacy = { ...document, frame: frameWithoutPlane };
+    const parsed = parseSketchJson(JSON.stringify(legacy));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(parsed.sketch.frame.plane).toEqual(createEmptySketch().frame.plane);
+  });
+
+  it("rejects non-default sketch planes without bumping schema", () => {
+    const document = sketchToDocument(createEmptySketch());
+    const bad = {
+      ...document,
+      frame: {
+        ...document.frame!,
+        plane: {
+          kind: "world-xy",
+          origin: { x: 0, y: 0, z: 10 },
+          normal: { x: 0, y: 0, z: 1 },
+        },
+      },
+    };
+    const parsed = parseSketchJson(JSON.stringify(bad));
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) {
+      return;
+    }
+    expect(parsed.reason).toMatch(/world-xy plane/i);
   });
 
   it("round-trips geometry and constraints with equivalent solver status", () => {
