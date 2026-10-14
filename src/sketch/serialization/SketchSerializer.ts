@@ -322,6 +322,24 @@ function cloneConstraint(constraint: Constraint): Constraint {
           },
         }
       : {}),
+    ...(constraint.annotation !== undefined
+      ? { annotation: cloneAnnotation(constraint.annotation) }
+      : {}),
+  };
+}
+
+function cloneAnnotation(
+  annotation: NonNullable<Constraint["annotation"]>,
+): NonNullable<Constraint["annotation"]> {
+  return {
+    ...(annotation.labelOffset !== undefined
+      ? {
+          labelOffset: {
+            x: annotation.labelOffset.x,
+            y: annotation.labelOffset.y,
+          },
+        }
+      : {}),
   };
 }
 
@@ -619,6 +637,18 @@ function parseConstraint(
     };
   }
 
+  let annotation: Constraint["annotation"] | undefined;
+  if (raw.annotation !== undefined) {
+    const parsedAnnotation = parseConstraintAnnotation(
+      raw.annotation,
+      index,
+    );
+    if (!parsedAnnotation.ok) {
+      return parsedAnnotation;
+    }
+    annotation = parsedAnnotation.annotation;
+  }
+
   const constraint: Constraint = {
     id: raw.id,
     type: raw.type as ConstraintType,
@@ -626,9 +656,51 @@ function parseConstraint(
     ...(value !== undefined ? { value } : {}),
     ...(driving !== undefined ? { driving } : {}),
     ...(locked !== undefined ? { locked } : {}),
+    ...(annotation !== undefined ? { annotation } : {}),
   };
 
   return { ok: true, constraint };
+}
+
+function parseConstraintAnnotation(
+  raw: unknown,
+  index: number,
+):
+  | { ok: true; annotation: NonNullable<Constraint["annotation"]> }
+  | { ok: false; reason: string } {
+  if (!isRecord(raw)) {
+    return {
+      ok: false,
+      reason: `constraints[${index}].annotation must be an object when present.`,
+    };
+  }
+  if (raw.labelOffset === undefined) {
+    return { ok: true, annotation: {} };
+  }
+  if (!isRecord(raw.labelOffset)) {
+    return {
+      ok: false,
+      reason: `constraints[${index}].annotation.labelOffset must be an object.`,
+    };
+  }
+  const x = parseFiniteNumber(
+    raw.labelOffset.x,
+    `constraints[${index}].annotation.labelOffset.x`,
+  );
+  if (!x.ok) {
+    return x;
+  }
+  const y = parseFiniteNumber(
+    raw.labelOffset.y,
+    `constraints[${index}].annotation.labelOffset.y`,
+  );
+  if (!y.ok) {
+    return y;
+  }
+  return {
+    ok: true,
+    annotation: { labelOffset: { x: x.value, y: y.value } },
+  };
 }
 
 function parseSettings(

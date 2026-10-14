@@ -39,6 +39,8 @@ export interface ViewportRenderOptions {
   readonly geometry?: readonly Geometry[];
   /** Sketch whose constraints are annotated (H/V glyphs, dimension labels). */
   readonly annotationSketch?: Sketch | null;
+  /** Live dimension-label drag overrides (world-mm). */
+  readonly labelOffsetOverrides?: ReadonlyMap<string, Point2D>;
   /** World datum frame; defaults to annotationSketch.frame or the default frame. */
   readonly frame?: SketchFrame;
   /** Free handles for under-constrained visualization (Chunk 17). */
@@ -66,6 +68,7 @@ export function renderViewport(
     gridVisible,
     geometry = [],
     annotationSketch = null,
+    labelOffsetOverrides,
     frame,
     freeHandles = [],
     fullyConstrainedIds,
@@ -109,7 +112,9 @@ export function renderViewport(
   }
 
   if (annotationSketch !== null && annotationSketch.constraints.length > 0) {
-    drawConstraintAnnotations(ctx, camera, annotationSketch);
+    drawConstraintAnnotations(ctx, camera, annotationSketch, {
+      labelOffsetOverrides,
+    });
   }
 
   if (previewLine !== null) {

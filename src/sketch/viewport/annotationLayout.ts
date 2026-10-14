@@ -50,14 +50,21 @@ type PreferredAnnotation = {
   readonly dimension: boolean;
 };
 
+export type AnnotationLayoutOptions = {
+  /** Live drag overrides (world-mm offsets from each dimension anchor). */
+  readonly labelOffsetOverrides?: ReadonlyMap<ConstraintId, Point2D>;
+};
+
 /**
  * Compute non-overlapping screen positions for constraint glyphs and dimension
  * labels. Shared by drawing and hit-testing so both stay in sync.
+ * Manual `annotation.labelOffset` (or an override) pins the label and skips stacking.
  */
 export function layoutConstraintAnnotations(
   sketch: Sketch,
   camera: Camera,
   measureTextWidth: (text: string) => number,
+  options?: AnnotationLayoutOptions,
 ): readonly PlacedAnnotation[] {
   const preferred: PreferredAnnotation[] = [];
   for (const constraint of sketch.constraints) {
@@ -79,18 +86,33 @@ export function layoutConstraintAnnotations(
   for (const item of preferred) {
     const width = measureTextWidth(item.text) + 6;
     const height = LABEL_HEIGHT_PX;
-    const base = worldToScreen(item.anchor, camera);
-    const preferredScreen = {
-      x: base.x + item.offset.x * LABEL_OFFSET_PX,
-      y: base.y + item.offset.y * LABEL_OFFSET_PX,
-    };
-    const screen = findFreeScreenPosition(
-      preferredScreen,
-      width,
-      height,
-      item.offset,
-      placed,
-    );
+    const manualOffset =
+      options?.labelOffsetOverrides?.get(item.constraintId) ??
+      sketch.constraints.find((c) => c.id === item.constraintId)?.annotation
+        ?.labelOffset;
+    let screen: Point2D;
+    if (manualOffset !== undefined) {
+      screen = worldToScreen(
+        {
+          x: item.anchor.x + manualOffset.x,
+          y: item.anchor.y + manualOffset.y,
+        },
+        camera,
+      );
+    } else {
+      const base = worldToScreen(item.anchor, camera);
+      const preferredScreen = {
+        x: base.x + item.offset.x * LABEL_OFFSET_PX,
+        y: base.y + item.offset.y * LABEL_OFFSET_PX,
+      };
+      screen = findFreeScreenPosition(
+        preferredScreen,
+        width,
+        height,
+        item.offset,
+        placed,
+      );
+    }
     placed.push({
       constraintId: item.constraintId,
       text: item.text,
@@ -102,6 +124,18 @@ export function layoutConstraintAnnotations(
     });
   }
   return placed;
+}
+
+/** World anchor used for dimension label placement (before offset / stacking). */
+export function dimensionLabelAnchor(
+  sketch: Sketch,
+  constraintId: ConstraintId,
+): Point2D | null {
+  const constraint = sketch.constraints.find((item) => item.id === constraintId);
+  if (constraint === undefined) {
+    return null;
+  }
+  return dimensionAnchor(sketch, constraint);
 }
 
 function findFreeScreenPosition(

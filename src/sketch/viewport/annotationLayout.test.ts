@@ -8,8 +8,11 @@ import { createAddRectangleCommand } from "../commands/CreateRectangleCommand.ts
 import { resetEntityIdCounter } from "../model/EntityId.ts";
 import { parseRectangleFeature } from "../model/RectangleFeature.ts";
 import { createEmptySketch, type Sketch } from "../model/Sketch.ts";
-import { createCamera } from "./Camera.ts";
-import { layoutConstraintAnnotations } from "./annotationLayout.ts";
+import { createCamera, worldToScreen } from "./Camera.ts";
+import {
+  dimensionLabelAnchor,
+  layoutConstraintAnnotations,
+} from "./annotationLayout.ts";
 
 function measure(text: string): number {
   return text.length * 6;
@@ -160,5 +163,40 @@ describe("annotationLayout anti-overlap", () => {
         ).toBe(false);
       }
     }
+  });
+
+  it("pins a dimension label when annotation.labelOffset is set", () => {
+    let sketch = createAddRectangleCommand({ x: 0, y: 0 }, { x: 80, y: 40 })!.apply(
+      createEmptySketch(),
+    );
+    const rect = parseRectangleFeature(
+      sketch.constraints.find((c) => c.type === "rectangle")!,
+    )!;
+    sketch = addDim(sketch, "length", [
+      { entityId: rect.edges.bottom, role: "entity" },
+    ]);
+    const length = sketch.constraints.find((c) => c.type === "length")!;
+    const anchor = dimensionLabelAnchor(sketch, length.id)!;
+    sketch = {
+      ...sketch,
+      constraints: sketch.constraints.map((constraint) =>
+        constraint.id === length.id
+          ? {
+              ...constraint,
+              annotation: { labelOffset: { x: 12, y: -7 } },
+            }
+          : constraint,
+      ),
+    };
+    const camera = createCamera(800, 600, 4);
+    const placed = layoutConstraintAnnotations(sketch, camera, measure).find(
+      (item) => item.constraintId === length.id,
+    )!;
+    const expected = worldToScreen(
+      { x: anchor.x + 12, y: anchor.y - 7 },
+      camera,
+    );
+    expect(placed.screenX).toBeCloseTo(expected.x, 6);
+    expect(placed.screenY).toBeCloseTo(expected.y, 6);
   });
 });

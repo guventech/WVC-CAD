@@ -100,6 +100,7 @@ export default function App() {
     handleChamfer,
     handleEditDimension,
     handleCommitDimensionText,
+    handleCommitDimensionAnnotation,
     dismissConstraintConflict,
     handleDimensionParseError,
   } = useSketchDocument({
@@ -425,6 +426,7 @@ export default function App() {
           activeTool={activeTool}
           onSelectionChange={setSelection}
           onCommitDimensionText={handleCommitDimensionText}
+          onCommitDimensionAnnotation={handleCommitDimensionAnnotation}
           onCreatePoint={handleCreatePoint}
           onCreateLine={handleCreateLine}
           onCreateRectangle={handleCreateRectangle}

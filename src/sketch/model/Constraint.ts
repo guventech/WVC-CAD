@@ -71,6 +71,17 @@ export interface ConstraintReference {
 }
 
 /**
+ * Presentation-only annotation placement (does not affect the solver).
+ * `labelOffset` is a world-mm offset from the dimension's layout anchor.
+ */
+export interface ConstraintAnnotation {
+  readonly labelOffset?: {
+    readonly x: number;
+    readonly y: number;
+  };
+}
+
+/**
  * Parametric constraint record.
  * Geometric/feature constraints omit `value` (except feature radius/length).
  * Dimensional constraints carry `value` (mm, or radians for `angle`) and
@@ -91,6 +102,8 @@ export interface Constraint {
     readonly endY?: number;
     readonly radius?: number;
   };
+  /** Optional view placement for dimension labels (ignored by residuals). */
+  readonly annotation?: ConstraintAnnotation;
 }
 
 export function isDimensionalConstraintType(

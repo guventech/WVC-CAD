@@ -227,6 +227,8 @@ Failed add/edit operations leave the sketch unchanged and return a `ConstraintCo
 
 Driving dimension values edit from the Constraints panel or by double-clicking a canvas label (Select tool). `parseDimensionInput` accepts `75` / `75 mm` and `90` / `90°` / `rad`; model units stay mm / radians. Invalid input and solver conflicts are rejected without mutating the sketch.
 
+**Label reposition (ADR-062):** Select-tool drag on a dimension label stores presentation-only `annotation.labelOffset` (world mm from the layout anchor) via `SetDimensionAnnotationCommand`. Residuals ignore it; missing `annotation` on load keeps auto layout (schema v1, no bump).
+
 ## Trim and extend (Chunk 19 / ADR-026)
 
 `Intersections.ts` provides line–line math. **Trim** removes the clicked interval of a line between cutters (other lines or world axes): end intervals keep the entity id; middle intervals split into two new lines and drop constraints that referenced the original. **Extend** grows the nearer endpoint to the nearest valid cutter along the ray. Rectangle feature edges are blocked. Ops run through undoable commands and `maintainConstraints` (reject on failure). Circles/arcs as trim/extend targets and break/split remain later work. Fillet/chamfer are Chunk 21.

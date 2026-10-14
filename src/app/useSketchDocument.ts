@@ -33,6 +33,7 @@ import {
   type DimensionEdit,
   type EditDimensionOutcome,
 } from "../sketch/commands/EditDimensionCommand.ts";
+import { createSetDimensionAnnotationCommand } from "../sketch/commands/SetDimensionAnnotationCommand.ts";
 import { parseDimensionInput } from "../sketch/constraints/DimensionInput.ts";
 import { isSupportedDimensionType } from "../sketch/constraints/Dimensions.ts";
 import type { GeometryDragTarget } from "../sketch/commands/GeometryDrag.ts";
@@ -626,6 +627,28 @@ export function useSketchDocument({
     [],
   );
 
+  const handleCommitDimensionAnnotation = useCallback(
+    (constraintId: string, labelOffset: Point2D) => {
+      setDocumentState((current) => {
+        const outcome = createSetDimensionAnnotationCommand(
+          current.sketch,
+          constraintId,
+          labelOffset,
+        );
+        if (!outcome.ok) {
+          return current;
+        }
+        const result = executeCommand(
+          current.history,
+          current.sketch,
+          outcome.command,
+        );
+        return { sketch: result.sketch, history: result.history };
+      });
+    },
+    [],
+  );
+
   return {
     sketch,
     history,
@@ -664,6 +687,7 @@ export function useSketchDocument({
     handleChamfer,
     handleEditDimension,
     handleCommitDimensionText,
+    handleCommitDimensionAnnotation,
     dismissConstraintConflict,
     handleDimensionParseError,
   };

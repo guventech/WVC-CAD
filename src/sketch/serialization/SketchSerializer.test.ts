@@ -69,6 +69,48 @@ describe("SketchSerializer", () => {
     expect(parsed.reason).toMatch(/world-xy plane/i);
   });
 
+  it("round-trips dimension annotation.labelOffset without a schema bump", () => {
+    resetEntityIdCounter();
+    let sketch = createAddRectangleCommand({ x: 0, y: 0 }, { x: 80, y: 40 })!.apply(
+      createEmptySketch(),
+    );
+    const feature = sketch.constraints
+      .map(parseRectangleFeature)
+      .find((item) => item !== null)!;
+    const length = createAddMaintainedConstraintCommand(sketch, {
+      type: "length",
+      references: [{ entityId: feature.edges.bottom, role: "entity" }],
+      value: 80,
+      driving: true,
+    });
+    expect(length.ok).toBe(true);
+    if (!length.ok) {
+      return;
+    }
+    sketch = length.command.apply(sketch);
+    const lengthId = sketch.constraints.find((c) => c.type === "length")!.id;
+    sketch = {
+      ...sketch,
+      constraints: sketch.constraints.map((constraint) =>
+        constraint.id === lengthId
+          ? {
+              ...constraint,
+              annotation: { labelOffset: { x: 4.5, y: -11 } },
+            }
+          : constraint,
+      ),
+    };
+    const parsed = parseSketchJson(serializeSketchToJson(sketch));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(
+      parsed.sketch.constraints.find((c) => c.id === lengthId)?.annotation
+        ?.labelOffset,
+    ).toEqual({ x: 4.5, y: -11 });
+  });
+
   it("round-trips geometry and constraints with equivalent solver status", () => {
     resetEntityIdCounter();
     let sketch = createAddRectangleCommand({ x: 0, y: 0 }, { x: 100, y: 50 })!.apply(

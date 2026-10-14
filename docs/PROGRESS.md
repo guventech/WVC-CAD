@@ -37,7 +37,9 @@
 
 ## Current
 
-**`v0.1.0-alpha.4` (2026-10-12).** Pre-3D R1–R3 + chamfer topology residuals (ADR-061) + TR/BL outer-bevel fix. Tag triggers Windows NSIS (unsigned).
+**Dimension label drag + Weekly rename (2026-10-14).** Select-tool drag repositions dimension labels via presentation-only `annotation.labelOffset` (ADR-062, schema v1, undoable). README tagline: **Weekly** Vibe-Coded CAD.
+
+**`v0.1.0-alpha.4` (2026-10-12).** Pre-3D R1–R3 + chamfer topology residuals (ADR-061) + TR/BL outer-bevel fix. Tag triggers Windows NSIS (unsigned). Release asset confirmed on GitHub Releases.
 
 **Chamfer topology residuals (ADR-061, 2026-10-12).** Chamfer features contribute on-parent + along-line glue residuals (parity with fillet); create no longer adds blend coincidents; `settleLoadedSketch` strips legacy blend coincidents. Fully located D20 chamfered rectangle DOF=0 regression added. Proximity pairing keeps top-right / bottom-left chamfers inside the profile.
 

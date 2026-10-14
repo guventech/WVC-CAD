@@ -4,6 +4,11 @@ All notable user-visible changes to WVC-CAD are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Drag placed dimension labels to reposition them (presentation-only `annotation.labelOffset`; undoable)
+- Product tagline: **Weekly** Vibe-Coded CAD (was Weekend)
+
 ## [0.1.0-alpha.4] — 2026-10-12
 
 Pre-3D handoff + chamfer topology since `v0.1.0-alpha.3`.

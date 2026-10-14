@@ -3,7 +3,10 @@ import type { ConstraintId } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { worldToScreen } from "./Camera.ts";
-import { layoutConstraintAnnotations } from "./annotationLayout.ts";
+import {
+  layoutConstraintAnnotations,
+  type AnnotationLayoutOptions,
+} from "./annotationLayout.ts";
 
 const HIT_PADDING_PX = 8;
 
@@ -21,9 +24,15 @@ export function hitTestDimensionLabel(
   worldPoint: Point2D,
   camera: Camera,
   measureTextWidth: (text: string) => number,
+  layoutOptions?: AnnotationLayoutOptions,
 ): DimensionLabelHit | null {
   const screenCursor = worldToScreen(worldPoint, camera);
-  const placed = layoutConstraintAnnotations(sketch, camera, measureTextWidth);
+  const placed = layoutConstraintAnnotations(
+    sketch,
+    camera,
+    measureTextWidth,
+    layoutOptions,
+  );
   let best: DimensionLabelHit | null = null;
   let bestDist = Number.POSITIVE_INFINITY;
 

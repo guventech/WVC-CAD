@@ -1,6 +1,9 @@
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
-import { layoutConstraintAnnotations } from "./annotationLayout.ts";
+import {
+  layoutConstraintAnnotations,
+  type AnnotationLayoutOptions,
+} from "./annotationLayout.ts";
 import { drawDimensionLeaders } from "./drawDimensionLeaders.ts";
 import { VIEWPORT_COLORS } from "./viewportColors.ts";
 
@@ -13,6 +16,7 @@ export function drawConstraintAnnotations(
   ctx: CanvasRenderingContext2D,
   camera: Camera,
   sketch: Sketch,
+  layoutOptions?: AnnotationLayoutOptions,
 ): void {
   drawDimensionLeaders(ctx, camera, sketch);
 
@@ -21,8 +25,11 @@ export function drawConstraintAnnotations(
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  const placed = layoutConstraintAnnotations(sketch, camera, (text) =>
-    ctx.measureText(text).width,
+  const placed = layoutConstraintAnnotations(
+    sketch,
+    camera,
+    (text) => ctx.measureText(text).width,
+    layoutOptions,
   );
 
   for (const label of placed) {

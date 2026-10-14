@@ -977,3 +977,20 @@ Fillet already owned connectivity in the feature residual vector; chamfer's coin
 
 Status:
 **Implemented.**
+
+---
+
+## ADR-062 — Movable dimension label offsets (presentation only)
+
+Date: 2026-10-14
+
+Decision:
+1. Dimensional constraints may store optional `annotation.labelOffset` (world mm from the layout anchor). Residuals and the solver ignore it.
+2. Select-tool drag on a dimension label commits via `SetDimensionAnnotationCommand` (undoable). Auto anti-overlap stacking is skipped when an offset is set.
+3. Schema version stays **1**; missing `annotation` loads as auto layout (same optional-field pattern as `frame.plane`).
+
+Reason:
+CAD users expect to park dimension text after placing a driving value without changing geometry.
+
+Status:
+**Implemented.**

@@ -37,7 +37,11 @@ import { toolHint } from "../../sketch/tools/ToolTypes.ts";
 import type { TrimExtendRequest } from "../../sketch/tools/TrimExtendTool.ts";
 import type { MirrorRequest } from "../../sketch/tools/MirrorTool.ts";
 import type { FilletChamferRequest } from "../../sketch/tools/FilletChamferTool.ts";
-import { panCamera, screenToWorld } from "../../sketch/viewport/Camera.ts";
+import {
+  panCamera,
+  screenToWorld,
+} from "../../sketch/viewport/Camera.ts";
+import { dimensionLabelAnchor } from "../../sketch/viewport/annotationLayout.ts";
 import { hitTestDimensionLabel } from "../../sketch/viewport/dimensionHitTest.ts";
 import { chooseGridSpacing } from "../../sketch/viewport/Grid.ts";
 import { renderViewport } from "../../sketch/viewport/renderViewport.ts";
@@ -135,6 +139,11 @@ type SketchCanvasProps = {
   readonly onChamfer: (request: FilletChamferRequest) => void;
   /** Commit canvas dimension edit text (parsed/validated by App). */
   readonly onCommitDimensionText?: (constraintId: string, text: string) => void;
+  /** Commit a dragged dimension label offset (world mm; presentation only). */
+  readonly onCommitDimensionAnnotation?: (
+    constraintId: string,
+    labelOffset: Point2D,
+  ) => void;
   readonly onCommitPointMove: (
     target: GeometryDragTarget,
     from: Point2D,
@@ -204,6 +213,7 @@ export const SketchCanvas = memo(function SketchCanvas({
   onFillet,
   onChamfer,
   onCommitDimensionText,
+  onCommitDimensionAnnotation,
   onCommitPointMove,
   onCursorWorldChange,
   onSnapChange,
@@ -222,8 +232,18 @@ export const SketchCanvas = memo(function SketchCanvas({
   const lastPolygonNudgeSeqRef = useRef(0);
   const lastCursorWorldRef = useRef<Point2D | null>(null);
   const dragRef = useRef<PointDragState | null>(null);
+  const annotationDragRef = useRef<{
+    readonly constraintId: string;
+    readonly startWorld: Point2D;
+    readonly startOffset: Point2D;
+    readonly currentOffset: Point2D;
+  } | null>(null);
   const [isDraggingPoint, setIsDraggingPoint] = useState(false);
   const [dragPreview, setDragPreview] = useState<PointDragState | null>(null);
+  const [annotationDragPreview, setAnnotationDragPreview] = useState<{
+    readonly constraintId: string;
+    readonly offset: Point2D;
+  } | null>(null);
   const [dimensionEdit, setDimensionEdit] = useState<{
     readonly constraintId: string;
     readonly left: number;
@@ -305,6 +325,21 @@ export const SketchCanvas = memo(function SketchCanvas({
     applyToolResult(result, toolCallbacks, toolLocal);
   };
 
+  const clearAnnotationDrag = (commit: boolean) => {
+    const drag = annotationDragRef.current;
+    annotationDragRef.current = null;
+    setAnnotationDragPreview(null);
+    if (
+      commit &&
+      drag !== null &&
+      onCommitDimensionAnnotation !== undefined &&
+      (Math.abs(drag.currentOffset.x - drag.startOffset.x) > 1e-9 ||
+        Math.abs(drag.currentOffset.y - drag.startOffset.y) > 1e-9)
+    ) {
+      onCommitDimensionAnnotation(drag.constraintId, drag.currentOffset);
+    }
+  };
+
   const clearPointDrag = () => {
     if (dragRef.current === null && !isDraggingPoint) {
       return;
@@ -317,7 +352,7 @@ export const SketchCanvas = memo(function SketchCanvas({
 
   // Escape / tool change must discard in-progress select drag without committing.
   useEffect(() => {
-    if (!isDraggingPoint) {
+    if (!isDraggingPoint && annotationDragPreview === null) {
       return;
     }
     const onKeyDown = (event: KeyboardEvent) => {
@@ -327,14 +362,16 @@ export const SketchCanvas = memo(function SketchCanvas({
       event.preventDefault();
       event.stopImmediatePropagation();
       clearPointDrag();
+      clearAnnotationDrag(false);
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- clearPointDrag reads latest drag refs
-  }, [isDraggingPoint]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clear* reads latest drag refs
+  }, [isDraggingPoint, annotationDragPreview]);
 
   useEffect(() => {
     clearPointDrag();
+    clearAnnotationDrag(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- abort drag when leaving Select or switching tools
   }, [activeTool]);
 
@@ -468,12 +505,22 @@ export const SketchCanvas = memo(function SketchCanvas({
 
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     const showPreview = isCreationTool(activeTool) || isDraggingPoint;
+    const labelOffsetOverrides =
+      annotationDragPreview === null
+        ? undefined
+        : new Map([
+            [
+              annotationDragPreview.constraintId,
+              annotationDragPreview.offset,
+            ],
+          ]);
     renderViewport(context, {
       camera,
       viewport: size,
       gridVisible: sketch.settings.gridVisible,
       geometry: displaySketch.geometry,
       annotationSketch: displaySketch,
+      labelOffsetOverrides,
       freeHandles: underConstrained.freeHandles,
       fullyConstrainedIds: underConstrained.fullyConstrainedEntityIds,
       selection,
@@ -505,6 +552,7 @@ export const SketchCanvas = memo(function SketchCanvas({
   }, [
     activeSnap,
     activeTool,
+    annotationDragPreview,
     camera,
     displaySketch,
     isDraggingPoint,
@@ -570,6 +618,58 @@ export const SketchCanvas = memo(function SketchCanvas({
             return;
           }
 
+          // Dimension label drag (Select only) takes priority over geometry drag.
+          if (
+            activeTool === "select" &&
+            onCommitDimensionAnnotation !== undefined &&
+            !event.shiftKey &&
+            !event.ctrlKey &&
+            !event.metaKey
+          ) {
+            const canvas = event.currentTarget;
+            const ctx2d = canvas.getContext("2d");
+            if (ctx2d !== null) {
+              ctx2d.font = "11px system-ui, sans-serif";
+              const context = pointerContext(event);
+              const hit = hitTestDimensionLabel(
+                sketch,
+                context.worldPoint,
+                camera,
+                (text) => ctx2d.measureText(text).width,
+              );
+              if (hit !== null) {
+                const anchor = dimensionLabelAnchor(sketch, hit.constraintId);
+                if (anchor !== null) {
+                  const constraint = sketch.constraints.find(
+                    (item) => item.id === hit.constraintId,
+                  );
+                  const labelWorld = screenToWorld(hit.screen, camera);
+                  const startOffset = constraint?.annotation?.labelOffset ?? {
+                    x: labelWorld.x - anchor.x,
+                    y: labelWorld.y - anchor.y,
+                  };
+                  const next = {
+                    constraintId: hit.constraintId,
+                    startWorld: context.worldPoint,
+                    startOffset,
+                    currentOffset: startOffset,
+                  };
+                  annotationDragRef.current = next;
+                  setAnnotationDragPreview({
+                    constraintId: hit.constraintId,
+                    offset: startOffset,
+                  });
+                  try {
+                    canvas.setPointerCapture(event.pointerId);
+                  } catch {
+                    // Synthetic or unsupported pointer ids can reject capture.
+                  }
+                  return;
+                }
+              }
+            }
+          }
+
           const result = dispatchToolPointerDown(
             activeTool,
             pointerContext(event),
@@ -598,6 +698,28 @@ export const SketchCanvas = memo(function SketchCanvas({
             return;
           }
 
+          const annotationDrag = annotationDragRef.current;
+          if (annotationDrag !== null) {
+            const worldPoint = pointerContext(event).worldPoint;
+            const currentOffset = {
+              x:
+                annotationDrag.startOffset.x +
+                (worldPoint.x - annotationDrag.startWorld.x),
+              y:
+                annotationDrag.startOffset.y +
+                (worldPoint.y - annotationDrag.startWorld.y),
+            };
+            annotationDragRef.current = {
+              ...annotationDrag,
+              currentOffset,
+            };
+            setAnnotationDragPreview({
+              constraintId: annotationDrag.constraintId,
+              offset: currentOffset,
+            });
+            return;
+          }
+
           // Once a point drag is active (pointer capture), keep updating even if
           // the browser omits buttons on some move events (seen in automation).
           const drag = dragRef.current;
@@ -616,7 +738,9 @@ export const SketchCanvas = memo(function SketchCanvas({
             setIsPanning(false);
           }
 
-          if (dragRef.current !== null) {
+          if (annotationDragRef.current !== null) {
+            clearAnnotationDrag(true);
+          } else if (dragRef.current !== null) {
             applyResult(dispatchToolPointerUp(dragRef.current));
           }
 
@@ -634,9 +758,14 @@ export const SketchCanvas = memo(function SketchCanvas({
             setIsPanning(false);
           }
           clearPointDrag();
+          clearAnnotationDrag(false);
         }}
         onPointerLeave={() => {
-          if (panRef.current !== null || dragRef.current !== null) {
+          if (
+            panRef.current !== null ||
+            dragRef.current !== null ||
+            annotationDragRef.current !== null
+          ) {
             return;
           }
           applyResult(
