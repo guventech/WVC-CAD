@@ -9,6 +9,7 @@ All notable user-visible changes to WVC-CAD are documented here.
 - Drag placed dimension labels to reposition them (presentation-only `annotation.labelOffset`; undoable)
 - Dimension drag moves label + leaders as a set; horizontal dims slide up/down, vertical left/right
 - Product tagline: **Weekly** Vibe-Coded CAD (was Weekend)
+- Private alpha guide ([docs/ALPHA.md](./docs/ALPHA.md)) + public-release checklist; `private/` gitignored for local strategy notes
 
 ## [0.1.0-alpha.4] — 2026-10-12
 

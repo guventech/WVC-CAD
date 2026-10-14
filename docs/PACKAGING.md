@@ -2,6 +2,14 @@
 
 Goal: ship WVC-CAD as a **Windows installer** (`.msi` / `.exe`) that runs well on modest PCs.
 
+## Alpha tester distribution
+
+For **private alpha** invites ([ALPHA.md](./ALPHA.md)):
+
+1. Prefer the latest GitHub Release NSIS asset from a `v*-alpha.*` tag (unsigned — document SmartScreen).
+2. Optionally share a static web build: `npm run build`, then serve or zip `dist/` (browser Save/Open; no Tauri dialogs).
+3. Do not require accounts or payments for testers.
+
 ## Decision: Tauri 2 (not Electron)
 
 | | Tauri 2 | Electron |

@@ -6,6 +6,8 @@ Living project docs for WVC-CAD.
 |------|------|
 | [PROGRESS.md](./PROGRESS.md) | Live checklist |
 | [ROADMAP.md](./ROADMAP.md) | Near-term public priorities |
+| [ALPHA.md](./ALPHA.md) | Private alpha invites / tester packaging |
+| [PUBLIC_RELEASE_CHECKLIST.md](./PUBLIC_RELEASE_CHECKLIST.md) | Before public beta |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Layers and edit pipeline |
 | [DECISIONS.md](./DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./TEST_PLAN.md) | Test coverage |

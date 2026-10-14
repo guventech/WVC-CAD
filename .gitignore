@@ -27,6 +27,11 @@ credentials.json
 **/secrets/
 **/secret/
 
+# Local-only strategy / brand notes — never publish (see private/README.md)
+# Ignore contents, not the directory itself, so README can be force-tracked.
+/private/*
+!/private/README.md
+
 # Local overrides / caches
 *.local
 .cache

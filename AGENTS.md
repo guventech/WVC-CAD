@@ -18,6 +18,8 @@
 
 **Out of scope unless the active task asks:** payments, accounts, cloud sync, analytics, or AI infrastructure. Keep the local sketching workflow independent of monetization.
 
+**Confidential strategy:** never commit business/brand strategy docs. Local notes belong under `private/` (gitignored except `private/README.md`). Do not paste confidential plans into public docs, Issues, or PRs. Near-term public priority: private alpha — [docs/ALPHA.md](./docs/ALPHA.md).
+
 # Architecture Preservation Rules
 
 Before implementing any new chunk:

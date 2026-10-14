@@ -100,6 +100,7 @@ Easy to find for alpha testers — also mirrored in [CHANGELOG.md](./CHANGELOG.m
 - ADR-052 residual **row** scaling is in; column scaling unused
 - Windows NSIS builds are **unsigned** (SmartScreen warning expected) until code signing is configured ([PACKAGING.md](./docs/PACKAGING.md))
 - Reporting a bug: use [GitHub Issues](https://github.com/guventech/WVC-CAD/issues/new/choose) — include steps, expected/actual, version, OS, and a `.sketch.json` when safe
+- **Private alpha:** invite workflow and packaging for testers — [docs/ALPHA.md](./docs/ALPHA.md)
 
 ## License
 
@@ -111,6 +112,8 @@ MIT — see [LICENSE](./LICENSE). Third-party notices: [THIRD_PARTY.md](./THIRD_
 |------|------|
 | [PROGRESS.md](./docs/PROGRESS.md) | Live checklist |
 | [ROADMAP.md](./docs/ROADMAP.md) | Near-term public priorities |
+| [ALPHA.md](./docs/ALPHA.md) | Private alpha invites / tester packaging |
+| [PUBLIC_RELEASE_CHECKLIST.md](./docs/PUBLIC_RELEASE_CHECKLIST.md) | Before public beta |
 | [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Layers and edit pipeline |
 | [DECISIONS.md](./docs/DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./docs/TEST_PLAN.md) | Test coverage |
