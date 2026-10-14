@@ -6,22 +6,33 @@ import {
 } from "../constraints/Dimensions.ts";
 import { pointOnCircle } from "../geometry/EntityFeatures.ts";
 import type { Point2D } from "../geometry/Point2D.ts";
-import type { Constraint } from "../model/Constraint.ts";
+import type { Constraint, ConstraintId } from "../model/Constraint.ts";
 import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { worldToScreen } from "./Camera.ts";
+import {
+  resolveDimensionAnnotationOffset,
+  unitPerpendicular,
+} from "./dimensionAnnotationOffset.ts";
 import { radialDimensionAngle } from "./radialDimensionAngle.ts";
 import { VIEWPORT_COLORS } from "./viewportColors.ts";
+
+export type DimensionLeaderOptions = {
+  /** Live drag overrides (world-mm offsets from each dimension anchor). */
+  readonly labelOffsetOverrides?: ReadonlyMap<ConstraintId, Point2D>;
+};
 
 /**
  * Draw simple CAD-like extension/arrow leaders for driving linear and radial dims.
  * View-only; does not affect the model.
+ * When a presentation `labelOffset` is set, leaders move with the label as a set.
  */
 export function drawDimensionLeaders(
   ctx: CanvasRenderingContext2D,
   camera: Camera,
   sketch: Sketch,
+  options?: DimensionLeaderOptions,
 ): void {
   ctx.save();
   ctx.strokeStyle = VIEWPORT_COLORS.dimension;
@@ -32,20 +43,39 @@ export function drawDimensionLeaders(
     if (!isDrivingConstraint(constraint)) {
       continue;
     }
+    const offset = resolveDimensionAnnotationOffset(
+      sketch,
+      constraint.id,
+      options?.labelOffsetOverrides,
+    );
     if (constraint.type === "length" || constraint.type === "distance") {
       const points = linearLeaderEndpoints(sketch, constraint);
       if (points !== null) {
-        drawLinearLeader(ctx, camera, points.a, points.b);
+        drawLinearLeader(ctx, camera, points.a, points.b, offset);
       }
     } else if (constraint.type === "horizontal-distance") {
       const points = linearLeaderEndpoints(sketch, constraint);
       if (points !== null) {
-        drawOrthogonalLeader(ctx, camera, points.a, points.b, "horizontal");
+        drawOrthogonalLeader(
+          ctx,
+          camera,
+          points.a,
+          points.b,
+          "horizontal",
+          offset,
+        );
       }
     } else if (constraint.type === "vertical-distance") {
       const points = linearLeaderEndpoints(sketch, constraint);
       if (points !== null) {
-        drawOrthogonalLeader(ctx, camera, points.a, points.b, "vertical");
+        drawOrthogonalLeader(
+          ctx,
+          camera,
+          points.a,
+          points.b,
+          "vertical",
+          offset,
+        );
       }
     } else if (constraint.type === "coordinate-x") {
       const point = resolveCoordinatePoint(sketch, constraint.references[0]);
@@ -56,6 +86,7 @@ export function drawDimensionLeaders(
           { x: 0, y: point.y },
           { x: point.x, y: point.y },
           "horizontal",
+          offset,
         );
       }
     } else if (constraint.type === "coordinate-y") {
@@ -67,10 +98,11 @@ export function drawDimensionLeaders(
           { x: point.x, y: 0 },
           { x: point.x, y: point.y },
           "vertical",
+          offset,
         );
       }
     } else if (constraint.type === "radius" || constraint.type === "diameter") {
-      drawRadialLeader(ctx, camera, sketch, constraint);
+      drawRadialLeader(ctx, camera, sketch, constraint, offset);
     }
   }
 
@@ -105,24 +137,26 @@ function drawLinearLeader(
   camera: Camera,
   a: Point2D,
   b: Point2D,
+  labelOffset: Point2D | undefined,
 ): void {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy);
-  if (!(len > 1e-9)) {
+  const normal = unitPerpendicular(a, b);
+  if (normal === null) {
     return;
   }
-  const offsetWorld = 4 / camera.scale;
-  const nx = (-dy / len) * offsetWorld;
-  const ny = (dx / len) * offsetWorld;
-  const a2 = { x: a.x + nx, y: a.y + ny };
-  const b2 = { x: b.x + nx, y: b.y + ny };
+  const defaultStandoff = 4 / camera.scale;
+  const signed =
+    labelOffset === undefined
+      ? defaultStandoff
+      : labelOffset.x * normal.x + labelOffset.y * normal.y;
+  const a2 = { x: a.x + normal.x * signed, y: a.y + normal.y * signed };
+  const b2 = { x: b.x + normal.x * signed, y: b.y + normal.y * signed };
   strokeLeader(ctx, camera, a, b, a2, b2);
 }
 
 /**
  * Horizontal / vertical distance leaders stay axis-aligned even when the
  * referenced points sit at different X and Y (e.g. filleted rectangle corners).
+ * `offsetWorld` is signed: positive is above / to the right of the outer base.
  */
 export function orthogonalLeaderGeometry(
   a: Point2D,
@@ -137,7 +171,7 @@ export function orthogonalLeaderGeometry(
 } {
   if (axis === "horizontal") {
     const yBase = Math.max(a.y, b.y);
-    const yDim = yBase + Math.abs(offsetWorld);
+    const yDim = yBase + offsetWorld;
     return {
       extA: a,
       extB: b,
@@ -146,7 +180,7 @@ export function orthogonalLeaderGeometry(
     };
   }
   const xBase = Math.max(a.x, b.x);
-  const xDim = xBase + Math.abs(offsetWorld);
+  const xDim = xBase + offsetWorld;
   return {
     extA: a,
     extB: b,
@@ -161,8 +195,15 @@ function drawOrthogonalLeader(
   a: Point2D,
   b: Point2D,
   axis: "horizontal" | "vertical",
+  labelOffset: Point2D | undefined,
 ): void {
-  const offsetWorld = 10 / camera.scale;
+  const defaultStandoff = 10 / camera.scale;
+  const offsetWorld =
+    labelOffset === undefined
+      ? defaultStandoff
+      : axis === "horizontal"
+        ? labelOffset.y
+        : labelOffset.x;
   const { dimA, dimB, extA, extB } = orthogonalLeaderGeometry(
     a,
     b,
@@ -209,6 +250,7 @@ function drawRadialLeader(
   camera: Camera,
   sketch: Sketch,
   constraint: Constraint,
+  labelOffset: Point2D | undefined,
 ): void {
   const entity = sketch.geometry.find(
     (item) => item.id === constraint.references[0]?.entityId,
@@ -216,7 +258,12 @@ function drawRadialLeader(
   if (entity?.type !== "circle" && entity?.type !== "arc") {
     return;
   }
-  const angle = radialDimensionAngle(entity, constraint.id);
+  let angle = radialDimensionAngle(entity, constraint.id);
+  if (labelOffset !== undefined) {
+    const rim = pointOnCircle(entity.center, entity.radius, angle);
+    const label = { x: rim.x + labelOffset.x, y: rim.y + labelOffset.y };
+    angle = Math.atan2(label.y - entity.center.y, label.x - entity.center.x);
+  }
   const rim = pointOnCircle(entity.center, entity.radius, angle);
   const rimScreen = worldToScreen(rim, camera);
   ctx.beginPath();

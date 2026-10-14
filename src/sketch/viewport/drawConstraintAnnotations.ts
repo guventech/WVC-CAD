@@ -18,7 +18,7 @@ export function drawConstraintAnnotations(
   sketch: Sketch,
   layoutOptions?: AnnotationLayoutOptions,
 ): void {
-  drawDimensionLeaders(ctx, camera, sketch);
+  drawDimensionLeaders(ctx, camera, sketch, layoutOptions);
 
   ctx.save();
   ctx.font = "11px system-ui, sans-serif";

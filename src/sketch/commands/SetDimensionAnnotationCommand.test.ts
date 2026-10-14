@@ -42,7 +42,8 @@ describe("SetDimensionAnnotationCommand", () => {
     const applied = move.command.apply(sketch);
     const updated = applied.constraints.find((c) => c.id === length.id)!;
     expect(updated.value).toBe(beforeValue);
-    expect(updated.annotation?.labelOffset).toEqual({ x: 5, y: -8 });
+    // Bottom edge is horizontal → only ±Y is kept.
+    expect(updated.annotation?.labelOffset).toEqual({ x: 0, y: -8 });
 
     const afterUndo = move.command.undo(applied);
     expect(

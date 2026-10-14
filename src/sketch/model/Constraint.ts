@@ -73,6 +73,8 @@ export interface ConstraintReference {
 /**
  * Presentation-only annotation placement (does not affect the solver).
  * `labelOffset` is a world-mm offset from the dimension's layout anchor.
+ * Linear dims store an axis-constrained offset (H → ±Y, V → ±X) so the
+ * label and leaders move together as a set.
  */
 export interface ConstraintAnnotation {
   readonly labelOffset?: {

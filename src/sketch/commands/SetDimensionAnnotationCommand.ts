@@ -2,6 +2,7 @@ import type { Point2D } from "../geometry/Point2D.ts";
 import type { Constraint, ConstraintId } from "../model/Constraint.ts";
 import { isDimensionalConstraintType } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
+import { constrainDimensionAnnotationOffset } from "../viewport/dimensionAnnotationOffset.ts";
 import type { SketchCommand } from "./Command.ts";
 
 export type SetDimensionAnnotationOutcome =
@@ -9,7 +10,8 @@ export type SetDimensionAnnotationOutcome =
   | { readonly ok: false; readonly reason: string };
 
 /**
- * Move a dimension label in the view (presentation only — not a solver edit).
+ * Move a dimension annotation set in the view (presentation only — not a solver edit).
+ * Offset is axis-constrained (horizontal dims → ±Y, vertical → ±X).
  */
 export function createSetDimensionAnnotationCommand(
   sketch: Sketch,
@@ -25,9 +27,11 @@ export function createSetDimensionAnnotationCommand(
   }
 
   const before = constraint.annotation?.labelOffset
-    ? { ...constraint.annotation.labelOffset }
+    ? constrainDimensionAnnotationOffset(sketch, constraint, {
+        ...constraint.annotation.labelOffset,
+      })
     : undefined;
-  const after = { x: labelOffset.x, y: labelOffset.y };
+  const after = constrainDimensionAnnotationOffset(sketch, constraint, labelOffset);
   if (
     before !== undefined &&
     Math.abs(before.x - after.x) < 1e-12 &&

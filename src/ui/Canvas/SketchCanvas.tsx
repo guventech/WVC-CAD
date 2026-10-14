@@ -42,6 +42,7 @@ import {
   screenToWorld,
 } from "../../sketch/viewport/Camera.ts";
 import { dimensionLabelAnchor } from "../../sketch/viewport/annotationLayout.ts";
+import { constrainDimensionAnnotationOffset } from "../../sketch/viewport/dimensionAnnotationOffset.ts";
 import { hitTestDimensionLabel } from "../../sketch/viewport/dimensionHitTest.ts";
 import { chooseGridSpacing } from "../../sketch/viewport/Grid.ts";
 import { renderViewport } from "../../sketch/viewport/renderViewport.ts";
@@ -639,15 +640,20 @@ export const SketchCanvas = memo(function SketchCanvas({
               );
               if (hit !== null) {
                 const anchor = dimensionLabelAnchor(sketch, hit.constraintId);
-                if (anchor !== null) {
-                  const constraint = sketch.constraints.find(
-                    (item) => item.id === hit.constraintId,
-                  );
+                const constraint = sketch.constraints.find(
+                  (item) => item.id === hit.constraintId,
+                );
+                if (anchor !== null && constraint !== undefined) {
                   const labelWorld = screenToWorld(hit.screen, camera);
-                  const startOffset = constraint?.annotation?.labelOffset ?? {
+                  const rawStart = constraint.annotation?.labelOffset ?? {
                     x: labelWorld.x - anchor.x,
                     y: labelWorld.y - anchor.y,
                   };
+                  const startOffset = constrainDimensionAnnotationOffset(
+                    sketch,
+                    constraint,
+                    rawStart,
+                  );
                   const next = {
                     constraintId: hit.constraintId,
                     startWorld: context.worldPoint,
@@ -701,7 +707,7 @@ export const SketchCanvas = memo(function SketchCanvas({
           const annotationDrag = annotationDragRef.current;
           if (annotationDrag !== null) {
             const worldPoint = pointerContext(event).worldPoint;
-            const currentOffset = {
+            const rawOffset = {
               x:
                 annotationDrag.startOffset.x +
                 (worldPoint.x - annotationDrag.startWorld.x),
@@ -709,6 +715,17 @@ export const SketchCanvas = memo(function SketchCanvas({
                 annotationDrag.startOffset.y +
                 (worldPoint.y - annotationDrag.startWorld.y),
             };
+            const constraint = sketch.constraints.find(
+              (item) => item.id === annotationDrag.constraintId,
+            );
+            const currentOffset =
+              constraint === undefined
+                ? rawOffset
+                : constrainDimensionAnnotationOffset(
+                    sketch,
+                    constraint,
+                    rawOffset,
+                  );
             annotationDragRef.current = {
               ...annotationDrag,
               currentOffset,

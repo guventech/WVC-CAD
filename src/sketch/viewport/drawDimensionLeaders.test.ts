@@ -25,4 +25,16 @@ describe("orthogonalLeaderGeometry", () => {
     expect(geom.dimA.y).toBe(a.y);
     expect(geom.dimB.y).toBe(b.y);
   });
+
+  it("accepts a signed standoff so dragged dims can cross to the other side", () => {
+    const a = { x: 0, y: 0 };
+    const b = { x: 50, y: 10 };
+    const below = orthogonalLeaderGeometry(a, b, "horizontal", -12);
+    expect(below.dimA.y).toBe(Math.max(a.y, b.y) - 12);
+    expect(below.dimB.y).toBe(below.dimA.y);
+
+    const left = orthogonalLeaderGeometry(a, b, "vertical", -8);
+    expect(left.dimA.x).toBe(Math.max(a.x, b.x) - 8);
+    expect(left.dimB.x).toBe(left.dimA.x);
+  });
 });

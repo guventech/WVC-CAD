@@ -988,9 +988,11 @@ Decision:
 1. Dimensional constraints may store optional `annotation.labelOffset` (world mm from the layout anchor). Residuals and the solver ignore it.
 2. Select-tool drag on a dimension label commits via `SetDimensionAnnotationCommand` (undoable). Auto anti-overlap stacking is skipped when an offset is set.
 3. Schema version stays **1**; missing `annotation` loads as auto layout (same optional-field pattern as `frame.plane`).
+4. Offset is axis-constrained so the label and leaders move as one set: horizontal dims (incl. `coordinate-x`) along ±Y; vertical dims (incl. `coordinate-y`) along ±X; diagonal length/distance along the segment normal. Leaders read the same offset when drawing.
+5. Radius / diameter / angle stay free-2D for now (radial leaders follow the label angle when an offset is present).
 
 Reason:
-CAD users expect to park dimension text after placing a driving value without changing geometry.
+CAD users expect to park dimension text after placing a driving value without changing geometry, and to slide a linear dimension line parallel to itself (not freely in the plane).
 
 Status:
 **Implemented.**

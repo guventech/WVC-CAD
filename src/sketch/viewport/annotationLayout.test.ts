@@ -192,8 +192,9 @@ describe("annotationLayout anti-overlap", () => {
     const placed = layoutConstraintAnnotations(sketch, camera, measure).find(
       (item) => item.constraintId === length.id,
     )!;
+    // Horizontal length → axis-constrain drops X; leaders/label share ±Y.
     const expected = worldToScreen(
-      { x: anchor.x + 12, y: anchor.y - 7 },
+      { x: anchor.x, y: anchor.y - 7 },
       camera,
     );
     expect(placed.screenX).toBeCloseTo(expected.x, 6);

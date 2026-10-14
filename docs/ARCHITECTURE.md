@@ -227,7 +227,7 @@ Failed add/edit operations leave the sketch unchanged and return a `ConstraintCo
 
 Driving dimension values edit from the Constraints panel or by double-clicking a canvas label (Select tool). `parseDimensionInput` accepts `75` / `75 mm` and `90` / `90°` / `rad`; model units stay mm / radians. Invalid input and solver conflicts are rejected without mutating the sketch.
 
-**Label reposition (ADR-062):** Select-tool drag on a dimension label stores presentation-only `annotation.labelOffset` (world mm from the layout anchor) via `SetDimensionAnnotationCommand`. Residuals ignore it; missing `annotation` on load keeps auto layout (schema v1, no bump).
+**Label reposition (ADR-062):** Select-tool drag on a dimension label stores presentation-only `annotation.labelOffset` (world mm from the layout anchor) via `SetDimensionAnnotationCommand`. Residuals ignore it; missing `annotation` on load keeps auto layout (schema v1, no bump). Offset is axis-constrained (H → ±Y, V → ±X, diagonal → segment normal) so leaders and the label move together.
 
 ## Trim and extend (Chunk 19 / ADR-026)
 

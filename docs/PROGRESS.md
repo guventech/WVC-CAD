@@ -37,7 +37,7 @@
 
 ## Current
 
-**Dimension label drag + Weekly rename (2026-10-14).** Select-tool drag repositions dimension labels via presentation-only `annotation.labelOffset` (ADR-062, schema v1, undoable). README tagline: **Weekly** Vibe-Coded CAD.
+**Dimension label drag + Weekly rename (2026-10-14).** Select-tool drag repositions dimension labels via presentation-only `annotation.labelOffset` (ADR-062, schema v1, undoable). Leaders move with the label; H dims slide ±Y, V dims ±X. README tagline: **Weekly** Vibe-Coded CAD.
 
 **`v0.1.0-alpha.4` (2026-10-12).** Pre-3D R1–R3 + chamfer topology residuals (ADR-061) + TR/BL outer-bevel fix. Tag triggers Windows NSIS (unsigned). Release asset confirmed on GitHub Releases.
 

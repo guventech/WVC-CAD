@@ -22,6 +22,7 @@ import { isDrivingConstraint } from "../model/Constraint.ts";
 import type { Sketch } from "../model/Sketch.ts";
 import type { Camera } from "./Camera.ts";
 import { worldToScreen } from "./Camera.ts";
+import { resolveDimensionAnnotationOffset } from "./dimensionAnnotationOffset.ts";
 import { radialDimensionAngle } from "./radialDimensionAngle.ts";
 
 /** Screen-pixel offset of labels from the geometry they annotate. */
@@ -59,6 +60,7 @@ export type AnnotationLayoutOptions = {
  * Compute non-overlapping screen positions for constraint glyphs and dimension
  * labels. Shared by drawing and hit-testing so both stay in sync.
  * Manual `annotation.labelOffset` (or an override) pins the label and skips stacking.
+ * Offsets are axis-constrained (H → vertical motion, V → horizontal) before placing.
  */
 export function layoutConstraintAnnotations(
   sketch: Sketch,
@@ -86,10 +88,11 @@ export function layoutConstraintAnnotations(
   for (const item of preferred) {
     const width = measureTextWidth(item.text) + 6;
     const height = LABEL_HEIGHT_PX;
-    const manualOffset =
-      options?.labelOffsetOverrides?.get(item.constraintId) ??
-      sketch.constraints.find((c) => c.id === item.constraintId)?.annotation
-        ?.labelOffset;
+    const manualOffset = resolveDimensionAnnotationOffset(
+      sketch,
+      item.constraintId,
+      options?.labelOffsetOverrides,
+    );
     let screen: Point2D;
     if (manualOffset !== undefined) {
       screen = worldToScreen(

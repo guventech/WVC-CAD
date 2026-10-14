@@ -77,7 +77,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 - **Coincident** — pick first point/endpoint/center, then second point or a line; partners stay together when dragged
 - **Horizontal / Vertical** — click a line, or two points/endpoints/centers; stays H/V while dragging; conflicting constraints are rejected
 - **Parallel / Perpendicular / Tangent / Concentric / Midpoint / Equal / Symmetric / Point on object / Fix** — constraint tools (Constraints menu / toolbar)
-- **Dimensions** — Distance (smart), Size (circle ⌀ / Shift=R; arc R), Angle. Edit in the Constraints panel or double-click a canvas label; drag a label to reposition it (presentation only; undoable)
+- **Dimensions** — Distance (smart), Size (circle ⌀ / Shift=R; arc R), Angle. Edit in the Constraints panel or double-click a canvas label; drag a label to slide the dimension set (H → up/down, V → left/right; undoable)
 - **File** — New (Ctrl+N), Open (Ctrl+O), Save / Save As, Open recent, **Sample: …**, Export DXF…
 - **Autosave** — dirty sketches autosave to a local recovery slot; restore prompt after crash/reload
 - **Undo / Redo** — Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z)
