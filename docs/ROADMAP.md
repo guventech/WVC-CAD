@@ -1,24 +1,17 @@
-# Roadmap (near-term)
+# Roadmap
 
-Public priorities only. This is **not** a promise of dates or a full business plan.
+Frozen at v0.1.0 on 2026-10-18.
 
-## Now / next
+This repository is a finished portfolio piece. I am not actively developing it. I am not planning another release, a private alpha, a public beta, signed installers, or new features here. When I do more CAD work, I contribute to [tangency-labs/solidcraft](https://github.com/tangency-labs/solidcraft).
 
-1. **Phase 0 core (gate met for developer use)** — geometry/constraints, undo/redo, save/load/recovery, samples, tests, alpha.4 installer. Fix only blockers that break create → constrain → save → reopen → export.
-2. **Phase 1 — private alpha** — invite ~10–20 target users; observe real sessions; triage Issues. Guide: [ALPHA.md](./ALPHA.md).
-3. **Alpha packaging** — unsigned Windows NSIS from GitHub Releases; optional static Web (`npm run build` → `dist/`). No mobile/VR.
-4. **Parallel (non-product-code)** — brand name shortlist + clearance (local notes only under `private/`); keep codename **WVC-CAD** until chosen.
-5. **Before public beta** — [PUBLIC_RELEASE_CHECKLIST.md](./PUBLIC_RELEASE_CHECKLIST.md) (license/deps already started; confirm before wide marketing).
-6. **Reliability** — expand Playwright/unit coverage as alpha reports gaps.
-7. **Installer polish** — signed Windows builds when a certificate is available ([PACKAGING.md](./PACKAGING.md)).
+v0.1.0 is the sketcher from `0.1.0-alpha.1` through `0.1.0-alpha.4`, plus dimension-label drag from 14 Oct 2026. The record is in [CHANGELOG.md](../CHANGELOG.md) and [PROGRESS.md](./PROGRESS.md).
 
-Completed recently (not the active focus): sample sketches, quick-start polish, review remediation Phases 0–10, pre-3D R1–R3 bridge (no Pad UI).
+## Not in this repository
 
-## Explicitly not current work
+- Payments, accounts, cloud sync, analytics, or AI features
+- 3D solids, Pad, Pocket, or STEP export
+- A different product name (the codename stays WVC-CAD)
+- iOS, Android, or VR packaging
+- More solver work (residual row scaling from ADR-052 is what shipped; column scaling was left unused)
 
-- Payments, donations UI, accounts, cloud sync, analytics, or AI features
-- 3D solids / extrusion (Pad/Pocket) / Clipper-backed offset until the 2D core stays solid under real use
-- Renaming away from WVC-CAD (codename stays unless a cleared product name is chosen later)
-- iOS / Android / VR native packaging
-
-Solver residual **row** scaling is **implemented** (ADR-052); column scaling is intentionally unused; engineering gates stay unscaled.
+The earlier "now / next" list (private alpha invites, signed Windows builds, more test coverage) was unfinished work. It is withdrawn.

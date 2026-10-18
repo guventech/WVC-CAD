@@ -1,6 +1,8 @@
 # Private alpha (Phase 1)
 
-WVC-CAD is past the core sketcher gate for **developer** workflows and is ready for a **small private alpha** (about 10–20 people). This is **not** a public beta and **not** a monetization phase.
+> Historical note. WVC-CAD is frozen at v0.1.0. I am not running this alpha. See the project status in [README.md](../README.md).
+
+WVC-CAD passed the core sketcher gate for **developer** workflows. The text below described a **small private alpha** (about 10–20 people) that I did not run. This is **not** a public beta and **not** a monetization phase.
 
 ## Goals
 

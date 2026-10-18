@@ -2,14 +2,45 @@
 
 All notable user-visible changes to WVC-CAD are documented here.
 
-## [Unreleased]
+## [0.1.0] — 2026-10-18
+
+Final frozen release. This is the last version of this repository.
+
+It summarises `0.1.0-alpha.1` through `0.1.0-alpha.4` (11 and 12 Oct 2026), plus the dimension-label drag work from 14 Oct 2026. The alpha sections below keep the day-by-day notes.
 
 ### Added
 
-- Drag placed dimension labels to reposition them (presentation-only `annotation.labelOffset`; undoable)
-- Dimension drag moves label + leaders as a set; horizontal dims slide up/down, vertical left/right
-- Product tagline: **Weekly** Vibe-Coded CAD (was Weekend)
-- Private alpha guide ([docs/ALPHA.md](./docs/ALPHA.md)) + public-release checklist; `private/` gitignored for local strategy notes
+- Parametric 2D sketcher: points, lines, circles, arcs, rectangles, polygons, slots, and construction geometry
+- Geometric and dimensional constraints, a Levenberg-Marquardt solver, and degrees of freedom from Jacobian rank
+- On-canvas dimension editing (double-click a label)
+- Snaps (grid, origin, endpoints, midpoints, centers, intersections, and related inferences)
+- Fillet, chamfer, and offset, plus trim, extend, and mirror
+- Undo and redo through commands
+- Save and load of versioned `.sketch.json`, autosave and recovery, and sample sketches
+- DXF R12 export (geometry only; constraints stay in `.sketch.json`)
+- Tauri 2 Windows NSIS installer (unsigned)
+- Vitest unit tests and Playwright end-to-end tests
+- Drag a placed dimension label to move it (14 Oct 2026). The offset is presentation-only (`annotation.labelOffset`) and undoable. Leaders move with the label. Horizontal dimensions slide up and down. Vertical dimensions slide left and right.
+- Tagline: **Weekly** Vibe-Coded CAD
+
+### Fixed across alpha.2 to alpha.4
+
+- Solver status for unsatisfied underdetermined sketches reports `failed` instead of `inconsistent`
+- Mirror keeps copied constraints; move undo restores constraints; selection is pruned after trim, extend, mirror, fillet, and chamfer
+- Dirty open, sample, and recent files ask before discarding work
+- DXF export fails closed on non-finite geometry
+- Chamfer topology residuals, including top-right and bottom-left rectangle chamfers that used to settle outside the profile
+- Closed line-and-arc offset via a densified polyline (approximate)
+
+### Known limitations
+
+- Not suitable for safety-critical engineering
+- Windows NSIS installer is unsigned
+- DXF is export only
+- Arc offset is approximate
+- Comfortable solver size is tens to low hundreds of constraints
+
+No further releases are planned.
 
 ## [0.1.0-alpha.4] — 2026-10-12
 
