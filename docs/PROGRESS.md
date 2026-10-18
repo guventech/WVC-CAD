@@ -37,7 +37,9 @@
 
 ## Current
 
-**Business-plan alignment (2026-10-14).** Phase 0 core gate treated as met for developer workflows; next public priority is **Phase 1 private alpha** ([ALPHA.md](./ALPHA.md)). `private/` is gitignored for local strategy/brand notes (never publish). Monetization remains deferred. Public-beta hygiene: [PUBLIC_RELEASE_CHECKLIST.md](./PUBLIC_RELEASE_CHECKLIST.md).
+**Frozen v0.1.0 portfolio piece (2026-10-18).** Final release. Not actively developed. Later CAD work is contributing to tangency-labs/solidcraft. Status write-up is in the README. The notes below are the record through 2026-10-14, not a plan.
+
+**Business-plan alignment (2026-10-14).** Phase 0 core gate was treated as met for developer workflows. At that time the next public priority was Phase 1 private alpha ([ALPHA.md](./ALPHA.md)). Superseded by the freeze above. `private/` is gitignored for local strategy/brand notes (never publish). Monetization stayed deferred. Public-beta hygiene notes: [PUBLIC_RELEASE_CHECKLIST.md](./PUBLIC_RELEASE_CHECKLIST.md) (historical; no public beta).
 
 **Dimension label drag + Weekly rename (2026-10-14).** Select-tool drag repositions dimension labels via presentation-only `annotation.labelOffset` (ADR-062, schema v1, undoable). Leaders move with the label; H dims slide ±Y, V dims ±X. README tagline: **Weekly** Vibe-Coded CAD.
 

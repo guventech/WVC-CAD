@@ -1,6 +1,8 @@
 # Public release checklist (before Phase 2 / public beta)
 
-Use this before calling a build a **public** beta or marketing it as open to everyone. Private alpha ([ALPHA.md](./ALPHA.md)) can proceed without finishing every item.
+> Historical note. WVC-CAD is frozen at v0.1.0. I am not taking it to a public beta. See the project status in [README.md](../README.md).
+
+This list was for calling a build a **public** beta. That step is withdrawn. Private alpha notes ([ALPHA.md](./ALPHA.md)) are historical too.
 
 ## License and dependencies
 

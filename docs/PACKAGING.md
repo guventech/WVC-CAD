@@ -1,10 +1,12 @@
 # Packaging — Windows desktop (target)
 
-Goal: ship WVC-CAD as a **Windows installer** (`.msi` / `.exe`) that runs well on modest PCs.
+> Historical note. WVC-CAD is frozen at v0.1.0. I am not signing installers or adding an MSI target. See the project status in [README.md](../README.md).
+
+The Windows build that exists is an unsigned NSIS installer from the alpha tags.
 
 ## Alpha tester distribution
 
-For **private alpha** invites ([ALPHA.md](./ALPHA.md)):
+The steps below were written for private alpha invites ([ALPHA.md](./ALPHA.md)). That alpha was not run.
 
 1. Prefer the latest GitHub Release NSIS asset from a `v*-alpha.*` tag (unsigned — document SmartScreen).
 2. Optionally share a static web build: `npm run build`, then serve or zip `dist/` (browser Save/Open; no Tauri dialogs).
@@ -49,7 +51,7 @@ Until Rust is installed, use the web app: `npm run dev` / `npm run build`.
 ### Config notes
 
 - App id: `com.wvccad.app` (`src-tauri/tauri.conf.json`)
-- Bundle targets: **NSIS only** for alpha (`0.1.0-alpha.4`). WiX/MSI rejects non-numeric prerelease labels like `alpha`; re-enable `"msi"` when the version is MSI-safe (e.g. `0.1.0` or `0.1.0-1`).
+- Bundle targets: **NSIS only**. Alpha tags used `0.1.0-alpha.4` because WiX/MSI rejects a prerelease label like `alpha`. v0.1.0 is numeric, and the bundle target stays NSIS. I am not adding MSI.
 - Dev URL: `http://localhost:5173` (Vite `strictPort`)
 - CSP: production WebView CSP in `tauri.conf.json` (no cloud `connect-src`); web `index.html` meta allows `ws:`/`wss:` for Vite HMR only
 - Icons: original mark from `branding/icon-source.png` via `npx tauri icon`

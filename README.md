@@ -4,6 +4,32 @@
 
 > Not a production CAD product. No affiliation with Autodesk, Dassault Systèmes, Siemens, PTC, or other commercial CAD vendors. Icons and chrome are original — not copied from proprietary products.
 
+## Project status: frozen v0.1 portfolio piece
+
+I built WVC-CAD as a parametric 2D mechanical sketcher, and I am finished with it. v0.1.0 is the last release in this repository. I am not developing it anymore. When I do more CAD work, I contribute to [tangency-labs/solidcraft](https://github.com/tangency-labs/solidcraft).
+
+What it does:
+
+- Parametric 2D sketches with constraints.
+- A solver that checks degrees of freedom from Jacobian rank.
+- Dimensions you can edit on the canvas.
+- Snaps.
+- Fillet, chamfer, and offset.
+- DXF R12 export.
+- A Tauri Windows installer.
+
+What I learned:
+
+- Constraint solving.
+- DOF honesty via Jacobian rank.
+- A command and undo architecture.
+- Testing with Vitest and Playwright.
+- Packaging with Tauri.
+
+![WVC-CAD canvas](./docs/images/app-canvas.png)
+
+To run it: Node.js 22 or newer, `npm install`, then `npm run dev`. The quick start below is the same short path.
+
 ## Prerequisites
 
 - **Node.js ≥ 22** (see [`.nvmrc`](./.nvmrc)); `package.json` pins `packageManager` to npm 12 for lockfile reproducibility (Corepack / matching npm recommended).
@@ -50,10 +76,10 @@ Other samples: filleted plate with hole, capsule slot, L-bracket, over-constrain
 | DOF / over-constraint honesty | **Supported** (Jacobian rank; no fake “fully constrained”) |
 | Save / Save As / recent / samples / autosave | **Supported** |
 | DXF | **Partial** — R12 export only (no import; constraints stay in `.sketch.json`) |
-| Windows installer (Tauri 2) | **Partial** — NSIS alpha builds work; **unsigned** until code signing |
+| Windows installer (Tauri 2) | **Partial** — unsigned NSIS installer |
 | 3D Pad/Pocket / STEP / cloud / AI / payments | **Unsupported** |
 
-See [ROADMAP.md](./docs/ROADMAP.md) for near-term priorities. Full limitation list under [Current limitations](#current-limitations).
+[ROADMAP.md](./docs/ROADMAP.md) records that this repository is frozen. Full limitation list under [Current limitations](#current-limitations).
 
 ## Controls
 
@@ -91,7 +117,7 @@ Menus: **File** | **Edit** | **Sketch** | **Constraints** | **Tools**, plus geom
 
 ## Current limitations
 
-Easy to find for alpha testers — also mirrored in [CHANGELOG.md](./CHANGELOG.md) and [PROGRESS.md](./docs/PROGRESS.md):
+Limits of this frozen v0.1.0 build, also written in [CHANGELOG.md](./CHANGELOG.md) and [PROGRESS.md](./docs/PROGRESS.md):
 
 - **Alpha quality** — not production-ready; not suitable for safety-critical engineering
 - Offset of closed line+arc profiles densifies arcs to polylines (approximate DIY; not exact parallel arcs)
@@ -100,7 +126,7 @@ Easy to find for alpha testers — also mirrored in [CHANGELOG.md](./CHANGELOG.m
 - ADR-052 residual **row** scaling is in; column scaling unused
 - Windows NSIS builds are **unsigned** (SmartScreen warning expected) until code signing is configured ([PACKAGING.md](./docs/PACKAGING.md))
 - Reporting a bug: use [GitHub Issues](https://github.com/guventech/WVC-CAD/issues/new/choose) — include steps, expected/actual, version, OS, and a `.sketch.json` when safe
-- **Private alpha:** invite workflow and packaging for testers — [docs/ALPHA.md](./docs/ALPHA.md)
+- Notes in [docs/ALPHA.md](./docs/ALPHA.md) are historical. I am not inviting testers.
 
 ## License
 
@@ -111,9 +137,9 @@ MIT — see [LICENSE](./LICENSE). Third-party notices: [THIRD_PARTY.md](./THIRD_
 | File | Role |
 |------|------|
 | [PROGRESS.md](./docs/PROGRESS.md) | Live checklist |
-| [ROADMAP.md](./docs/ROADMAP.md) | Near-term public priorities |
-| [ALPHA.md](./docs/ALPHA.md) | Private alpha invites / tester packaging |
-| [PUBLIC_RELEASE_CHECKLIST.md](./docs/PUBLIC_RELEASE_CHECKLIST.md) | Before public beta |
+| [ROADMAP.md](./docs/ROADMAP.md) | Frozen at v0.1.0 |
+| [ALPHA.md](./docs/ALPHA.md) | Historical private-alpha notes |
+| [PUBLIC_RELEASE_CHECKLIST.md](./docs/PUBLIC_RELEASE_CHECKLIST.md) | Historical checklist; no public beta |
 | [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Layers and edit pipeline |
 | [DECISIONS.md](./docs/DECISIONS.md) | ADRs |
 | [TEST_PLAN.md](./docs/TEST_PLAN.md) | Test coverage |
