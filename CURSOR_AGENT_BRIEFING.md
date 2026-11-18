@@ -1,5 +1,7 @@
 # Cursor Agent Briefing — WVC-CAD Repository Review
 
+> **Historical snapshot, not current instructions.** This 11 October review predates the current manifest and changelog. For work now, start with [AGENTS.md](AGENTS.md), [README.md](README.md), [current progress](docs/PROGRESS.md) and `package.json`. The manifest at the 18 November 2026 documentation review is alpha.4 with TypeScript ~6.0.2, and [CHANGELOG.md](CHANGELOG.md) exists. Preserve the old claims below as history; do not use them to select tools, infer feature status or start another chunk.
+
 **Date:** October 11, 2026  
 **Repository:** guventech/WVC-CAD  
 **Version:** v0.1.0-alpha.1  

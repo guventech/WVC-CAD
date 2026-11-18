@@ -6,6 +6,8 @@
 
 ## Project status: frozen v0.1 portfolio piece
 
+**Agent entry point:** [AGENTS.md](AGENTS.md). It records the frozen lifecycle and engineering boundaries; the former agent roadmap is preserved as historical reference.
+
 I built WVC-CAD as a parametric 2D mechanical sketcher, and I am finished with it. v0.1.0 is the last release in this repository. I am not developing it anymore. When I do more CAD work, I contribute to [tangency-labs/solidcraft](https://github.com/tangency-labs/solidcraft).
 
 What it does:
@@ -145,7 +147,7 @@ MIT — see [LICENSE](./LICENSE). Third-party notices: [THIRD_PARTY.md](./THIRD_
 | [TEST_PLAN.md](./docs/TEST_PLAN.md) | Test coverage |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute |
 | [SECURITY.md](./SECURITY.md) | Vulnerability reporting |
-| [AGENTS.md](./AGENTS.md) | Agent/contributor roadmap |
+| [AGENTS.md](./AGENTS.md) | Current agent handoff and engineering boundaries |
 | [assessments.md](./docs/assessments.md) | Historical architecture snapshot |
 | [PACKAGING.md](./docs/PACKAGING.md) | Tauri 2 installer notes |
 | [THIRD_PARTY.md](./THIRD_PARTY.md) | Dependency licenses |
