@@ -7,7 +7,7 @@ Local folder `CAD`; GitHub repository `guventech/WVC-CAD`. This is an experiment
 - Before implementation, read [README.md](README.md), [current progress](docs/PROGRESS.md) and [architecture](docs/ARCHITECTURE.md). Read [decisions](docs/DECISIONS.md) and [test plan](docs/TEST_PLAN.md) for the subsystem being changed.
 - `package.json` and the lockfile own current versions and commands. After reconciling the existing remote freeze on 18 November 2026, the manifest is `0.1.0`, TypeScript `~6.0.2`, Node `>=22`, npm `12.0.2`.
 - **Frozen v0.1.0 portfolio piece:** the existing remote decision of 18 October 2026 ended active development and further releases. Private-alpha, packaging and roadmap plans are historical. Preserve that lifecycle; documentation maintenance does not reopen features, tester invitations or releases.
-- The [dated former AGENTS roadmap](docs/history/AGENTS-before-2026-11-18.md) and [old Cursor briefing](CURSOR_AGENT_BRIEFING.md) are historical references, not current instructions or evidence of completed capabilities. Chunk numbers in old prompts are not new implementation authorization.
+- The [dated former AGENTS roadmap](docs/history/AGENTS-before-2026-11-18.txt) and [old Cursor briefing](CURSOR_AGENT_BRIEFING.md) are historical references, not current instructions or evidence of completed capabilities. The roadmap is preserved verbatim as plain text because its original relative links belong to its former location. Chunk numbers in old prompts are not new implementation authorization.
 
 ## Engineering boundaries
 
