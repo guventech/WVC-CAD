@@ -37,6 +37,8 @@
 
 ## Current
 
+**Documentation reconciliation (2026-11-18).** The local checkout now includes the existing 18 October remote freeze. Current contributor entry point: [AGENTS.md](../AGENTS.md); the former long agent roadmap is preserved as history. This maintenance does not reopen development, private alpha or releases, and did not rerun application or installer checks.
+
 **Frozen v0.1.0 portfolio piece (2026-10-18).** Final release. Not actively developed. Later CAD work is contributing to tangency-labs/solidcraft. Status write-up is in the README. The notes below are the record through 2026-10-14, not a plan.
 
 **Business-plan alignment (2026-10-14).** Phase 0 core gate was treated as met for developer workflows. At that time the next public priority was Phase 1 private alpha ([ALPHA.md](./ALPHA.md)). Superseded by the freeze above. `private/` is gitignored for local strategy/brand notes (never publish). Monetization stayed deferred. Public-beta hygiene notes: [PUBLIC_RELEASE_CHECKLIST.md](./PUBLIC_RELEASE_CHECKLIST.md) (historical; no public beta).
